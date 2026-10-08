@@ -1,0 +1,447 @@
+/* === Universal base CSS === */
+.rtly-color-primary {
+  color: #027390;
+}
+.rtly-copyright {
+  text-align: center;
+  display: block;
+  margin-top: 5px;
+  direction: rtl;
+  width: 100%;
+}
+.rtly-copyright a {
+  font-size: 12px;
+  text-align: center;
+  text-decoration: none;
+  color: #aaa;
+}
+.rtly-feedback {
+  text-align: center;
+  display: block;
+  margin-top: 6px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  direction: rtl;
+  width: 100%;
+  font-family: var(--rtly-font-family);
+}
+.rtly-feedback a {
+  font-size: 14px;
+  text-align: center;
+  text-decoration: none;
+  color: #cdd9e8;
+}
+.rtly-topbar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 50% !important;
+  max-width: 1200px !important;
+  min-width: 400px !important;
+  z-index: 9999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  padding: 10px 14px !important;
+  background: linear-gradient(90deg, #0e1625, #0c1320) !important;
+  color: #e9f2ff !important;
+  font-family: var(--rtly-font-family) !important;
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+  direction: rtl !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28) !important;
+  backdrop-filter: blur(10px) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  border-radius: 0 0 5px 5px !important;
+}
+.rtly-topbar[data-theme="light"] {
+  background: linear-gradient(90deg, #f1f5f9, #e2e8f0) !important;
+  color: #0f172a !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+.rtly-topbar[data-theme="light"] .rtly-topbar__link {
+  color: #027390 !important;
+}
+/* ============================================================
+ * Bidi quality (v1.7.0)
+ *
+ * These rules improve mixed-language (English + RTL script) rendering
+ * everywhere the extension is active. They complement the per-element
+ * dir="rtl"/"ltr" we set in JS — that handles BLOCK-level direction;
+ * these rules handle INLINE-level bidi and live-typing UX.
+ *
+ * 1. unicode-bidi: plaintext on inputs
+ *    ----------------------------------
+ *    Per UAX 9 § 3.3.1 P2, the browser auto-picks each paragraph's base
+ *    direction from its first strong directional character. Combined with
+ *    dir="auto" (set in JS), this gives ideal typing UX: starting a line
+ *    in Persian makes that line RTL automatically; starting a new line in
+ *    English makes that line LTR. No JS event handlers, no flicker.
+ *
+ * 2. bidi isolation on every processed text block (v1.9.24: direction-aware)
+ *    ---------------------------------------------------
+ *    Each processed element becomes its own bidi-isolated paragraph, so
+ *    direction set on one message can't leak into a sibling message via
+ *    the Bidirectional Algorithm's resolution rules. RTL-majority blocks use
+ *    `isolate` (base = detected rtl). LTR-majority blocks use `plaintext` so
+ *    embedded Persian/RTL lines and runs auto-resolve their own base direction
+ *    and stay readable, while the block itself stays left-anchored. See the
+ *    rule's own comment below for the full rationale.
+ *
+ * 3. unicode-bidi: isolate on inline code/kbd/samp/var
+ *    -------------------------------------------------
+ *    Inline code stays a bidi-isolated LTR island even inside an RTL
+ *    paragraph — `console.log(x)` mid-sentence doesn't drag surrounding
+ *    Persian text into LTR.
+ *
+ * Why no !important on the input rules: these are non-conflicting hints. If a
+ * site explicitly sets unicode-bidi (rare), we let it win.
+ *
+ * v1.9.12 — mode gating. The input bidi rules below are DIRECTION behaviour
+ * (plaintext makes a field auto-pick its base direction from content), so they
+ * must only apply when RTL is enabled. They were previously gated on
+ * `[class*="rtly-"]` (always present, even in font_only), which meant a
+ * Persian-bearing input still flipped to RTL in font_only mode — contradicting
+ * "font_only = font only, no direction change". They are now gated on
+ * `.rtly-with-rtl`, which the content script puts on <html>/<body> only in
+ * full / rtl_only modes. Same specificity (class+element), so cascade order is
+ * unchanged. The `code/kbd/samp` isolate rules stay always-on: isolating an
+ * inline code run is a readability hint that's harmless (a no-op) in an LTR
+ * context, so it needn't be mode-gated.
+ * ============================================================ */
+.rtly-with-rtl textarea,
+.rtly-with-rtl input[type="text"],
+.rtly-with-rtl input[type="search"],
+.rtly-with-rtl input:not([type]),
+.rtly-with-rtl [contenteditable="true"],
+.rtly-with-rtl [contenteditable=""] {
+  unicode-bidi: plaintext;
+}
+/* CRITICAL: descendants of contenteditable MUST also be plaintext.
+   Rich editors (Claude's ProseMirror, Gemini's Quill, etc.) put each
+   line in its own <p>. Without this rule the <p> falls back to the
+   UA default `unicode-bidi: isolate`, which locks the paragraph to
+   whatever `direction` is inherited. Then typing English in a previously-
+   Persian editor stays RTL — exactly the bug we want to avoid. With
+   plaintext on every descendant, each <p> independently auto-detects
+   from its own first-strong character, line by line. */
+.rtly-with-rtl [contenteditable="true"] *,
+.rtly-with-rtl [contenteditable=""] * {
+  unicode-bidi: plaintext !important;
+}
+/* v1.9.24 — direction-aware isolation.
+ * RTL-majority blocks keep `isolate`: base direction = the rtl we detected
+ * (the primary, well-tested path — unchanged).
+ * LTR-majority blocks use `plaintext` instead: the block stays left-anchored
+ * (direction:ltr + text-align:start are still set inline by JS, so an
+ * English-heavy answer does NOT flip wholesale), but each Persian/RTL sentence,
+ * line (<br>-separated) or inline run inside it now auto-resolves its OWN base
+ * direction per UAX9 P2/P3 and renders readably — instead of being force-ordered
+ * against the block's LTR base, which scrambled punctuation/numbers/run order
+ * (the "بهم‌ریختگی" report). `plaintext` still isolates the element from its
+ * siblings exactly like `isolate`, so rule #2's leak-protection is preserved;
+ * it only changes how the base direction is chosen. Pure-English blocks are
+ * unaffected (first strong char is Latin → LTR base, identical to before). */
+[data-rtly-dir="rtl"] {
+  unicode-bidi: isolate;
+}
+[data-rtly-dir="ltr"] {
+  unicode-bidi: plaintext;
+}
+[class*="rtly-"] code,
+[class*="rtly-"] kbd,
+[class*="rtly-"] samp,
+[class*="rtly-"] var,
+[class*="rtly-"] tt {
+  unicode-bidi: isolate;
+}
+/* End bidi quality */
+
+/* Prevent chat input boxes from moving down due to top bar */
+:root {
+  --rtly-bar-height: 48px;
+  --rtly-font-family: "IranYekan", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+/* Only apply padding to main content areas, not input boxes */
+html.rtly-active body {
+  padding-top: 0 !important;
+}
+/* Input boxes should stay in place */
+html.rtly-active textarea,
+html.rtly-active [contenteditable="true"],
+html.rtly-active input[type="text"] {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+/* Don't apply any direction changes to sidebar, navigation, and menu - let them stay in their default state */
+/* JavaScript will skip processing these elements, so they won't be affected */
+
+/* Protect menus, navigation, and sidebars from direction changes - keep default direction */
+/* Only apply font, never change direction */
+/* These rules have maximum specificity to override any [dir="rtl"] rules */
+html.rtly-active nav,
+html.rtly-active nav[dir="rtl"],
+html.rtly-active nav[dir="ltr"],
+html.rtly-active aside,
+html.rtly-active aside[dir="rtl"],
+html.rtly-active aside[dir="ltr"],
+html.rtly-active [role="navigation"],
+html.rtly-active [role="navigation"][dir="rtl"],
+html.rtly-active [role="navigation"][dir="ltr"],
+html.rtly-active [role="menu"],
+html.rtly-active [role="menu"][dir="rtl"],
+html.rtly-active [role="menu"][dir="ltr"],
+html.rtly-active [role="menubar"],
+html.rtly-active [role="menubar"][dir="rtl"],
+html.rtly-active [role="menubar"][dir="ltr"],
+html.rtly-active [role="complementary"],
+html.rtly-active [role="complementary"][dir="rtl"],
+html.rtly-active [role="complementary"][dir="ltr"],
+html.rtly-active .sidebar,
+html.rtly-active .side-bar,
+html.rtly-active .navigation,
+html.rtly-active .nav,
+html.rtly-active .menu,
+html.rtly-active header,
+html.rtly-active header[dir="rtl"],
+html.rtly-active header[dir="ltr"],
+html.rtly-active [role="banner"],
+html.rtly-active [role="banner"][dir="rtl"],
+html.rtly-active [role="banner"][dir="ltr"],
+html.rtly-active [role="toolbar"],
+html.rtly-active [role="toolbar"][dir="rtl"],
+html.rtly-active [role="toolbar"][dir="ltr"],
+html.rtly-active .toolbar,
+html.rtly-active .mdc-top-app-bar,
+html.rtly-active [data-testid*="sidebar"],
+html.rtly-active [data-testid*="nav"],
+html.rtly-active [data-testid*="menu"],
+html.rtly-active [aria-label*="navigation" i],
+html.rtly-active [aria-label*="menu" i],
+html.rtly-active [aria-label*="sidebar" i],
+html.rtly-active [aria-label*="profile" i],
+html.rtly-active [aria-label*="settings" i],
+html.rtly-active [aria-label*="history" i],
+html.rtly-active [data-testid*="profile"],
+html.rtly-active [data-testid*="settings"],
+html.rtly-active [data-testid*="history"],
+html.rtly-active [data-testid*="user"],
+html.rtly-active .profile,
+html.rtly-active .settings,
+html.rtly-active .history,
+html.rtly-active .user-menu,
+html.rtly-active .account-menu,
+html.rtly-active nav *,
+html.rtly-active nav[dir="rtl"] *,
+html.rtly-active nav[dir="ltr"] *,
+html.rtly-active aside *,
+html.rtly-active aside[dir="rtl"] *,
+html.rtly-active aside[dir="ltr"] *,
+html.rtly-active [role="navigation"] *,
+html.rtly-active [role="navigation"][dir="rtl"] *,
+html.rtly-active [role="navigation"][dir="ltr"] *,
+html.rtly-active [role="menu"] *,
+html.rtly-active [role="menu"][dir="rtl"] *,
+html.rtly-active [role="menu"][dir="ltr"] *,
+html.rtly-active [role="menubar"] *,
+html.rtly-active [role="menubar"][dir="rtl"] *,
+html.rtly-active [role="menubar"][dir="ltr"] *,
+html.rtly-active [role="complementary"] *,
+html.rtly-active [role="complementary"][dir="rtl"] *,
+html.rtly-active [role="complementary"][dir="ltr"] *,
+html.rtly-active .sidebar *,
+html.rtly-active .side-bar *,
+html.rtly-active .navigation *,
+html.rtly-active .nav *,
+html.rtly-active .menu *,
+html.rtly-active header *,
+html.rtly-active header[dir="rtl"] *,
+html.rtly-active header[dir="ltr"] *,
+html.rtly-active [role="banner"] *,
+html.rtly-active [role="banner"][dir="rtl"] *,
+html.rtly-active [role="banner"][dir="ltr"] *,
+html.rtly-active [role="toolbar"] *,
+html.rtly-active [role="toolbar"][dir="rtl"] *,
+html.rtly-active [role="toolbar"][dir="ltr"] *,
+html.rtly-active .toolbar *,
+html.rtly-active .mdc-top-app-bar * {
+  direction: unset !important;
+  text-align: unset !important;
+}
+.rtly-topbar__text {
+  flex: 0 1 auto;
+  text-align: center;
+  font-weight: 600;
+}
+.rtly-topbar__link {
+  background: linear-gradient(135deg, #2c9bff, #1a78ff);
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 14px;
+  padding: 8px 14px;
+  border-radius: 5px;
+  box-shadow: 0 6px 16px rgba(26, 120, 255, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+.rtly-topbar__link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(26, 120, 255, 0.45);
+  opacity: 0.95;
+}
+.rtly-topbar__close {
+  position: absolute;
+  inset-inline-end: 10px;
+  top: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #f5f7fb;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 6px 10px;
+  line-height: 1;
+  border-radius: 5px;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+.rtly-topbar__close:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffd5d5;
+  transform: scale(1.03);
+}
+
+/* Support modal on site (first visit) */
+
+/* === Universal icon shield === */
+/* ============================================================
+ * Universal icon-font shield (v1.6.0 — rewritten)
+ *
+ * History:
+ *   1.2.9 introduced a `font-family: revert !important` rule on icon
+ *   containers. That seemed reasonable but is actually BUGGY for
+ *   class-based icon fonts (e.g. Google's `.material-icons { font-family:
+ *   'Material Icons' }`): `revert` rolls past ALL author styles including
+ *   the site's own font definition, so the icon falls back to UA default
+ *   (Times New Roman) and the glyph renders as the literal word "menu"
+ *   instead of a hamburger icon.
+ *
+ *   We confirmed this with a synthetic test:
+ *     <span class="material-icons">menu</span>  inside .rtly-gemini
+ *     → computed font-family was "Times New Roman", NOT "Material Icons".
+ *   The icon glyphs on every Google product (Gemini, NotebookLM, AI
+ *   Studio) were being silently broken since v1.2.9.
+ *
+ * v1.6.0 fix:
+ *   Replace `revert` with an EXPLICIT fallback list of every icon font
+ *   we know AI chat sites use. The browser picks the first font that's
+ *   actually loaded on the current origin (sites only @font-face their
+ *   own icon font), so:
+ *     - On Claude        → "Anthropicons-Variable" matches first
+ *     - On Gemini/Google → "Material Symbols Outlined" matches first
+ *     - On Copilot/MS    → "FluentSystemIcons-Resizable" matches first
+ *   var(--rtly-font-family) at the end keeps Persian text inside an
+ *   icon container readable.
+ *
+ *   `direction: ltr` is kept so icons don't shuffle inside RTL flex
+ *   parents. Color/visibility/opacity are still NOT touched (host site
+ *   controls those via inline presentation attrs).
+ * ============================================================ */
+[class*="rtly-"] svg,
+[class*="rtly-"] img,
+[class*="rtly-"] picture {
+  direction: ltr !important;
+}
+[class*="rtly-"] [data-icon],
+[class*="rtly-"] [data-cds="Icon" i],
+[class*="rtly-"] [data-cds="icon"],
+[class*="rtly-"] [data-icon-name],
+[class*="rtly-"] [data-lucide],
+[class*="rtly-"] [data-mat-icon-type],
+[class*="rtly-"] mat-icon,
+[class*="rtly-"] [class*="anthropicon" i],
+[class*="rtly-"] [class*="material-icons" i],
+[class*="rtly-"] [class*="material-symbols" i],
+[class*="rtly-"] [class*="lumi-symbols" i],
+[class*="rtly-"] [class*="lm-icon" i],
+[class*="rtly-"] [class*="mat-ligature-font" i],
+[class*="rtly-"] [class*="mat-icon" i],
+[class*="rtly-"] [class*="google-symbols" i],
+[class*="rtly-"] [class*="lucide" i],
+[class*="rtly-"] [class*="fluent-icon" i],
+[class*="rtly-"] [class*="ms-Icon" i],
+[class*="rtly-"] [class*="ant-icon" i],
+[class*="rtly-"] [class*="anticon" i],
+[class*="rtly-"] [class*="tabler-icon" i],
+[class*="rtly-"] [class*="phosphor" i],
+[class*="rtly-"] [class*="icon" i]:not([class*="lucide" i]):not([class*="material" i]):not([class*="fa-"]):not(body):not(html),
+[class*="rtly-"] [class*="fa-"]:not(body):not(html):not(form):not(table):not(label):not(input):not(textarea),
+[class*="rtly-"] i.fa,
+[class*="rtly-"] i.fas,
+[class*="rtly-"] i.far,
+[class*="rtly-"] i.fab,
+[class*="rtly-"] i.fal,
+[class*="rtly-"] [style*="anthropicons" i],
+[class*="rtly-"] [style*="Anthropicons"],
+[class*="rtly-"] [style*="Material Symbols"],
+[class*="rtly-"] [style*="Material Icons"],
+[class*="rtly-"] [style*="Google Symbols"],
+[class*="rtly-"] [style*="google-symbols" i],
+[class*="rtly-"] [style*="Luminous Symbols"],
+[class*="rtly-"] [style*="lumi-symbols" i],
+[class*="rtly-"] [style*="FontAwesome"],
+[class*="rtly-"] [style*="Font Awesome"],
+[class*="rtly-"] [style*="FluentSystemIcons" i],
+[class*="rtly-"] [role="img"]:not(svg):not(img):not(picture) {
+  /* Universal icon-font fallback list.
+   *
+   * IMPORTANT (v1.8.20): the list is also the SET of fonts the browser
+   * will lazy-load on this origin. If a host site declares
+   *   .lumi-symbols { font-family: "Luminous Symbols"; }
+   * but our !important rule wins the cascade, the browser only sees a
+   * USAGE of the fonts in OUR list — fonts not listed here will NEVER
+   * be requested from the network, even if @font-face declares them.
+   * That is exactly how Gemini's `lumi-symbols` icons came out as tofu /
+   * literal-text in v1.8.17 → v1.8.19: Luminous Symbols was @font-face'd
+   * but never referenced, so it stayed `unloaded`, and the browser
+   * picked the next loaded match (Google Symbols) which is missing the
+   * Gemini-specific glyphs.
+   *
+   * Order matters only for fonts that share glyph ranges (e.g. Material
+   * Symbols Outlined vs Sharp); the browser picks the first font in the
+   * list that has a glyph for the requested codepoint / ligature, after
+   * triggering loads for all listed faces it can find on the origin.
+   *
+   * Per-site icon fonts seen so far:
+   *   - Anthropic Claude              → Anthropicons-Variable
+   *   - Gemini (current)              → Luminous Symbols          (NEW)
+   *   - Gemini (older) / Google apps  → Google Symbols / Material Symbols
+   *   - Copilot / MS apps             → FluentSystemIcons-Resizable
+   *   - Generic                       → Material Icons, FontAwesome, etc.
+   */
+  font-family:
+    var(--font-anthropicons, "Anthropicons-Variable"),
+    "Luminous Symbols",
+    "Material Symbols Outlined", "Material Symbols Rounded", "Material Symbols Sharp",
+    "Google Symbols",
+    "Material Icons", "Material Icons Outlined", "Material Icons Round", "Material Icons Sharp", "Material Icons Two Tone",
+    "Material Icons Extended",
+    "Font Awesome 6 Free", "Font Awesome 6 Brands", "Font Awesome 6 Pro",
+    "Font Awesome 5 Free", "Font Awesome 5 Brands", "Font Awesome 5 Pro",
+    "FontAwesome",
+    "FluentSystemIcons-Resizable", "FluentSystemIcons-Filled", "FluentSystemIcons-Regular",
+    "FabricMDL2Icons",
+    "anticon",
+    "iconfont",
+    "Phosphor", "Phosphor-Bold", "Phosphor-Fill",
+    "tabler-icons",
+    "remixicon",
+    "Feather",
+    "Glyphicons Halflings",
+    var(--rtly-font-family) !important;
+  direction: ltr !important;
+}
+/* End universal icon protection */

@@ -1,0 +1,17 @@
+{
+   "actionTitle": {
+      "message": "RTLY"
+   },
+   "commandToggleSite": {
+      "message": "RTLY: اس سائٹ کے لیے فعال/غیر فعال کریں"
+   },
+   "contextMenuToggle": {
+      "message": "RTLY: اس سائٹ کے لیے فعال/غیر فعال کریں"
+   },
+   "extensionDescription": {
+      "message": "ChatGPT، Claude، Gemini، Copilot اور دیگر AI ٹولز میں عربی، فارسی، عبرانی، اردو اور دیگر RTL زبانوں کے لیے RTL سیدھ اور فونٹ ٹول۔"
+   },
+   "extensionName": {
+      "message": "RTLY — AI چیٹس کے لیے RTL اور فونٹ ٹول"
+   }
+}

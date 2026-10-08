@@ -1,0 +1,33 @@
+name: Feature request
+description: Suggest an improvement or ask for support for a new website.
+title: "[Feature]: "
+labels: ["enhancement", "needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        RTLY is intentionally small and asks for few permissions. Ideas that need new permissions, network access or remote services are unlikely to fit, but describing your problem helps us find another way.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      description: Describe your situation first, rather than the solution. For a new site, give its address and say what you use it for.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and did not find this request.
+          required: true

@@ -1,0 +1,17 @@
+{
+   "actionTitle": {
+      "message": "RTLY"
+   },
+   "commandToggleSite": {
+      "message": "RTLY: ھن سائٽ لاءِ چالو/بند"
+   },
+   "contextMenuToggle": {
+      "message": "RTLY: ھن سائٽ لاءِ چالو/بند"
+   },
+   "extensionDescription": {
+      "message": "ChatGPT، Claude، Gemini، Copilot ۽ ٻين AI اوزارن ۾ عربي، فارسي، عبراني، اردو ۽ ٻين RTL ٻولين لاءِ RTL سيد ۽ فونٽ اوزار."
+   },
+   "extensionName": {
+      "message": "RTLY — AI چيٽن لاءِ RTL ۽ فونٽ اوزار"
+   }
+}

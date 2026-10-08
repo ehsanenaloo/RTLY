@@ -1,0 +1,68 @@
+/* === Poe === */
+/* Poe */
+.rtly-poe.rtly-with-font, .rtly-poe.rtly-with-font span, .rtly-poe.rtly-with-font p, .rtly-poe.rtly-with-font h1, .rtly-poe.rtly-with-font h2, .rtly-poe.rtly-with-font h3, .rtly-poe.rtly-with-font h4, .rtly-poe.rtly-with-font h5, .rtly-poe.rtly-with-font h6, .rtly-poe.rtly-with-font span, .rtly-poe.rtly-with-font div, .rtly-poe.rtly-with-font li, .rtly-poe.rtly-with-font a, .rtly-poe.rtly-with-font ul, .rtly-poe.rtly-with-font ol, .rtly-poe.rtly-with-font table, .rtly-poe.rtly-with-font th, .rtly-poe.rtly-with-font td, .rtly-poe.rtly-with-font tr, .rtly-poe.rtly-with-font label, .rtly-poe.rtly-with-font input, .rtly-poe.rtly-with-font textarea, .rtly-poe.rtly-with-font button {
+  font-family: var(--rtly-font-family) !important;
+}
+
+.rtly-poe.rtly-with-rtl [class*="ChatMessage_messageWrapper"] table * {
+  text-align: center;
+}
+.rtly-poe.rtly-with-rtl [class*="ChatMessage_messageWrapper"], .rtly-poe.rtly-with-rtl [class*="Message_row"] {
+  flex-direction: row-reverse;
+}
+.rtly-poe.rtly-with-font [class*="ChatMessage_chatMessage"], .rtly-poe.rtly-with-font [class*="GrowingTextArea_growWrap"] {
+  font-family: var(--rtly-font-family) !important;
+}
+.rtly-poe.rtly-with-rtl [class*="ChatMessage_chatMessage"], .rtly-poe.rtly-with-rtl [class*="GrowingTextArea_growWrap"] {
+  direction: rtl;
+}
+
+.rtly-with-rtl [class*="MarkdownCodeBlock"] {
+  direction: ltr !important;
+}
+
+.rtly-poe.rtly-with-font code, .rtly-poe.rtly-with-font kbd, .rtly-poe.rtly-with-font samp, .rtly-poe.rtly-with-font pre {
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
+    Liberation Mono, monospace, var(--rtly-font-family) !important;
+}
+/* ============================================================
+ * v1.9.6 — Poe code-tag alignment is content-aware
+ *
+ * Diagnosis (production console output on Poe with Persian content):
+ *   <code>سلام، این یک متن راست‌به‌چپ است.</code>
+ *   computed direction: rtl    ← inherited from parent <p>
+ *   text-align: left           ← previous rule forced this unconditionally
+ *
+ * direction is correctly RTL via inheritance (the BiDi algorithm
+ * already orders the Persian glyphs right-to-left), but the line as
+ * a whole was pinned to the LEFT edge of its <code> box, making it
+ * read visually as if it were LTR.
+ *
+ * Two surgical changes:
+ *
+ *   1. text-align: start  — resolves to `right` in an RTL context,
+ *      `left` in an LTR context. Persian-content code aligns to the
+ *      right (matching surrounding Persian prose); English-content
+ *      code in an LTR paragraph still aligns to the left as before.
+ *
+ *   2. unicode-bidi: plaintext  — overrides the inherited direction
+ *      based on the FIRST STRONG CHARACTER in the element's text.
+ *      Persian-content <code> resolves to RTL even if Poe wraps it
+ *      in an LTR ancestor; pure English <code> stays LTR even when
+ *      embedded in a Persian paragraph. This preserves the project
+ *      convention "English code stays LTR" while handling Persian
+ *      annotations Poe places inside <code> tags.
+ *
+ * unicode-bidi: plaintext is supported in Chrome 17+ (manifest
+ * minimum_chrome_version is 105 — well above the threshold).
+ * ============================================================ */
+.rtly-poe.rtly-with-rtl code, .rtly-poe.rtly-with-rtl kbd, .rtly-poe.rtly-with-rtl samp, .rtly-poe.rtly-with-rtl pre {
+  text-align: start;
+  unicode-bidi: plaintext;
+}
+/* Protect menus and navigation from direction changes - Poe */
+.rtly-poe.rtly-with-rtl nav, .rtly-poe.rtly-with-rtl aside, .rtly-poe.rtly-with-rtl [role="navigation"], .rtly-poe.rtly-with-rtl [role="menu"], .rtly-poe.rtly-with-rtl header, .rtly-poe.rtly-with-rtl [role="banner"], .rtly-poe.rtly-with-rtl nav *, .rtly-poe.rtly-with-rtl aside *, .rtly-poe.rtly-with-rtl [role="navigation"] *, .rtly-poe.rtly-with-rtl [role="menu"] *, .rtly-poe.rtly-with-rtl header *, .rtly-poe.rtly-with-rtl [role="banner"] * {
+  direction: unset !important;
+  text-align: unset !important;
+}
+/* End Poe */

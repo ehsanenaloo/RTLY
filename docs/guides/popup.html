@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en" data-root="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The popup | RTLY user guide</title>
+<meta name="description" content="Every control in the RTLY toolbar popup: the current site card, modes, font size, the list of sites, the menu, About and the support reminder.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" type="image/svg+xml" href="../assets/logo.svg">
+<link rel="canonical" href="https://ehsanenaloo.github.io/RTLY/guides/popup.html">
+
+<link rel="stylesheet" href="../styles.css">
+<script>try{var t=localStorage.getItem("rtly-docs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script defer src="../app.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a><header class="site-header"><div class="shell header-inner"><a class="brand" href="../index.html"><img src="../assets/logo.svg" width="34" height="34" alt=""><span>RTLY<small>User guide</small></span></a><nav class="top-nav" aria-label="Primary"><a href="../index.html">Overview</a><a href="../guides/quick-start.html">Quick start</a><a href="../guides/index.html">All guides</a><a href="../guides/troubleshooting-faq.html">Help</a><a href="../fa/index.html" hreflang="fa" lang="fa">فارسی</a><a href="https://github.com/ehsanenaloo/RTLY" rel="noopener">GitHub &#8599;</a></nav><div class="header-tools"><span data-search-host></span><button type="button" class="icon-button" data-theme-toggle hidden>Theme</button></div></div></header>
+<main id="main">
+<div class="shell page-intro"><p class="breadcrumbs"><a href="../index.html">Home</a> / <a href="index.html">Guides</a> / Using RTLY</p><h1>The popup</h1><p class="lead">The popup is the fast way to switch a site on or off, change its mode and change the text size.</p><p class="meta-line">Checked against the source on 2026-10-08, RTLY 2.0.0.</p></div>
+<div class="shell doc-layout has-toc">
+<aside class="sidebar"><details open><summary>Browse the guides</summary><nav aria-label="Guides"><a href="index.html">All guides</a><p>Get started</p><a href="quick-start.html">Quick start</a><a href="installation.html">Installation</a><p>Using RTLY</p><a href="popup.html" aria-current="page">The popup</a><a href="settings.html">The settings page</a><a href="modes-and-direction.html">Modes and direction</a><a href="shortcut-and-menu.html">Shortcut and right-click menu</a><a href="supported-sites.html">Supported sites</a><a href="languages-and-appearance.html">Languages and appearance</a><p>Trust and support</p><a href="privacy-and-data.html">Privacy, permissions and data</a><a href="troubleshooting-faq.html">Troubleshooting and FAQ</a><a href="limits.html">Limits and known problems</a><a href="../privacy.html">Privacy policy</a></nav></details></aside>
+<article class="prose">
+
+<p>Click the RTLY icon in the toolbar to open it. Everything you change here is saved at once.</p>
+<figure class="shot narrow"><div class="frame"><img class="for-light" src="../assets/screenshots/popup-light.png" data-file="popup-light.png" alt="The RTLY popup on a supported site: the current site card with an on/off switch, the mode selector and the font size, and the list of all sites below (light theme)" loading="lazy" decoding="async" width="760" height="1190"><img class="for-dark" src="../assets/screenshots/popup-dark.png" data-file="popup-dark.png" alt="The RTLY popup on a supported site: the current site card with an on/off switch, the mode selector and the font size, and the list of all sites below (dark theme)" loading="lazy" decoding="async" width="760" height="1190"></div><figcaption>The popup on a supported site.</figcaption></figure>
+
+<h2 id="the-current-site-card">The current site card<a class="anchor" href="#the-current-site-card" aria-label="Link to this section">#</a></h2>
+<p>When the tab you are on is a <a href="supported-sites.html">supported site</a>, the top of the popup shows a card for it:</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Current site controls"><table><thead><tr><th scope="col">Control</th><th scope="col">What it does</th></tr></thead><tbody><tr><td>Site name and address</td><td>Shows which site RTLY recognized, for example Claude and <code>claude.ai</code>.</td></tr><tr><td>Status line</td><td>"RTLY active" when the site is on, "RTLY disabled" when it is off.</td></tr><tr><td>Switch</td><td>Turns RTLY on or off for this site. RTLY reloads the site's open tabs after you change it.</td></tr><tr><td>Full / Font / RTL</td><td>The mode for this site. A short line under the buttons explains the selected mode. Mode changes apply to open tabs at once.</td></tr><tr><td>Font size, A&minus; and A+</td><td>Changes the text size by 5% per click, from 85% to 120%. This setting is shared by all sites.</td></tr></tbody></table></div>
+<p>On any other page, the card says that RTLY does not support the site and asks you to open one of the supported chats.</p>
+
+<h2 id="all-sites">All sites<a class="anchor" href="#all-sites" aria-label="Link to this section">#</a></h2>
+<p>Below the card is the list of all 16 supported sites with a switch for each, and a count such as "16 of 16 enabled". Pinned sites come first and show a star. A site that is in a single-feature mode shows a small "Font only" or "RTL only" tag, and the site you are on is tagged "Current". You choose the pinned sites on the <a href="settings.html">settings page</a>. Until you change it, the pinned sites are ChatGPT, Claude, Gemini and Perplexity.</p>
+
+<h2 id="the-menu">The menu<a class="anchor" href="#the-menu" aria-label="Link to this section">#</a></h2>
+<p>The three-dot button opens a menu:</p>
+<figure class="shot narrow"><div class="frame"><img src="../assets/screenshots/popup-menu.png" data-file="popup-menu.png" alt="The popup menu with Settings, Help guide, About RTLY, Support RTLY, the theme choice and the color palette" loading="lazy" decoding="async" width="760" height="1190"></div><figcaption>The popup menu.</figcaption></figure>
+<ul>
+  <li><strong>Settings</strong> opens the <a href="settings.html">settings page</a> in a new tab.</li>
+  <li><strong>Help guide</strong> opens this user guide on GitHub Pages.</li>
+  <li><strong>About RTLY</strong> shows the version, the author, the author's website (www.enaloo.com) and a support button.</li>
+  <li><strong>Support RTLY</strong> opens the Buy me a coffee page.</li>
+  <li><strong>Theme</strong>: light, dark or system.</li>
+  <li><strong>Color palette</strong>: teal, blue, indigo or neutral.</li>
+</ul>
+<p>The heart button in the header does the same as <strong>Support RTLY</strong>. These links open only when you click them.</p>
+
+<h2 id="the-footer">The footer<a class="anchor" href="#the-footer" aria-label="Link to this section">#</a></h2>
+<p>The bottom of the popup rotates every few seconds through four short messages: about, source code on GitHub, rate the extension, and support. The GitHub, rating and support messages have a button that opens a page in a new tab.</p>
+
+<h2 id="support-reminder">The support reminder<a class="anchor" href="#support-reminder" aria-label="Link to this section">#</a></h2>
+<p>About two weeks after installation, and then at most once a month, RTLY asks once if you want to support the project. Two things happen:</p>
+<ul>
+  <li>While a supported site is in front, a small red heart appears on the toolbar icon.</li>
+  <li>When you open the popup, a card appears with a coffee button, a rating button and "Not now". Showing the card clears the heart and starts the next month.</li>
+</ul>
+<p>The reminder never appears inside a web page. It uses no timer, no alarm and no network request. Nothing in the interface turns it off for good, but it can appear only about once a month.</p>
+
+<h2 id="other-languages">Language and direction<a class="anchor" href="#other-languages" aria-label="Link to this section">#</a></h2>
+<p>The popup follows the interface language you picked on the settings page, or your browser's language if it is one of the 15 supported languages. Right-to-left languages flip the whole popup. See <a href="languages-and-appearance.html">Languages and appearance</a>.</p>
+<figure class="shot narrow"><div class="frame"><img src="../assets/screenshots/popup-en-dark.png" data-file="popup-en-dark.png" alt="The popup in English with the dark theme" loading="lazy" decoding="async" width="760" height="1190"></div><figcaption>The same popup in English, dark theme.</figcaption></figure>
+<div class="reading-footer"><a class="prev" href="installation.html"><small>Previous</small>Installation</a><a class="next" href="settings.html"><small>Next</small>The settings page</a></div>
+</article>
+<nav class="toc" aria-label="On this page"><p>On this page</p><ol><li><a href="#the-current-site-card">The current site card</a></li><li><a href="#all-sites">All sites</a></li><li><a href="#the-menu">The menu</a></li><li><a href="#the-footer">The footer</a></li><li><a href="#support-reminder">The support reminder</a></li><li><a href="#other-languages">Language and direction</a></li></ol></nav>
+</div>
+</main>
+<footer class="footer"><div class="shell footer-inner"><p>RTLY user guide &middot; MIT licensed &middot; Maintained by Ehsan Enaloo</p><div><a href="../guides/troubleshooting-faq.html">Troubleshooting</a><a href="../guides/limits.html">Limits</a><a href="../privacy.html">Privacy</a><a href="https://github.com/ehsanenaloo/RTLY" rel="noopener">Source repository &#8599;</a></div></div></footer>
+</body>
+</html>

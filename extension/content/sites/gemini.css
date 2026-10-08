@@ -1,0 +1,429 @@
+/* === Gemini (Lumi + classic) === */
+/* Gemini */
+.gds-label-m-alt {
+  margin-bottom: 0px !important;
+}
+.rtly-gemini.rtly-with-font {
+  font-family: var(--rtly-font-family) !important;
+}
+/* Direction will be set dynamically by JavaScript based on content analysis */
+.rtly-gemini.rtly-with-rtl [dir="rtl"]:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]), .rtly-gemini.rtly-with-rtl [dir="rtl"] *:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]):not(nav *):not(aside *):not([role="navigation"] *):not([role="menu"] *):not(header *):not([role="banner"] *):not(code):not(kbd):not(samp):not(pre):not(var):not(tt):not(code *):not(pre *):not(kbd *):not(samp *) {
+  direction: rtl !important;
+  text-align: right !important;
+}
+/* Force RTL for elements with dir="rtl" attribute - override any conflicting styles */
+.rtly-gemini.rtly-with-rtl [dir="rtl"]:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]) {
+  direction: rtl !important;
+  text-align: right !important;
+}
+.rtly-gemini.rtly-with-rtl [dir="ltr"]:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]) {
+  direction: ltr !important;
+  text-align: left !important;
+}
+/* Protect menus and navigation from direction changes - Gemini */
+/* These rules have maximum specificity to override any [dir="rtl"] rules */
+.rtly-gemini.rtly-with-rtl nav, .rtly-gemini.rtly-with-rtl nav[dir="rtl"], .rtly-gemini.rtly-with-rtl nav[dir="ltr"], .rtly-gemini.rtly-with-rtl aside, .rtly-gemini.rtly-with-rtl aside[dir="rtl"], .rtly-gemini.rtly-with-rtl aside[dir="ltr"], .rtly-gemini.rtly-with-rtl [role="navigation"], .rtly-gemini.rtly-with-rtl [role="navigation"][dir="rtl"], .rtly-gemini.rtly-with-rtl [role="navigation"][dir="ltr"], .rtly-gemini.rtly-with-rtl [role="menu"], .rtly-gemini.rtly-with-rtl [role="menu"][dir="rtl"], .rtly-gemini.rtly-with-rtl [role="menu"][dir="ltr"], .rtly-gemini.rtly-with-rtl header, .rtly-gemini.rtly-with-rtl header[dir="rtl"], .rtly-gemini.rtly-with-rtl header[dir="ltr"], .rtly-gemini.rtly-with-rtl [role="banner"], .rtly-gemini.rtly-with-rtl [role="banner"][dir="rtl"], .rtly-gemini.rtly-with-rtl [role="banner"][dir="ltr"], .rtly-gemini.rtly-with-rtl nav *, .rtly-gemini.rtly-with-rtl nav[dir="rtl"] *, .rtly-gemini.rtly-with-rtl nav[dir="ltr"] *, .rtly-gemini.rtly-with-rtl aside *, .rtly-gemini.rtly-with-rtl aside[dir="rtl"] *, .rtly-gemini.rtly-with-rtl aside[dir="ltr"] *, .rtly-gemini.rtly-with-rtl [role="navigation"] *, .rtly-gemini.rtly-with-rtl [role="navigation"][dir="rtl"] *, .rtly-gemini.rtly-with-rtl [role="navigation"][dir="ltr"] *, .rtly-gemini.rtly-with-rtl [role="menu"] *, .rtly-gemini.rtly-with-rtl [role="menu"][dir="rtl"] *, .rtly-gemini.rtly-with-rtl [role="menu"][dir="ltr"] *, .rtly-gemini.rtly-with-rtl header *, .rtly-gemini.rtly-with-rtl header[dir="rtl"] *, .rtly-gemini.rtly-with-rtl header[dir="ltr"] *, .rtly-gemini.rtly-with-rtl [role="banner"] *, .rtly-gemini.rtly-with-rtl [role="banner"][dir="rtl"] *, .rtly-gemini.rtly-with-rtl [role="banner"][dir="ltr"] * {
+  direction: unset !important;
+  text-align: unset !important;
+}
+.rtly-gemini.rtly-with-font p, .rtly-gemini.rtly-with-font h1, .rtly-gemini.rtly-with-font h2, .rtly-gemini.rtly-with-font h3, .rtly-gemini.rtly-with-font h4, .rtly-gemini.rtly-with-font h5, .rtly-gemini.rtly-with-font h6, .rtly-gemini.rtly-with-font li, .rtly-gemini.rtly-with-font a, .rtly-gemini.rtly-with-font ul, .rtly-gemini.rtly-with-font span, .rtly-gemini.rtly-with-font div, .rtly-gemini.rtly-with-font article, .rtly-gemini.rtly-with-font section, .rtly-gemini.rtly-with-font table, .rtly-gemini.rtly-with-font th, .rtly-gemini.rtly-with-font td, .rtly-gemini.rtly-with-font tr {
+  font-family: var(--rtly-font-family) !important;
+}
+.rtly-gemini.rtly-with-rtl table {
+  direction: rtl !important;
+}
+.rtly-gemini table, .rtly-gemini tr, .rtly-gemini th, .rtly-gemini td {
+  text-align: center !important;
+}
+.rtly-gemini.rtly-with-font .conversation-title {
+  font-family: var(--rtly-font-family);
+}
+.rtly-gemini.rtly-with-rtl .conversation-title {
+  text-align: right;
+  direction: rtl;
+}
+.rtly-gemini.rtly-with-font code, .rtly-gemini.rtly-with-font kbd, .rtly-gemini.rtly-with-font samp, .rtly-gemini.rtly-with-font pre, .rtly-gemini.rtly-with-font .inline-code {
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
+    Liberation Mono, monospace, var(--rtly-font-family) !important;
+}
+.rtly-gemini.rtly-with-rtl code, .rtly-gemini.rtly-with-rtl kbd, .rtly-gemini.rtly-with-rtl samp, .rtly-gemini.rtly-with-rtl pre, .rtly-gemini.rtly-with-rtl .inline-code {
+  direction: ltr !important;
+}
+/* Direction will be set dynamically by JavaScript based on content analysis */
+.rtly-gemini.rtly-with-rtl .ql-editor.textarea[dir="rtl"], .rtly-gemini.rtly-with-rtl textarea[dir="rtl"], .rtly-gemini.rtly-with-rtl [contenteditable="true"][dir="rtl"], .rtly-gemini.rtly-with-rtl [contenteditable][dir="rtl"], .rtly-gemini.rtly-with-rtl [role="textbox"][dir="rtl"] {
+  direction: rtl !important;
+  text-align: right !important;
+}
+/* Message containers - apply direction when set by JavaScript */
+.rtly-gemini.rtly-with-rtl .message-content[dir="rtl"], .rtly-gemini.rtly-with-rtl [data-message-content][dir="rtl"], .rtly-gemini.rtly-with-rtl article[dir="rtl"], .rtly-gemini.rtly-with-rtl [role="article"][dir="rtl"], .rtly-gemini.rtly-with-rtl [data-message][dir="rtl"], .rtly-gemini.rtly-with-rtl [data-qa*="message"][dir="rtl"], .rtly-gemini.rtly-with-rtl .message[dir="rtl"], .rtly-gemini.rtly-with-rtl [class*="message"][dir="rtl"], .rtly-gemini.rtly-with-rtl [class*="Message"][dir="rtl"], .rtly-gemini.rtly-with-rtl [data-role="assistant"][dir="rtl"], .rtly-gemini.rtly-with-rtl [data-role="user"][dir="rtl"], .rtly-gemini.rtly-with-rtl div[data-message][dir="rtl"], .rtly-gemini.rtly-with-rtl main div[role="article"][dir="rtl"], .rtly-gemini.rtly-with-rtl [class*="response"][dir="rtl"], .rtly-gemini.rtly-with-rtl [class*="Response"][dir="rtl"], .rtly-gemini.rtly-with-rtl p[dir="rtl"], .rtly-gemini.rtly-with-rtl div[dir="rtl"], .rtly-gemini.rtly-with-rtl span[dir="rtl"], .rtly-gemini.rtly-with-rtl li[dir="rtl"], .rtly-gemini.rtly-with-rtl h1[dir="rtl"], .rtly-gemini.rtly-with-rtl h2[dir="rtl"], .rtly-gemini.rtly-with-rtl h3[dir="rtl"], .rtly-gemini.rtly-with-rtl h4[dir="rtl"], .rtly-gemini.rtly-with-rtl h5[dir="rtl"], .rtly-gemini.rtly-with-rtl h6[dir="rtl"] {
+  direction: rtl !important;
+  text-align: right !important;
+}
+/* Ensure LTR for code blocks even if parent is RTL */
+.rtly-gemini.rtly-with-rtl code[dir="ltr"], .rtly-gemini.rtly-with-rtl pre[dir="ltr"], .rtly-gemini.rtly-with-rtl kbd[dir="ltr"], .rtly-gemini.rtly-with-rtl samp[dir="ltr"] {
+  direction: ltr !important;
+  text-align: left !important;
+}
+/* Additional protection for Gemini menus - override any direction set by JavaScript */
+.rtly-gemini.rtly-with-rtl aside, .rtly-gemini.rtly-with-rtl aside[dir], .rtly-gemini.rtly-with-rtl aside[dir="rtl"], .rtly-gemini.rtly-with-rtl aside[dir="ltr"], .rtly-gemini.rtly-with-rtl nav, .rtly-gemini.rtly-with-rtl nav[dir], .rtly-gemini.rtly-with-rtl nav[dir="rtl"], .rtly-gemini.rtly-with-rtl nav[dir="ltr"], .rtly-gemini.rtly-with-rtl [role="complementary"], .rtly-gemini.rtly-with-rtl [role="complementary"][dir], .rtly-gemini.rtly-with-rtl [role="complementary"][dir="rtl"], .rtly-gemini.rtly-with-rtl [role="complementary"][dir="ltr"], .rtly-gemini.rtly-with-rtl aside *, .rtly-gemini.rtly-with-rtl aside[dir] *, .rtly-gemini.rtly-with-rtl aside[dir="rtl"] *, .rtly-gemini.rtly-with-rtl aside[dir="ltr"] *, .rtly-gemini.rtly-with-rtl nav *, .rtly-gemini.rtly-with-rtl nav[dir] *, .rtly-gemini.rtly-with-rtl nav[dir="rtl"] *, .rtly-gemini.rtly-with-rtl nav[dir="ltr"] *, .rtly-gemini.rtly-with-rtl [role="complementary"] *, .rtly-gemini.rtly-with-rtl [role="complementary"][dir] *, .rtly-gemini.rtly-with-rtl [role="complementary"][dir="rtl"] *, .rtly-gemini.rtly-with-rtl [role="complementary"][dir="ltr"] * {
+  direction: unset !important;
+  text-align: unset !important;
+}
+
+/* ============================================================
+ * v1.8.19 — Gemini icon-bearing control protection
+ *
+ * Symptom: in RTL mode on Gemini, buttons/chips/list-items that combine
+ * an icon (`<mat-icon>`) with a text label rendered with the icon and
+ * the label visually overlapping or in the wrong order.
+ *
+ * Root cause: the broad rule above
+ *     .rtly-gemini.rtly-with-rtl [dir="rtl"] *
+ *         { direction: rtl !important; }
+ * forces direction:rtl on every descendant of an RTL'd container.
+ * For a control built as
+ *     <button style="display:flex">
+ *       <mat-icon>send</mat-icon>
+ *       <span>ارسال</span>
+ *     </button>
+ * direction:rtl on the button reverses the flex children's visual order
+ * (label first, icon second). The icon shield correctly keeps the
+ * `<mat-icon>` itself direction:ltr, but Angular Material / Gemini
+ * style the icon with *physical* margins (e.g. margin-right: 8px) and
+ * sometimes absolute positioning — when the icon flips to the other
+ * side of the flex line, its physical margin lands inside the label's
+ * region, producing the observed overlap.
+ *
+ * Fix: keep interactive controls that pair an icon with content in
+ * direction:ltr. The Persian inside the label still renders right-to-
+ * left character-by-character (Unicode BiDi P2), but the LAYOUT of
+ * icon + label stays as the designer intended. :has() is supported on
+ * every Chromium build covered by `minimum_chrome_version: 105`.
+ *
+ * Scope: limited to elements that actually contain an icon descendant.
+ * Pure text buttons or pure icon-only buttons are not touched here
+ * (the icon-only buttons are already handled by the universal icon
+ * shield because their class contains "icon" — e.g. `mdc-icon-button`).
+ * ============================================================ */
+.rtly-gemini.rtly-with-rtl button:has(mat-icon),
+.rtly-gemini.rtly-with-rtl a:has(mat-icon),
+.rtly-gemini.rtly-with-rtl [role="button"]:has(mat-icon),
+.rtly-gemini.rtly-with-rtl [role="menuitem"]:has(mat-icon),
+.rtly-gemini.rtly-with-rtl [role="tab"]:has(mat-icon),
+.rtly-gemini.rtly-with-rtl [role="option"]:has(mat-icon),
+.rtly-gemini.rtly-with-rtl mat-list-item:has(mat-icon),
+.rtly-gemini.rtly-with-rtl mat-chip:has(mat-icon),
+.rtly-gemini.rtly-with-rtl [class*="chip" i]:has(mat-icon),
+.rtly-gemini.rtly-with-rtl [class*="toolbox" i]:has(mat-icon),
+.rtly-gemini.rtly-with-rtl button:has([class*="material-icons" i]),
+.rtly-gemini.rtly-with-rtl button:has([class*="material-symbols" i]),
+.rtly-gemini.rtly-with-rtl button:has([class*="google-symbols" i]),
+.rtly-gemini.rtly-with-rtl button:has([class*="lumi-symbols" i]),
+.rtly-gemini.rtly-with-rtl button:has([class*="lm-icon" i]),
+.rtly-gemini.rtly-with-rtl a:has([class*="material-icons" i]),
+.rtly-gemini.rtly-with-rtl a:has([class*="material-symbols" i]),
+.rtly-gemini.rtly-with-rtl a:has([class*="google-symbols" i]),
+.rtly-gemini.rtly-with-rtl a:has([class*="lumi-symbols" i]),
+.rtly-gemini.rtly-with-rtl a:has([class*="lm-icon" i]),
+.rtly-gemini.rtly-with-rtl [role="button"]:has([class*="lumi-symbols" i]),
+.rtly-gemini.rtly-with-rtl [role="menuitem"]:has([class*="lumi-symbols" i]) {
+  direction: ltr !important;
+  text-align: initial !important;
+}
+
+/* ============================================================
+ * v1.8.22 — Gemini Lumi user-query collapsed bubble
+ *
+ * Production DOM (captured in console):
+ *
+ *   <span data-test-id="luminous-collapsed-bubble"            ← LTR
+ *         class="user-query-bubble-with-background">
+ *     <span class="horizontal-container">                     ← LTR
+ *       <div role="heading" class="query-text" dir="rtl">     ← RTL (Gemini)
+ *         <p class="query-text-line">اسمت چیه</p>
+ *       </div>
+ *       <div class="luminous-expand-fade"                     ← absolute, right:0
+ *            style="top:12px; right:0; bottom:-10px; left:-52px"></div>
+ *       <button data-test-id="luminous-expand-button"         ← absolute, right:0; left:0
+ *               class="mdc-icon-button" aria-label="Expand">
+ *         <mat-icon class="lumi-symbols">expand_more</mat-icon>
+ *       </button>
+ *     </span>
+ *   </span>
+ *
+ * Symptom: Persian text "اسمت چیه" is clipped to "ت چیه" with the
+ * expand icon visually overlapping the start of the text.
+ *
+ * Root cause (verified via getComputedStyle + getBoundingClientRect):
+ *
+ *   1. Gemini sets dir="rtl" on the inner query-text (good — text aligns
+ *      visually-right inside its own box).
+ *   2. The outer bubble + horizontal-container stay direction:LTR.
+ *   3. The expand button uses physical `right: 0; left: 0` (not just
+ *      `inset-inline-end: 0`), so it stretches the full width of the
+ *      pill and its visible mat-icon sits in the centre. The fade-gradient
+ *      stretches from `right: 0` outward to `left: -52px`, anchored to
+ *      the bubble's physical-right edge.
+ *   4. In Persian, text starts at the physical-right edge (visual start
+ *      in RTL) — the exact region the button hit-area and fade gradient
+ *      occupy. Together with `overflow: hidden; text-overflow: clip` on
+ *      query-text, the first characters of the Persian message get
+ *      visually hidden behind the button area.
+ *
+ * Fix strategy: trigger off Gemini's own dir="rtl" on the inner
+ * query-text via :has(), so this works even if RTLY's JS hasn't yet
+ * promoted the outer bubble (which we saw in production with
+ * data-rtly-dir still undefined). Two surgical changes:
+ *
+ *   a) Pin the expand button to the physical LEFT (= visual end in RTL),
+ *      releasing its `right: 0` anchor. The button width collapses to
+ *      its content size, no longer covers the text area.
+ *   b) Mirror the fade-gradient to the physical LEFT and flip it
+ *      horizontally so its transparent-to-solid gradient still points
+ *      from text region toward the button.
+ *
+ * The bubble's own direction is also promoted to RTL so any other
+ * logical-property positioning Gemini adds in future resolves
+ * correctly without further CSS patches.
+ * ============================================================ */
+.rtly-gemini.rtly-with-rtl :is([data-test-id="luminous-collapsed-bubble"], [class*="user-query-bubble" i]):has([dir="rtl"]),
+.rtly-gemini.rtly-with-rtl :is([data-test-id="luminous-collapsed-bubble"], [class*="user-query-bubble" i]):has([dir="rtl"]) [class*="horizontal-container" i] {
+  direction: rtl !important;
+}
+
+/* ============================================================
+ * v1.9.5 — Don't fight the chevron; remove the collapse state.
+ *
+ * Critical user A/B test (with-extension vs. without-extension on
+ * the same Gemini conversation) showed the root cause: our extension
+ * causes Gemini to render the user-query as a COLLAPSED PILL even for
+ * short Persian messages. Without RTLY, stock Gemini renders the same
+ * short text inline (no bubble, no chevron). With RTLY, Gemini's UI
+ * decides the message needs collapsing — most likely because our font
+ * substitution (IranYekan vs. Roboto) shifts character widths past
+ * Gemini's "long-enough-to-collapse" threshold.
+ *
+ * Previous versions (v1.8.22 → v1.9.4) tried to position the chevron
+ * correctly inside the collapsed bubble. v1.9.5 abandons that approach:
+ * if the collapse is itself unwanted (it is — the user confirmed it),
+ * we just neutralize the collapse UI. The bubble's text container is
+ * forced to overflow:visible / line-clamp:none, and the expand button
+ * + fade gradient are hidden via display:none. Result: full message
+ * text is visible, no chevron, no truncation.
+ *
+ * Long messages (multi-line in stock Gemini too) still render correctly
+ * — they just spill into their natural multi-line layout without the
+ * manual collapse-toggle affordance. Trade-off: the user can no longer
+ * manually collapse a very long message they sent. The user judged
+ * this acceptable; the broken-position chevron was the worse outcome.
+ *
+ * All the JS-side escalation from v1.9.2 / v1.9.3 / v1.9.4 (processGemini
+ * Lumi block, standalone observer, style-attribute watcher) is removed
+ * in this version — it's no longer needed because we don't try to
+ * reposition the button; we hide it.
+ * ============================================================ */
+
+/* Show the full query text — remove every overflow / clamp / max-height
+ * mechanism Gemini uses to truncate to a single line. */
+html.rtly-gemini.rtly-with-rtl
+  :is([data-test-id="luminous-collapsed-bubble"], [class*="user-query-bubble" i]):has([dir="rtl"])
+  :is(.query-text, [class*="query-text" i]) {
+  overflow: visible !important;
+  text-overflow: clip !important;
+  -webkit-line-clamp: unset !important;
+  -webkit-box-orient: unset !important;
+  max-height: none !important;
+  display: block !important;
+  white-space: normal !important;
+}
+
+/* Hide the expand button, its fade gradient, and any toggle/collapse
+ * variants — including future Gemini renames of luminous-*-button /
+ * luminous-*-fade. We accept both old (`expand`) and new (`toggle`)
+ * vocabulary that Gemini has shipped, plus a generic `*-fade` catch. */
+html.rtly-gemini.rtly-with-rtl
+  :is([data-test-id="luminous-collapsed-bubble"], [class*="user-query-bubble" i]):has([dir="rtl"])
+  :is(
+    [data-test-id*="luminous-expand" i],
+    [data-test-id*="luminous-toggle" i],
+    [data-test-id="luminous-expand-button"],
+    [data-test-id="luminous-toggle-button"],
+    [class*="luminous-expand-button" i],
+    [class*="luminous-toggle-button" i],
+    [class*="luminous-expand-fade" i],
+    [class*="luminous-toggle-fade" i],
+    [class*="expand-fade" i],
+    [class*="toggle-fade" i],
+    .luminous-expand-fade,
+    [aria-label="Expand" i],
+    [aria-label="Collapse" i]
+  ) {
+  display: none !important;
+}
+
+/* ============================================================
+ * v1.8.23 — Gemini assistant message containers (Lumi <model-response>)
+ *
+ * Diagnosis (DevTools snippet on production gemini.google.com):
+ *   <li>      direction:ltr   data-rtly-dir:undefined
+ *   <p>       direction:ltr   data-rtly-dir:undefined
+ *   <b>       direction:ltr   data-rtly-dir:undefined  ← "تداخل جهت‌ها (Direction Conflict):"
+ *   <code>    direction:ltr   unicode-bidi:isolate     ✓ (correct, already isolated)
+ *
+ * All text-bearing descendants of the assistant message stayed
+ * direction:ltr — JS hadn't reached them. Symptom: in a bulleted list
+ * with mixed Persian + English + inline-code, the visual order put the
+ * bullet on the left and the Persian title-text on the left side of the
+ * line rather than the right side, because the LTR container told Bidi
+ * to start the line at the visual-left edge.
+ *
+ * Why JS misses these: long assistant responses produce many text-
+ * bearing children (15+ in the response-selector pass, 150+ in the
+ * broad scan). The budget caps cut off late descendants. Even with
+ * v1.8.21's `model-response` / `model-response-text` selectors, only
+ * the outer containers and the first 15 children get processed
+ * deterministically — interior <li>/<p>/<b> can slip through.
+ *
+ * Fix: directly cascade direction:rtl + text-align:start to every
+ * text-bearing descendant of Gemini's assistant message containers,
+ * via CSS, regardless of whether JS reached them. Code-like elements
+ * (code/pre/kbd/samp/var/tt) explicitly stay LTR so syntax remains
+ * readable.
+ *
+ * Scope: triggered by `.rtly-gemini.rtly-with-rtl` body class — i.e.
+ * only when the user has explicitly enabled RTLY's RTL mode on Gemini.
+ * If they're on Gemini but with RTLY paused or in font-only mode, the
+ * rule does not fire.
+ * ============================================================ */
+.rtly-gemini.rtly-with-rtl model-response,
+.rtly-gemini.rtly-with-rtl model-response-text,
+.rtly-gemini.rtly-with-rtl message-content {
+  direction: rtl !important;
+  text-align: start !important;
+  unicode-bidi: isolate !important;
+}
+
+.rtly-gemini.rtly-with-rtl :is(model-response, model-response-text, message-content)
+  :is(p, li, ul, ol, h1, h2, h3, h4, h5, h6, blockquote, dl, dt, dd, b, strong, em, i, u, mark, ins, del, sub, sup, span, div, article, section, header, footer, aside, main, figure, figcaption, address, table, thead, tbody, tfoot, tr, th, td, caption, label) {
+  direction: rtl !important;
+  text-align: start !important;
+  unicode-bidi: isolate;
+}
+
+/* Code-like descendants stay LTR (their content is technical / programmatic) */
+.rtly-gemini.rtly-with-rtl :is(model-response, model-response-text, message-content)
+  :is(code, pre, kbd, samp, var, tt),
+.rtly-gemini.rtly-with-rtl :is(model-response, model-response-text, message-content)
+  :is(code, pre, kbd, samp, var, tt) * {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: isolate !important;
+}
+
+/* But the parent <p> of an inline <code> stays RTL — children handled above */
+
+/* ============================================================
+ * v1.9.2 — Justify prose in assistant messages
+ *
+ * User request: lines look nicer with justify alignment for long Persian
+ * paragraphs (visually distributes inter-word spacing so the right edge
+ * of every line aligns cleanly with the start of each line).
+ *
+ * Scope: <p>, <li>, <blockquote> inside Gemini's assistant message
+ * containers. Headings stay text-align: start because justifying a
+ * short heading produces awkward over-stretched letter spacing.
+ *
+ * `text-align-last: start` (which resolves to "right" in RTL) keeps the
+ * LAST line of each block aligned to the inline-start so a trailing
+ * short phrase doesn't get awkwardly stretched across the column.
+ *
+ * Single-line content is unaffected: `justify` only spreads inter-word
+ * gaps when a line WRAPS. Short labels and one-line items render
+ * identically to text-align: start.
+ * ============================================================ */
+html.rtly-gemini.rtly-with-rtl
+  :is(model-response, model-response-text, message-content)
+  :is(p, li, blockquote) {
+  text-align: justify !important;
+  text-align-last: start !important;
+}
+
+/* ============================================================
+ * v1.9.1 — Gemini list marker (li::before) flip for RTL
+ *
+ * Diagnosis (DevTools snippet on production gemini.google.com):
+ *   ul list-style-position: outside | list-style-type: none
+ *   ul padding-inline-start: 3.36px | padding-right: 3.36px
+ *   li direction: rtl | padding-inline-start: 36px (= physical right) ✓
+ *   li::marker — content: normal   (suppressed because list-style: none)
+ *   li::before — content: ""
+ *                position: absolute
+ *                left: 0px          ← PHYSICAL LEFT (= visual end in RTL)
+ *                right: 731.65px    ← auto-resolved
+ *
+ * Symptom: bulleted lists in assistant responses had Persian text RTL'd
+ * correctly via v1.8.23 cascade, but the bullet glyphs themselves stayed
+ * on the visual-left side of each line because Gemini paints them with
+ * `li::before { position: absolute; left: 0; }`. Physical `left:0` does
+ * NOT follow `direction:rtl` — the pseudo-element is anchored to the
+ * physical-left edge of the relative `<li>`, regardless of writing mode.
+ * Meanwhile `padding-inline-start: 36px` correctly resolved to
+ * `padding-right: 36px` in RTL, leaving the visual-right gutter empty
+ * and the bullet floating on the wrong side.
+ *
+ * Fix: in RTL mode, override the pseudo-element's physical offsets —
+ * `left: auto; right: 0` — so the bullet sits at the physical-right
+ * (visual start in RTL) edge, inside the gutter created by the existing
+ * padding-inline-start. We also set the logical pair explicitly in case
+ * Gemini's CSS uses inset-inline-* anywhere up the cascade.
+ *
+ * Scoped to ul/ol > li::before inside the assistant message containers
+ * to avoid touching unrelated `::before` decorations elsewhere on the
+ * page. Same trigger as v1.8.23 (.rtly-gemini.rtly-with-rtl).
+ * ============================================================ */
+html.rtly-gemini.rtly-with-rtl :is(model-response, model-response-text, message-content) :is(ul, ol) > li::before {
+  left: auto !important;
+  right: 0 !important;
+  inset-inline-start: 0 !important;
+  inset-inline-end: auto !important;
+}
+
+/* End Gemini */
+
+/* === Gemini ligature shaping === */
+/* ============================================================
+ * v1.8.24 — Gemini-scoped ligature shaping
+ *
+ * Previously (v1.8.20) this rule lived inside the universal icon shield
+ * above and forced `font-feature-settings: "liga" 1` on EVERY icon
+ * container across all sites — including Claude's `[data-cds="Icon"]`
+ * elements. That broke Anthropic's icon rendering because the
+ * Anthropicons-Variable font is designed to be used with
+ * `font-feature-settings: "liga" 0` (Anthropic disables ligature
+ * substitution intentionally; their glyph mapping doesn't rely on text
+ * ligatures the way Material Symbols does). Forcing liga ON triggered
+ * unintended substitutions and rendered the sidebar icons as text-like
+ * artefacts.
+ *
+ * Scoping the liga forcing to .rtly-gemini only restores Claude to its
+ * pre-v1.8.20 icon rendering while keeping the Lumi / Material Symbols
+ * fix intact on Gemini.
+ * ============================================================ */
+.rtly-gemini [data-mat-icon-type],
+.rtly-gemini mat-icon,
+.rtly-gemini [class*="lumi-symbols" i],
+.rtly-gemini [class*="lm-icon" i],
+.rtly-gemini [class*="mat-ligature-font" i],
+.rtly-gemini [class*="mat-icon" i],
+.rtly-gemini [class*="material-icons" i],
+.rtly-gemini [class*="material-symbols" i],
+.rtly-gemini [class*="google-symbols" i],
+.rtly-gemini [style*="Material Symbols"],
+.rtly-gemini [style*="Material Icons"],
+.rtly-gemini [style*="Google Symbols"],
+.rtly-gemini [style*="google-symbols" i],
+.rtly-gemini [style*="Luminous Symbols"],
+.rtly-gemini [style*="lumi-symbols" i] {
+  font-feature-settings: "liga" 1 !important;
+  font-variant-ligatures: common-ligatures !important;
+}

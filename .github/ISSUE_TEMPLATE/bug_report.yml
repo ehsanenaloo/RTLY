@@ -1,0 +1,65 @@
+name: Bug report
+description: Something in RTLY itself (popup, options, shortcut, context menu) does not work as expected.
+title: "[Bug]: "
+labels: ["bug", "needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. If the problem is one website that is not aligned correctly, please use the **Broken site** form instead.
+        For security problems, use the private link on the issue chooser.
+  - type: input
+    id: version
+    attributes:
+      label: RTLY version
+      placeholder: "2.0.0"
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      placeholder: "Firefox 130 on Linux"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where does the problem happen?
+      options:
+        - Popup
+        - Options page
+        - Keyboard shortcut
+        - Right-click menu
+        - Font or text size
+        - Language or translations
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Say what you saw and what you expected.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ...
+        2. Click ...
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots or console errors
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and did not find this problem.
+          required: true

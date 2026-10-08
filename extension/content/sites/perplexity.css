@@ -1,0 +1,60 @@
+/* === Perplexity === */
+/* Perplexity */
+
+:root {
+  --font-fk-grotesk-neue: var(--rtly-font-family);
+}
+
+.rtly-perplexity.rtly-with-font {
+  font-family: var(--rtly-font-family);
+}
+
+.rtly-perplexity table * {
+  text-align: center;
+}
+
+.rtly-perplexity span.w-full.overflow-hidden.whitespace-nowrap {
+  mask-image: none !important;
+}
+
+.rtly-perplexity.rtly-with-font .font-sans, .rtly-perplexity.rtly-with-font .font-display, .rtly-perplexity.rtly-with-font .\!font-display, .rtly-perplexity.rtly-with-font p, .rtly-perplexity.rtly-with-font h1, .rtly-perplexity.rtly-with-font h2, .rtly-perplexity.rtly-with-font h3, .rtly-perplexity.rtly-with-font h4, .rtly-perplexity.rtly-with-font h5, .rtly-perplexity.rtly-with-font h6, .rtly-perplexity.rtly-with-font li, .rtly-perplexity.rtly-with-font a, .rtly-perplexity.rtly-with-font ul, .rtly-perplexity.rtly-with-font span, .rtly-perplexity.rtly-with-font table, .rtly-perplexity.rtly-with-font th, .rtly-perplexity.rtly-with-font td, .rtly-perplexity.rtly-with-font tr {
+  font-family: var(--rtly-font-family), ui-sans-serif, system-ui,
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica Neue, Arial,
+    "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji" !important;
+}
+
+.rtly-perplexity .font-display, .rtly-perplexity .\!font-display {
+  line-height: 1.5;
+}
+.rtly-perplexity .font-sans {
+  line-height: 2;
+}
+
+.rtly-perplexity .space-x-sm > :not([hidden]) ~ :not([hidden]) {
+  margin-right: 7px;
+}
+
+.rtly-perplexity.rtly-with-rtl .grid-cols-12 > .col-span-8 pre {
+  direction: ltr;
+}
+
+.rtly-perplexity.rtly-with-font .font-mono {
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
+    Liberation Mono, monospace, var(--rtly-font-family) !important;
+}
+/* Direction will be set dynamically by JavaScript based on content analysis */
+.rtly-perplexity.rtly-with-rtl [dir="rtl"], .rtly-perplexity.rtly-with-rtl [dir="rtl"] *:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]):not(nav *):not(aside *):not([role="navigation"] *):not([role="menu"] *):not(header *):not([role="banner"] *):not(code):not(kbd):not(samp):not(pre):not(var):not(tt):not(code *):not(pre *):not(kbd *):not(samp *) {
+  direction: rtl !important;
+  text-align: right !important;
+}
+/* Protect menus and navigation from direction changes - Perplexity */
+.rtly-perplexity.rtly-with-rtl nav, .rtly-perplexity.rtly-with-rtl aside, .rtly-perplexity.rtly-with-rtl [role="navigation"], .rtly-perplexity.rtly-with-rtl [role="menu"], .rtly-perplexity.rtly-with-rtl header, .rtly-perplexity.rtly-with-rtl [role="banner"], .rtly-perplexity.rtly-with-rtl nav *, .rtly-perplexity.rtly-with-rtl aside *, .rtly-perplexity.rtly-with-rtl [role="navigation"] *, .rtly-perplexity.rtly-with-rtl [role="menu"] *, .rtly-perplexity.rtly-with-rtl header *, .rtly-perplexity.rtly-with-rtl [role="banner"] * {
+  direction: unset !important;
+  text-align: unset !important;
+}
+.rtly-perplexity.rtly-with-rtl .w-full.font-sans.caret-superDuper[dir="rtl"], .rtly-perplexity.rtly-with-rtl textarea[dir="rtl"], .rtly-perplexity.rtly-with-rtl [contenteditable="true"][dir="rtl"] {
+  direction: rtl !important;
+  text-align: right !important;
+}
+/* END Perplexity */

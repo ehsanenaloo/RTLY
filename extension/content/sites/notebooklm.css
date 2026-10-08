@@ -1,0 +1,35 @@
+/* === NotebookLM === */
+/* NotebookLM */
+.rtly-notebooklm.rtly-with-font {
+  font-family: var(--rtly-font-family) !important;
+}
+/* Direction will be set dynamically by JavaScript based on content analysis */
+.rtly-notebooklm.rtly-with-rtl [dir="rtl"]:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]), .rtly-notebooklm.rtly-with-rtl [dir="rtl"] *:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]):not(nav *):not(aside *):not([role="navigation"] *):not([role="menu"] *):not(header *):not([role="banner"] *):not(code):not(kbd):not(samp):not(pre):not(var):not(tt):not(code *):not(pre *):not(kbd *):not(samp *) {
+  direction: rtl !important;
+  text-align: right !important;
+}
+/* Protect menus and navigation from direction changes - NotebookLM */
+.rtly-notebooklm.rtly-with-rtl nav, .rtly-notebooklm.rtly-with-rtl aside, .rtly-notebooklm.rtly-with-rtl [role="navigation"], .rtly-notebooklm.rtly-with-rtl [role="menu"], .rtly-notebooklm.rtly-with-rtl header, .rtly-notebooklm.rtly-with-rtl [role="banner"], .rtly-notebooklm.rtly-with-rtl nav *, .rtly-notebooklm.rtly-with-rtl aside *, .rtly-notebooklm.rtly-with-rtl [role="navigation"] *, .rtly-notebooklm.rtly-with-rtl [role="menu"] *, .rtly-notebooklm.rtly-with-rtl header *, .rtly-notebooklm.rtly-with-rtl [role="banner"] * {
+  direction: unset !important;
+  text-align: unset !important;
+}
+.rtly-notebooklm.rtly-with-font p, .rtly-notebooklm.rtly-with-font h1, .rtly-notebooklm.rtly-with-font h2, .rtly-notebooklm.rtly-with-font h3, .rtly-notebooklm.rtly-with-font h4, .rtly-notebooklm.rtly-with-font h5, .rtly-notebooklm.rtly-with-font h6, .rtly-notebooklm.rtly-with-font li, .rtly-notebooklm.rtly-with-font a, .rtly-notebooklm.rtly-with-font ul, .rtly-notebooklm.rtly-with-font ol, .rtly-notebooklm.rtly-with-font span, .rtly-notebooklm.rtly-with-font div, .rtly-notebooklm.rtly-with-font article, .rtly-notebooklm.rtly-with-font section {
+  font-family: var(--rtly-font-family) !important;
+}
+.rtly-notebooklm.rtly-with-rtl table {
+  direction: rtl !important;
+}
+.rtly-notebooklm table th, .rtly-notebooklm table td {
+  text-align: center !important;
+}
+.rtly-notebooklm.rtly-with-font code, .rtly-notebooklm.rtly-with-font kbd, .rtly-notebooklm.rtly-with-font samp, .rtly-notebooklm.rtly-with-font pre {
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
+    Liberation Mono, monospace, var(--rtly-font-family) !important;
+}
+.rtly-notebooklm.rtly-with-rtl code, .rtly-notebooklm.rtly-with-rtl kbd, .rtly-notebooklm.rtly-with-rtl samp, .rtly-notebooklm.rtly-with-rtl pre {
+  direction: ltr !important;
+}
+.rtly-notebooklm.rtly-with-rtl textarea[dir="rtl"], .rtly-notebooklm.rtly-with-rtl [contenteditable="true"][dir="rtl"] {
+  direction: rtl !important;
+  text-align: right !important;
+}

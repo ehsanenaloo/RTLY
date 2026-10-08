@@ -1,0 +1,17 @@
+{
+  "extensionName": {
+    "message": "RTLY — RTL און פֿאָנט מיטל פֿאַר AI שמועסן"
+  },
+  "extensionDescription": {
+    "message": "RTL אויסגלייכן און פֿאָנט מיטל פֿאַר אַראַביש, פּערסיש, העברעאיש, אורדו און אַנדערע RTL שפּראַכן אין ChatGPT, Claude, Gemini."
+  },
+  "commandToggleSite": {
+    "message": "RTLY: אַ/אוס פֿאַר דעם זייטל"
+  },
+  "actionTitle": {
+    "message": "RTLY"
+  },
+  "contextMenuToggle": {
+    "message": "RTLY: אַ/אוס פֿאַר דעם זייטל"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "extensionName": {
+    "message": "RTLY — د AI چیټونو لپاره د RTL او فونټ وسیله"
+  },
+  "extensionDescription": {
+    "message": "په ChatGPT، Claude، Gemini او نورو AI وسیلو کې د عربي، فارسي، عبراني، اردو او نورو RTL ژبو لپاره د RTL سمون او فونټ وسیله."
+  },
+  "commandToggleSite": {
+    "message": "RTLY: د دې پاڼې لپاره فعال/غیر فعال"
+  },
+  "actionTitle": {
+    "message": "RTLY"
+  },
+  "contextMenuToggle": {
+    "message": "RTLY: د دې پاڼې لپاره فعال/غیر فعال"
+  }
+}

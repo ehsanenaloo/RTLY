@@ -1,0 +1,38 @@
+# RTLY
+
+> A browser extension (Manifest V3; Chrome and Edge, with an experimental Firefox build) that sets right-to-left direction and the IranYekan font for Persian, Arabic, Hebrew and Urdu text on 16 AI chat sites such as ChatGPT, Claude and Gemini. Local only: no account, no server, no analytics, no network requests.
+
+Written against RTLY 2.0.0. Checked 2026-10-08. Source: https://github.com/ehsanenaloo/RTLY
+
+## Get started
+
+- [Quick start](guides/quick-start.html): Install RTLY, open a supported AI chat, see a Persian answer line up right to left, and learn the three controls you will use most. About five minutes.
+- [Installation](guides/installation.html): Install RTLY from the Chrome Web Store, in Edge, or as an experimental Firefox build; load it unpacked; update and remove it.
+
+## Using RTLY
+
+- [The popup](guides/popup.html): Every control in the RTLY toolbar popup: the current site card, modes, font size, the list of sites, the menu, About and the support reminder.
+- [The settings page](guides/settings.html): The RTLY settings page: live preview, font size, interface language, color palette, theme and the sites table with modes, pins and switches.
+- [Modes and direction](guides/modes-and-direction.html): What the Full, Font and RTL modes do, exactly how RTLY decides a block is right-to-left, what it leaves alone, and what happens when you type or copy.
+- [Shortcut and right-click menu](guides/shortcut-and-menu.html): Turn RTLY on or off for the current site with Alt+Shift+R or the right-click menu, and change the shortcut in your browser.
+- [Supported sites](guides/supported-sites.html): The 16 AI chat sites RTLY works on, their addresses, and what to do if your site is not on the list.
+- [Languages and appearance](guides/languages-and-appearance.html): The 15 interface languages of RTLY, how the language is chosen, what is still English, and the light and dark themes and color palettes.
+
+## Trust and support
+
+- [Privacy, permissions and data](guides/privacy-and-data.html): Which permissions RTLY asks for and why, what it stores on your device, what it reads on a page, and what leaves your browser (nothing).
+- [Troubleshooting and FAQ](guides/troubleshooting-faq.html): Answers to common RTLY problems: nothing changes, the font is missing, English is flipped, the shortcut does nothing, a reload happened, and how to report a broken site.
+- [Limits and known problems](guides/limits.html): An honest list of what RTLY cannot do, what has not been tested, and what is known to be incomplete.
+
+- [Privacy policy](privacy.html): The full privacy policy. Same text as docs/PRIVACY.md in the repository.
+
+## Persian pages
+
+- [صفحهٔ اصلی](fa/index.html), [شروع سریع](fa/quick-start.html), [نصب](fa/installation.html), [حریم خصوصی](fa/privacy.html)
+
+## Notes for readers and tools
+
+- RTLY runs only on the 16 listed sites (27 https address patterns) and needs the storage and contextMenus permissions plus access to those sites.
+- It makes no network requests. Settings are stored in the browser's extension storage on the device.
+- Sites change their markup without notice, so RTLY can stop working on a site until it is updated. Known limits are in guides/limits.html.
+- The Firefox build is experimental: it passes web-ext lint but was not run in a real Firefox by the project's tests.

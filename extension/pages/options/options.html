@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="optionsTitle">RTLY Settings</title>
+  <link href="../../shared/ui.css" rel="stylesheet">
+  <script src="../../shared/i18n.js"></script>
+</head>
+<body>
+
+  <header class="options-topbar">
+    <div class="options-brand">
+      <img class="brand-mark" src="../../icons/rtly.svg" alt="" width="32" height="32">
+      <h1 class="options-brand__title" data-i18n="settingsHeading">RTLY Settings</h1>
+    </div>
+    <div class="options-actions">
+      <span class="save-status" id="saveStatus" role="status" data-i18n="saved"></span>
+      <button type="button" class="icon-btn icon-btn--heart" id="optionsSupportBtn"
+              data-i18n-aria-label="supportAriaLabel" data-i18n-title="menuSupportShort"
+              aria-label="Support RTLY">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.5-9.5-9.5C1.1 8.2 3.2 5 6.5 5c2 0 3.5 1 4.5 2.5 1-1.5 2.5-2.5 4.5-2.5 3.3 0 5.4 3.2 4 6.5C19.5 16.5 12 21 12 21z"></path></svg>
+      </button>
+      <div class="seg theme-seg" id="themeSwitcher" role="radiogroup" data-i18n-aria-label="sectionTheme" aria-label="Theme">
+        <button type="button" role="radio" data-theme="light" data-i18n-title="themeLight" data-i18n-aria-label="themeLight" title="Light" aria-label="Light">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg>
+        </button>
+        <button type="button" role="radio" data-theme="dark" data-i18n-title="themeDark" data-i18n-aria-label="themeDark" title="Dark" aria-label="Dark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </button>
+        <button type="button" role="radio" data-theme="system" data-i18n-title="themeSystem" data-i18n-aria-label="themeSystem" title="System" aria-label="System">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"></rect><path d="M8 21h8M12 17v4"></path></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="options-container">
+
+    <!-- Live preview: the same chat, without and with RTLY -->
+    <section class="card preview" aria-labelledby="livePreviewHeading">
+      <div class="card__head">
+        <div class="preview__title" id="livePreviewHeading">
+          <span class="preview__live" aria-hidden="true"></span>
+          <span data-i18n="livePreview">Live preview</span>
+        </div>
+      </div>
+      <div class="preview__langs" id="previewLangTabs" role="group" aria-label="Preview language"></div>
+      <div class="preview__panes">
+        <div class="pane pane--before" id="paneBefore">
+          <div class="pane__label" data-i18n="previewBefore">Without RTLY</div>
+          <div class="pane__stage" id="previewStageBefore" dir="ltr">
+            <div class="bubble bubble--user" id="previewBubbleUserBefore"></div>
+            <div class="bubble bubble--ai" id="previewBubbleAiBefore"></div>
+          </div>
+        </div>
+        <div class="pane pane--after">
+          <div class="pane__label" data-i18n="previewAfter">With RTLY</div>
+          <div class="pane__stage" id="previewStage" lang="fa" dir="rtl">
+            <div class="bubble bubble--user" id="previewBubbleUser"></div>
+            <div class="bubble bubble--ai" id="previewBubbleAi"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Display -->
+    <section class="card" aria-labelledby="sectionDisplayHeading">
+      <div class="card__head">
+        <div>
+          <h2 class="card__title" id="sectionDisplayHeading" data-i18n="sectionDisplay">Display</h2>
+          <p class="card__hint" data-i18n="optDisplayHint">Applies to every supported site</p>
+        </div>
+      </div>
+      <div class="card__body">
+        <div class="setting">
+          <label class="setting__label" for="fontScale" data-i18n="fontSize">Font size</label>
+          <p class="setting__hint" data-i18n="optFontSizeHint">Scales chat text. The preview follows as you drag.</p>
+          <div class="slider">
+            <input type="range" id="fontScale" min="85" max="120" value="100" step="5">
+            <span class="scale-value" id="fontScaleValue">100%</span>
+          </div>
+        </div>
+        <div class="setting">
+          <label class="setting__label" for="uiLocale" data-i18n="languageLabel">UI language</label>
+          <select class="select" id="uiLocale"></select>
+        </div>
+        <div class="setting">
+          <div class="setting__label" id="paletteLabel" data-i18n="colorPaletteLabel">Color palette</div>
+          <div class="palette-row" id="palettePicker" role="radiogroup" aria-labelledby="paletteLabel"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sites -->
+    <section class="card sites-card" aria-labelledby="sectionSitesHeading">
+      <div class="card__head">
+        <div>
+          <h2 class="card__title" id="sectionSitesHeading" data-i18n="sectionSites">Sites</h2>
+          <p class="card__hint" data-i18n="optSitesHint">Pick a mode per site, pin favorites to the popup, or switch a site off.</p>
+        </div>
+        <div class="card__meta num" id="siteHeadMeta"></div>
+      </div>
+      <div class="toolbar">
+        <div class="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path></svg>
+          <input type="search" id="siteSearch" data-i18n-placeholder="searchSitesPlaceholder" data-i18n-aria-label="searchSitesPlaceholder" placeholder="Search sites…" aria-label="Search sites" autocomplete="off">
+        </div>
+      </div>
+      <table class="site-table">
+        <thead>
+          <tr>
+            <th class="col-site" data-i18n="columnSite">Site</th>
+            <th class="col-mode" data-i18n="columnMode">Mode</th>
+            <th class="col-pin" data-i18n="columnPin">Pin</th>
+            <th class="col-status" data-i18n="columnStatus">Status</th>
+          </tr>
+        </thead>
+        <tbody id="siteTableBody"></tbody>
+      </table>
+      <div class="empty" id="siteEmpty" data-i18n="noSitesFound" hidden>No sites match your search</div>
+    </section>
+  </main>
+
+  <!-- Rotating footer (footer.js) -->
+  <div class="rtly-footer-mount rtly-footer-mount--options" id="footerMount"></div>
+
+  <script src="../../shared/footer-config.js"></script>
+  <script src="../../shared/footer.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

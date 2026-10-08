@@ -1,0 +1,119 @@
+/* === Grok / Z.ai (shared) === */
+/* Generic RTL + font for Grok, Z.ai
+   v1.9.7-fix / v1.9.8: include input/textarea/[contenteditable] explicitly.
+   Form controls don't inherit font-family from ancestors in any browser, so
+   the bare `.rtly-zai.rtly-with-font { font-family ... }` rule left z.ai's
+   composer textbox in the site's default font. v1.9.8 also covers
+   [contenteditable] without a value, [role='textbox'], and explicitly
+   excludes [contenteditable='false'] so we don't restyle accidentally-
+   read-only widgets the site marks that way. */
+.rtly-grok.rtly-with-font,
+.rtly-grok.rtly-with-font input,
+.rtly-grok.rtly-with-font textarea,
+.rtly-grok.rtly-with-font [contenteditable]:not([contenteditable="false"]),
+.rtly-grok.rtly-with-font [role="textbox"],
+.rtly-zai.rtly-with-font,
+.rtly-zai.rtly-with-font input,
+.rtly-zai.rtly-with-font textarea,
+.rtly-zai.rtly-with-font [contenteditable]:not([contenteditable="false"]),
+.rtly-zai.rtly-with-font [role="textbox"] {
+  font-family: var(--rtly-font-family) !important;
+}
+
+/* v1.9.8: also force unicode-bidi:plaintext on z.ai's editor variants so
+   that per-line direction works even when JS hasn't yet stamped dir.
+   base.css already does this for `[contenteditable="true"]` and `=""`, but
+   not for the `[role="textbox"]` wrapper variant.
+   v1.9.20: gated under `.rtly-with-rtl` — unicode-bidi:plaintext is DIRECTION
+   behavior, so in font_only mode it must not apply (mirrors the base.css
+   input-bidi gating fix from v1.9.12). */
+.rtly-zai.rtly-with-rtl [role="textbox"],
+.rtly-zai.rtly-with-rtl [role="textbox"] *,
+.rtly-grok.rtly-with-rtl [role="textbox"],
+.rtly-grok.rtly-with-rtl [role="textbox"] * {
+  unicode-bidi: plaintext;
+}
+/* Direction will be set dynamically by JavaScript based on content analysis */
+.rtly-grok.rtly-with-rtl [dir="rtl"]:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]), .rtly-grok.rtly-with-rtl [dir="rtl"] *:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]):not(nav *):not(aside *):not([role="navigation"] *):not([role="menu"] *):not(header *):not([role="banner"] *):not(code):not(kbd):not(samp):not(pre):not(var):not(tt):not(code *):not(pre *):not(kbd *):not(samp *), .rtly-zai.rtly-with-rtl [dir="rtl"]:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]), .rtly-zai.rtly-with-rtl [dir="rtl"] *:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]):not(nav *):not(aside *):not([role="navigation"] *):not([role="menu"] *):not(header *):not([role="banner"] *):not(code):not(kbd):not(samp):not(pre):not(var):not(tt):not(code *):not(pre *):not(kbd *):not(samp *) {
+  direction: rtl !important;
+  text-align: right !important;
+}
+/* Protect menus and navigation from direction changes - Grok, Z.ai */
+.rtly-grok.rtly-with-rtl nav, .rtly-grok.rtly-with-rtl aside, .rtly-grok.rtly-with-rtl [role="navigation"], .rtly-grok.rtly-with-rtl [role="menu"], .rtly-grok.rtly-with-rtl header, .rtly-grok.rtly-with-rtl [role="banner"], .rtly-grok.rtly-with-rtl nav *, .rtly-grok.rtly-with-rtl aside *, .rtly-grok.rtly-with-rtl [role="navigation"] *, .rtly-grok.rtly-with-rtl [role="menu"] *, .rtly-grok.rtly-with-rtl header *, .rtly-grok.rtly-with-rtl [role="banner"] *, .rtly-zai.rtly-with-rtl nav, .rtly-zai.rtly-with-rtl aside, .rtly-zai.rtly-with-rtl [role="navigation"], .rtly-zai.rtly-with-rtl [role="menu"], .rtly-zai.rtly-with-rtl header, .rtly-zai.rtly-with-rtl [role="banner"], .rtly-zai.rtly-with-rtl nav *, .rtly-zai.rtly-with-rtl aside *, .rtly-zai.rtly-with-rtl [role="navigation"] *, .rtly-zai.rtly-with-rtl [role="menu"] *, .rtly-zai.rtly-with-rtl header *, .rtly-zai.rtly-with-rtl [role="banner"] * {
+  direction: unset !important;
+  text-align: unset !important;
+}
+.rtly-grok.rtly-with-rtl textarea[dir="rtl"], .rtly-grok.rtly-with-rtl [contenteditable="true"][dir="rtl"], .rtly-zai.rtly-with-rtl textarea[dir="rtl"], .rtly-zai.rtly-with-rtl [contenteditable="true"][dir="rtl"] {
+  direction: rtl !important;
+  text-align: right !important;
+}
+/* Z.ai: Preserve RTL in sent message bubbles (fix text displacement after send) */
+.rtly-zai.rtly-with-rtl article[dir="rtl"], .rtly-zai.rtly-with-rtl [role="article"][dir="rtl"], .rtly-zai.rtly-with-rtl [class*="message"][dir="rtl"], .rtly-zai.rtly-with-rtl [class*="Message"][dir="rtl"], .rtly-zai.rtly-with-rtl [class*="bubble"][dir="rtl"], .rtly-zai.rtly-with-rtl [data-message][dir="rtl"] {
+  direction: rtl !important;
+  text-align: right !important;
+}
+.rtly-grok table th, .rtly-grok table td, .rtly-zai table th, .rtly-zai table td {
+  text-align: center;
+}
+
+/* ============================================================
+ * v1.9.9 — z.ai user-message bubble belt-and-suspenders.
+ *
+ * z.ai's user bubbles have no semantic class. JS now targets them by
+ * `[data-expanded]`. If for any reason JS is late or skipped (heavy
+ * page load, observer race, classification cache miss), this CSS
+ * fallback ensures the bubble still renders correctly:
+ *
+ *   - unicode-bidi: plaintext lets each paragraph auto-detect its
+ *     direction from its first strong character. Pure-English bubbles
+ *     remain LTR; Persian-dominant bubbles flip RTL — no false flips.
+ *   - text-align: start follows the resolved direction.
+ *
+ * Importantly, we do NOT force `direction: rtl` here — that would
+ * incorrectly flip English-only user bubbles. The general
+ * `[dir="rtl"]` rule above already handles cases where JS does set
+ * dir; this rule is the safety net for when it doesn't.
+ * ============================================================ */
+.rtly-zai.rtly-with-rtl [data-expanded],
+.rtly-zai.rtly-with-rtl [data-expanded] * {
+  unicode-bidi: plaintext;
+}
+.rtly-zai.rtly-with-rtl [data-expanded] {
+  text-align: start;
+}
+
+/* Z.ai: Keep layout LTR, ensure main content fills space */
+.rtly-zai.rtly-with-rtl body > div, .rtly-zai.rtly-with-rtl body > div > div {
+  direction: ltr !important;
+}
+/* Main chat area: expand to fill space */
+.rtly-zai main, .rtly-zai [role="main"] {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+}
+
+/* ============================================================
+ * v1.9.7-fix — Flex-flip protection for icon-bearing interactive
+ * controls on z.ai (mirror of the Claude v1.9.7 rule).
+ *
+ * Why: the JS containsIcon guard in applyDirectionAndFont() was
+ * narrowed to interactive controls only on z.ai/chat.z.ai, so the
+ * user-message bubble's parent now gets direction:rtl as it should.
+ * But that narrowing also lets a content-area button (the per-
+ * message edit / copy / regenerate buttons) inherit direction:rtl
+ * from the bubble, which would flip its [icon][label] flex order.
+ *
+ * This rule re-clamps any button-shaped element that contains an
+ * icon back to LTR, exactly as Gemini does with `:has(mat-icon)`
+ * and Claude does with `:has(svg, [class*="lucide"], …)`.
+ *
+ * Both changes (JS narrowing + this CSS) must ship together.
+ * ============================================================ */
+.rtly-zai.rtly-with-rtl :is(
+  button, a,
+  [role="button"], [role="menuitem"], [role="tab"], [role="option"]
+):has(svg, img, picture, [data-icon], [data-icon-name],
+      [class*="icon" i], [class*="lucide" i], [data-lucide]) {
+  direction: ltr !important;
+}

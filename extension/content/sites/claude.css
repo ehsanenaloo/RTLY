@@ -1,0 +1,208 @@
+/* === Claude (initial Anthropic-specific) === */
+/* Start Claude */
+
+.rtly-claude.rtly-with-font .font-claude-message {
+  font-family: var(--rtly-font-family);
+}
+.rtly-claude.rtly-with-rtl .font-claude-message {
+  direction: rtl;
+}
+
+.rtly-claude.rtly-with-font code, .rtly-claude.rtly-with-font kbd, .rtly-claude.rtly-with-font samp, .rtly-claude.rtly-with-font pre {
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
+    Liberation Mono, monospace, var(--rtly-font-family) !important;
+}
+.rtly-claude.rtly-with-rtl code, .rtly-claude.rtly-with-rtl kbd, .rtly-claude.rtly-with-rtl samp, .rtly-claude.rtly-with-rtl pre {
+  direction: ltr !important;
+}
+.rtly-claude.rtly-with-font .ProseMirror.break-words {
+  font-family: var(--rtly-font-family) !important;
+}
+
+.rtly-claude.rtly-with-rtl .mb-1.mt-1 {
+  direction: rtl;
+}
+
+.rtly-claude table * {
+  text-align: center;
+}
+
+.rtly-claude.rtly-with-font, .rtly-claude.rtly-with-font span, .rtly-claude.rtly-with-font p, .rtly-claude.rtly-with-font h1, .rtly-claude.rtly-with-font h2, .rtly-claude.rtly-with-font h3, .rtly-claude.rtly-with-font h4, .rtly-claude.rtly-with-font h5, .rtly-claude.rtly-with-font h6, .rtly-claude.rtly-with-font span, .rtly-claude.rtly-with-font div, .rtly-claude.rtly-with-font li, .rtly-claude.rtly-with-font a, .rtly-claude.rtly-with-font ul, .rtly-claude.rtly-with-font ol, .rtly-claude.rtly-with-font table, .rtly-claude.rtly-with-font th, .rtly-claude.rtly-with-font td, .rtly-claude.rtly-with-font tr, .rtly-claude.rtly-with-font label, .rtly-claude.rtly-with-font input, .rtly-claude.rtly-with-font textarea, .rtly-claude.rtly-with-font button {
+  font-family: var(--rtly-font-family) !important;
+}
+/* Direction will be set dynamically by JavaScript based on content analysis */
+.rtly-claude.rtly-with-rtl [dir="rtl"]:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]), .rtly-claude.rtly-with-rtl [dir="rtl"] *:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]):not(nav *):not(aside *):not([role="navigation"] *):not([role="menu"] *):not(header *):not([role="banner"] *):not(svg):not(svg *):not(img):not(picture):not([data-icon]):not([class*="icon"]):not([class*="Icon"]):not([class*="lucide"]):not(code):not(kbd):not(samp):not(pre):not(var):not(tt):not(code *):not(pre *):not(kbd *):not(samp *) {
+  direction: rtl !important;
+  text-align: right !important;
+}
+/* Icon protection — never let icons inherit direction/alignment that flips their layout */
+.rtly-claude.rtly-with-rtl svg, .rtly-claude.rtly-with-rtl img, .rtly-claude.rtly-with-rtl picture, .rtly-claude.rtly-with-rtl [class*="lucide"], .rtly-claude.rtly-with-rtl [data-icon], .rtly-claude.rtly-with-rtl [aria-hidden="true"]:not(p):not(div):not(span):not(section) {
+  direction: ltr !important;
+}
+
+/* ============================================================
+ * v1.9.7 — Flex-flip protection for icon-bearing interactive controls.
+ *
+ * Diagnosis (DevTools snippet on production claude.ai):
+ *   34 lists scanned across an assistant conversation. The 13 .standard-
+ *   markdown containers with Persian content but NO dir="rtl" applied
+ *   ALL had an icon descendant (12/13 had svg/lucide/anthropicon child).
+ *   The 6 containers that DID get dir="rtl" were 5/6 icon-free.
+ *
+ * Root cause: JS `containsIcon` guard in applyDirectionAndFont skips
+ * direction application on any element whose subtree contains an icon —
+ * to prevent flex-flipping icon+label buttons. On Claude, code blocks
+ * with copy buttons + artifact previews + lucide icons in prose all
+ * trip this guard on the parent .standard-markdown, so direction never
+ * gets set on the response container.
+ *
+ * The fix is the same pattern v1.8.21 + v1.8.22 used for Gemini:
+ *   - JS side: narrow the containsIcon guard to ONLY fire on interactive
+ *     controls (button/anchor/role=button/etc), not on text containers
+ *     like .standard-markdown — done in content.js.
+ *   - CSS side (HERE): mirror Gemini's `:has(mat-icon){direction:ltr}`
+ *     protection for Claude's icon families (Anthropicons / Lucide /
+ *     generic *icon*). When the JS narrowing lets a content-area button
+ *     inherit direction:rtl from its parent, this CSS rule re-clamps
+ *     the button to LTR so its [icon][label] flex order survives.
+ *
+ * Without this CSS guard, narrowing the JS guard alone would visually
+ * flip every icon-bearing button in Claude's content area. Both
+ * changes must ship together.
+ * ============================================================ */
+.rtly-claude.rtly-with-rtl :is(
+  button, a, mat-list-item, mat-chip, mat-option,
+  [role="button"], [role="menuitem"], [role="tab"], [role="option"]
+):has(svg, img, picture, [data-icon], [data-icon-name], [data-cds="Icon"],
+      [data-cds="icon"], [class*="icon" i], [class*="lucide" i],
+      [class*="anthropicon" i], [data-lucide]) {
+  direction: ltr !important;
+}
+
+/* ============================================================
+ * v1.9.29 → v1.9.32 — ask_user_input choice card (Persian rows only).
+ *
+ * Claude's clarifying-question card (the multiple-choice list above the
+ * composer) renders OUTSIDE <main>, so RTLY's scan never reaches it.
+ * content.js marks rows whose LABEL is RTL with data-rtly-card-rtl="1".
+ *
+ * ANCHOR: the row's stable class `group/row` — NOT role="option". Claude
+ * only sets role="listbox"/role="option" while the card has keyboard
+ * focus and strips them otherwise, so a role anchor flipped on/off
+ * (v1.9.30/v1.9.31 missed the rows whenever the card was unfocused). The
+ * row is also an icon-bearing interactive control (role toggles between
+ * button/option, arrow is an svg), so the `:has(icon){direction:ltr}`
+ * clamp above pins it LTR. We re-flip the marked row to direction:rtl.
+ *
+ * A live probe confirmed direction:rtl on this flex row reorders the
+ * children correctly on its own (number badge → right, arrow → left), so
+ * no row-reverse / margin gymnastics are needed.
+ *
+ * Specificity: two classes (.rtly-claude.rtly-with-rtl) + three attribute
+ * selectors = (0,5,0), beating the clamp's (0,4,0) regardless of role or
+ * source order. `[class~="flex"]` is the padding attribute — the row is
+ * always display:flex, so it's a safe, role-independent qualifier.
+ * Lives under .rtly-with-rtl, so font_only never flips it.
+ * ============================================================ */
+.rtly-claude.rtly-with-rtl [class~="group/row"][class~="flex"][data-rtly-card-rtl="1"] {
+  direction: rtl !important;
+  text-align: right !important;
+}
+.rtly-claude.rtly-with-rtl [class~="group/row"][data-rtly-card-rtl="1"] :is(
+  [class~="truncate"], [class~="text-secondary"], [class*="text-left"], p, span, div
+):not(svg):not(svg *):not([class*="icon" i]):not([class*="lucide" i]) {
+  text-align: right !important;
+}
+
+/* ============================================================
+ * v1.9.35 — keep the choice-card HEADER controls LTR.
+ *
+ * Once the card entered RTLY's scope (v1.9.34 banner exemption),
+ * applyDirectionAndFont stamps dir=rtl on the header row
+ * (div.flex.items-center.gap-2.pl-4.pb-1.5) because the question text is
+ * Persian. That header also holds the pagination controls — Previous /
+ * Next buttons + a `tabular-nums` counter ("1 of 3") + a Minimize button —
+ * and the inherited rtl reorders/reverses them ("of ۳ ۱", swapped arrows).
+ *
+ * The question text SHOULD stay RTL; only the control cluster must read
+ * LTR. We re-clamp the control buttons, the counter, and the flex bar that
+ * wraps the prev/next buttons back to direction:ltr. Scoped to
+ * [data-ask-user-input-banner] so nothing outside the card is touched.
+ * ============================================================ */
+.rtly-claude.rtly-with-rtl [data-ask-user-input-banner] [aria-label="Previous question"],
+.rtly-claude.rtly-with-rtl [data-ask-user-input-banner] [aria-label="Next question"],
+.rtly-claude.rtly-with-rtl [data-ask-user-input-banner] [aria-label="Minimize"],
+.rtly-claude.rtly-with-rtl [data-ask-user-input-banner] [class~="tabular-nums"],
+.rtly-claude.rtly-with-rtl [data-ask-user-input-banner] div:has(> [aria-label="Previous question"]),
+.rtly-claude.rtly-with-rtl [data-ask-user-input-banner] div:has(> [aria-label="Next question"]) {
+  direction: ltr !important;
+}
+
+/* Protect menus and navigation from direction changes - Claude */
+.rtly-claude.rtly-with-font nav, .rtly-claude.rtly-with-font aside, .rtly-claude.rtly-with-font [role="navigation"], .rtly-claude.rtly-with-font [role="menu"], .rtly-claude.rtly-with-font header, .rtly-claude.rtly-with-font [role="banner"], .rtly-claude.rtly-with-font nav *, .rtly-claude.rtly-with-font aside *, .rtly-claude.rtly-with-font [role="navigation"] *, .rtly-claude.rtly-with-font [role="menu"] *, .rtly-claude.rtly-with-font header *, .rtly-claude.rtly-with-font [role="banner"] * {
+  font-family: var(--rtly-font-family) !important;
+}
+.rtly-claude.rtly-with-rtl nav, .rtly-claude.rtly-with-rtl aside, .rtly-claude.rtly-with-rtl [role="navigation"], .rtly-claude.rtly-with-rtl [role="menu"], .rtly-claude.rtly-with-rtl header, .rtly-claude.rtly-with-rtl [role="banner"], .rtly-claude.rtly-with-rtl nav *, .rtly-claude.rtly-with-rtl aside *, .rtly-claude.rtly-with-rtl [role="navigation"] *, .rtly-claude.rtly-with-rtl [role="menu"] *, .rtly-claude.rtly-with-rtl header *, .rtly-claude.rtly-with-rtl [role="banner"] * {
+  direction: unset !important;
+  text-align: unset !important;
+}
+.rtly-claude.rtly-with-rtl .ProseMirror.break-words[dir="rtl"], .rtly-claude.rtly-with-rtl textarea[dir="rtl"], .rtly-claude.rtly-with-rtl [contenteditable="true"][dir="rtl"] {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+/* 1.8.8: Claude chat-ui-core message containers — DIR-GATED.
+   We reinforce direction ONLY where JS has already detected Persian content
+   and stamped dir="rtl" / data-rtly-dir="rtl". Earlier 1.8.7 attempt applied
+   `direction: rtl` unconditionally to .standard-markdown / .font-claude-
+   response / [data-testid="user-message"], which flipped English-only
+   messages too (colons jumped to the left side of lines). The general
+   `.rtly-claude.rtly-with-rtl [dir="rtl"]:not(nav)…` rule above already
+   catches dir-stamped elements; these extra selectors handle Claude's
+   specific newer containers when JS sets dir directly on them. */
+.rtly-claude.rtly-with-rtl [data-testid="user-message"][dir="rtl"],
+.rtly-claude.rtly-with-rtl .font-claude-response[dir="rtl"],
+.rtly-claude.rtly-with-rtl .standard-markdown[dir="rtl"],
+.rtly-claude.rtly-with-rtl [data-test-render-count][dir="rtl"] {
+  direction: rtl;
+  text-align: start;
+}
+/* End Claude */
+
+/* === Anthropic icon restoration === */
+/* ============================================================
+ * Anthropic icon font restoration (v1.6.0 — bulletproof)
+ *
+ * Anthropic's UI uses a custom icon font 'Anthropicons-Variable',
+ * declared on icon-bearing elements like:
+ *   <span data-cds="Icon" aria-hidden="true"
+ *         style="font-family: var(--font-anthropicons, Anthropicons-Variable); ...">
+ * but WITHOUT !important.
+ *
+ * Our broad `.rtly-claude span { font-family: IranYekan !important }`
+ * was winning the cascade, replacing the icon font with IranYekan.
+ * Icon glyphs live in Anthropicons' PUA codepoints / ligatures —
+ * IranYekan has no glyphs there, so the browser renders missing-glyph
+ * "tofu" boxes (those empty rectangles).
+ *
+ * Earlier (v1.2.8 → v1.5.0) tried to enumerate selectors. Anthropic's
+ * CDS (Claude Design System) keeps shipping new icon shells, so any
+ * fixed list goes stale fast. The v1.6.0 approach instead matches on
+ * what is invariant about an icon container:
+ *   1) [data-cds="Icon"]                 — CDS marker on every icon
+ *   2) [style*="Anthropicons"]           — inline style references the font
+ *      (matches both var(--font-anthropicons,...) and the bare name)
+ *   3) [style*="anthropicons"]           — case variant
+ *   4) [class*="anthropicon" i]          — any "anthropicon*" class
+ *   5) [aria-hidden="true"]:not(...)     — fallback for legacy icons
+ *      (excludes structural tags that *contain* icons but aren't icons)
+ *
+ * The combined specificity is high enough to override the broad
+ * `.rtly-claude span` rule, and inline-style/data-attribute matches
+ * survive future Anthropic refactors without us having to ship a patch.
+ * ============================================================ */
+
+.rtly-claude.rtly-with-font [data-cds="Icon"], .rtly-claude.rtly-with-font [data-cds="Icon"] *, .rtly-claude.rtly-with-font [style*="Anthropicons"], .rtly-claude.rtly-with-font [style*="Anthropicons"] *, .rtly-claude.rtly-with-font [style*="anthropicons"], .rtly-claude.rtly-with-font [style*="anthropicons"] *, .rtly-claude.rtly-with-font [class*="anthropicon" i], .rtly-claude.rtly-with-font [class*="anthropicon" i] *, .rtly-claude.rtly-with-font i, .rtly-claude.rtly-with-font [data-icon]:not([data-icon=""]):not([data-icon="false"]), .rtly-claude.rtly-with-font span[class*="icon" i]:not([class*="lucide" i]):not([class*="material" i]):not([class*="fa-"]), .rtly-claude.rtly-with-font [aria-hidden="true"]:not(div):not(section):not(article):not(p):not(li):not(ul):not(ol):not(table):not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(button):not(a) {
+  font-family: var(--font-anthropicons, "Anthropicons-Variable"), var(--rtly-font-family) !important;
+}
+/* End Anthropic icon font restoration */

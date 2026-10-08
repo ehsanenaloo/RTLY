@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Mistral AI's iconic 5-color stacked-strip "M" mark -->
+  <g>
+    <!-- Yellow / sand row (top) -->
+    <rect x="3"  y="3"  width="5" height="5" fill="#FFCC00"/>
+    <rect x="13" y="3"  width="5" height="5" fill="#FFCC00"/>
+    <rect x="23" y="3"  width="6" height="5" fill="#FFCC00"/>
+    <!-- Orange row -->
+    <rect x="3"  y="8"  width="10" height="5" fill="#FF9F1A"/>
+    <rect x="18" y="8"  width="11" height="5" fill="#FF9F1A"/>
+    <!-- Red-orange row (middle) -->
+    <rect x="3"  y="13" width="26" height="5" fill="#FF6F00"/>
+    <!-- Red row -->
+    <rect x="3"  y="18" width="10" height="5" fill="#E63900"/>
+    <rect x="18" y="18" width="11" height="5" fill="#E63900"/>
+    <!-- Dark red / wine row (bottom) -->
+    <rect x="3"  y="23" width="5" height="6" fill="#9E1F00"/>
+    <rect x="13" y="23" width="5" height="6" fill="#9E1F00"/>
+    <rect x="23" y="23" width="6" height="6" fill="#9E1F00"/>
+  </g>
+</svg>

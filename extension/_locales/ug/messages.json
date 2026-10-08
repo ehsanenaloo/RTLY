@@ -1,0 +1,17 @@
+{
+  "extensionName": {
+    "message": "RTLY — سۈنئىي ئەقىل پاراڭلىرى ئۈچۈن RTL ۋە خەت نۇسخىسى قورالى"
+  },
+  "extensionDescription": {
+    "message": "ChatGPT، Claude، Gemini قاتارلىق AI قوراللىرىدا ئەرەب، پارس، ئىبرى، ئۇردۇ ۋە باشقا RTL تىللىرى ئۈچۈن RTL تەڭلەش ۋە خەت قورالى."
+  },
+  "commandToggleSite": {
+    "message": "RTLY: بۇ تور بەت ئۈچۈن ئاچ/ياپ"
+  },
+  "actionTitle": {
+    "message": "RTLY"
+  },
+  "contextMenuToggle": {
+    "message": "RTLY: بۇ تور بەت ئۈچۈن ئاچ/ياپ"
+  }
+}

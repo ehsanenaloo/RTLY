@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en" data-root="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Installation | RTLY user guide</title>
+<meta name="description" content="Install RTLY from the Chrome Web Store, in Edge, or as an experimental Firefox build; load it unpacked; update and remove it.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" type="image/svg+xml" href="../assets/logo.svg">
+<link rel="canonical" href="https://ehsanenaloo.github.io/RTLY/guides/installation.html">
+<link rel="alternate" hreflang="fa" href="https://ehsanenaloo.github.io/RTLY/fa/installation.html">
+<link rel="stylesheet" href="../styles.css">
+<script>try{var t=localStorage.getItem("rtly-docs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script defer src="../app.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a><header class="site-header"><div class="shell header-inner"><a class="brand" href="../index.html"><img src="../assets/logo.svg" width="34" height="34" alt=""><span>RTLY<small>User guide</small></span></a><nav class="top-nav" aria-label="Primary"><a href="../index.html">Overview</a><a href="../guides/quick-start.html">Quick start</a><a href="../guides/index.html">All guides</a><a href="../guides/troubleshooting-faq.html">Help</a><a href="../fa/index.html" hreflang="fa" lang="fa">فارسی</a><a href="https://github.com/ehsanenaloo/RTLY" rel="noopener">GitHub &#8599;</a></nav><div class="header-tools"><span data-search-host></span><button type="button" class="icon-button" data-theme-toggle hidden>Theme</button></div></div></header>
+<main id="main">
+<div class="shell page-intro"><p class="breadcrumbs"><a href="../index.html">Home</a> / <a href="index.html">Guides</a> / Get started</p><h1>Installation</h1><p class="lead">RTLY works in Chrome and in Microsoft Edge from the same package. A Firefox build exists but is experimental. This page covers each way to install, update and remove it.</p><p class="meta-line">Checked against the source on 2026-10-08, RTLY 2.0.0.</p></div>
+<div class="shell doc-layout has-toc">
+<aside class="sidebar"><details open><summary>Browse the guides</summary><nav aria-label="Guides"><a href="index.html">All guides</a><p>Get started</p><a href="quick-start.html">Quick start</a><a href="installation.html" aria-current="page">Installation</a><p>Using RTLY</p><a href="popup.html">The popup</a><a href="settings.html">The settings page</a><a href="modes-and-direction.html">Modes and direction</a><a href="shortcut-and-menu.html">Shortcut and right-click menu</a><a href="supported-sites.html">Supported sites</a><a href="languages-and-appearance.html">Languages and appearance</a><p>Trust and support</p><a href="privacy-and-data.html">Privacy, permissions and data</a><a href="troubleshooting-faq.html">Troubleshooting and FAQ</a><a href="limits.html">Limits and known problems</a><a href="../privacy.html">Privacy policy</a></nav></details></aside>
+<article class="prose">
+
+<h2 id="chrome">Chrome<a class="anchor" href="#chrome" aria-label="Link to this section">#</a></h2>
+<ol>
+  <li>Open the <a href="https://chromewebstore.google.com/detail/hhifipkafndnildgldggiohfkbpikmkd" rel="noopener">RTLY page on the Chrome Web Store</a>.</li>
+  <li>Click <strong>Add to Chrome</strong> and confirm.</li>
+  <li>Click the puzzle icon in the toolbar and pin RTLY.</li>
+</ol>
+<p>RTLY needs Chrome 111 or newer. Chrome updates it automatically.</p>
+<aside class="callout"><span class="callout-title">Install prompt</span><p>Chrome tells you that RTLY can read and change your data on the websites it supports. That access is how RTLY sets direction and font on those pages. It does not apply to any other site. <a href="privacy-and-data.html">Privacy, permissions and data</a> lists every permission and what it is for.</p></aside>
+
+<h2 id="edge">Microsoft Edge<a class="anchor" href="#edge" aria-label="Link to this section">#</a></h2>
+<p>Edge uses the same package as Chrome. You can open the Chrome Web Store page above in Edge, or load the Chrome zip yourself as described in <a href="#load-unpacked">Load it unpacked</a> (use <code>edge://extensions</code>). The guide author has not tested the Chrome Web Store route in Edge for this release.</p>
+
+<h2 id="firefox">Firefox (experimental)<a class="anchor" href="#firefox" aria-label="Link to this section">#</a></h2>
+<p>RTLY is not on Firefox Add-ons. A Firefox build is published as a zip file on the Releases page. It needs Firefox 128 or newer on a computer.</p>
+<ol>
+  <li>Download <code>rtly-&lt;version&gt;-firefox.zip</code> from the <a href="https://github.com/ehsanenaloo/RTLY/releases" rel="noopener">Releases page</a>.</li>
+  <li>In Firefox, open <code>about:debugging#/runtime/this-firefox</code>.</li>
+  <li>Click <strong>Load Temporary Add-on</strong> and choose the zip file.</li>
+</ol>
+<p>Firefox removes temporary add-ons when it closes, so you repeat these steps after each restart.</p>
+<aside class="callout known"><span class="callout-title">Experimental</span><p>The Firefox package passes Mozilla's <code>web-ext lint</code> check, but it has not been run in a real Firefox by the project's tests. Direction handling, the popup, the shortcut and the right-click menu may behave differently there. Please <a href="https://github.com/ehsanenaloo/RTLY/issues" rel="noopener">report what you find</a>.</p></aside>
+
+<h2 id="load-unpacked">Load it unpacked (Chrome or Edge)<a class="anchor" href="#load-unpacked" aria-label="Link to this section">#</a></h2>
+<p>Use this to try a version that is not in the store yet, or to run the source code.</p>
+<ol>
+  <li>Download <code>rtly-&lt;version&gt;-chrome.zip</code> from the <a href="https://github.com/ehsanenaloo/RTLY/releases" rel="noopener">Releases page</a> and unzip it. Or, from the source repository, use the <code>extension</code> folder.</li>
+  <li>Open <code>chrome://extensions</code> (or <code>edge://extensions</code>) and turn on <strong>Developer mode</strong>.</li>
+  <li>Click <strong>Load unpacked</strong> and choose the folder that contains <code>manifest.json</code>.</li>
+</ol>
+<p>An unpacked extension does not update by itself. To update it, replace the folder's files and click the reload button on the extension card.</p>
+
+<h2 id="pin-it">Pin the icon<a class="anchor" href="#pin-it" aria-label="Link to this section">#</a></h2>
+<p>Click the puzzle icon in the toolbar and click the pin next to RTLY. In Firefox, use the extensions button in the toolbar.</p>
+
+<h2 id="update">Update<a class="anchor" href="#update" aria-label="Link to this section">#</a></h2>
+<p>Store installs update by themselves. To check by hand in Chrome, open <code>chrome://extensions</code>, turn on Developer mode and click <strong>Update</strong>. Your settings are kept.</p>
+
+<h2 id="remove">Remove<a class="anchor" href="#remove" aria-label="Link to this section">#</a></h2>
+<p>Right-click the RTLY icon and choose <strong>Remove from Chrome</strong> (or Edge). The settings RTLY saved in your browser are removed with the extension. Nothing is stored anywhere else.</p>
+<div class="reading-footer"><a class="prev" href="quick-start.html"><small>Previous</small>Quick start</a><a class="next" href="popup.html"><small>Next</small>The popup</a></div>
+</article>
+<nav class="toc" aria-label="On this page"><p>On this page</p><ol><li><a href="#chrome">Chrome</a></li><li><a href="#edge">Microsoft Edge</a></li><li><a href="#firefox">Firefox (experimental)</a></li><li><a href="#load-unpacked">Load it unpacked (Chrome or Edge)</a></li><li><a href="#pin-it">Pin the icon</a></li><li><a href="#update">Update</a></li><li><a href="#remove">Remove</a></li></ol></nav>
+</div>
+</main>
+<footer class="footer"><div class="shell footer-inner"><p>RTLY user guide &middot; MIT licensed &middot; Maintained by Ehsan Enaloo</p><div><a href="../guides/troubleshooting-faq.html">Troubleshooting</a><a href="../guides/limits.html">Limits</a><a href="../privacy.html">Privacy</a><a href="https://github.com/ehsanenaloo/RTLY" rel="noopener">Source repository &#8599;</a></div></div></footer>
+</body>
+</html>

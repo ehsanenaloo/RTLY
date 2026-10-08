@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="popupTagline">RTLY</title>
+  <link href="../../shared/ui.css" rel="stylesheet">
+  <script src="../../shared/i18n.js"></script>
+</head>
+<body>
+  <div class="popup" id="popup">
+    <header class="popup__head">
+      <img class="brand-mark" src="../../icons/rtly.svg" alt="" width="28" height="28">
+      <div class="popup__id">
+        <div class="popup__title"><span>RTLY</span><span class="popup__ver num ltr" id="popupVersion"></span></div>
+        <div class="popup__tag" data-i18n="popupTagline">RTL &amp; font tool for AI chats</div>
+      </div>
+      <div class="popup__actions">
+        <button type="button" class="icon-btn icon-btn--heart" id="supportBtn"
+                data-i18n-aria-label="supportAriaLabel" data-i18n-title="menuSupportShort"
+                aria-label="Support RTLY">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.5-9.5-9.5C1.1 8.2 3.2 5 6.5 5c2 0 3.5 1 4.5 2.5 1-1.5 2.5-2.5 4.5-2.5 3.3 0 5.4 3.2 4 6.5C19.5 16.5 12 21 12 21z"></path></svg>
+        </button>
+        <div class="rtly-overflow-wrap">
+          <button type="button" class="icon-btn" id="overflowBtn"
+                  aria-haspopup="menu" aria-expanded="false"
+                  data-i18n-aria-label="menuOpenLabel" data-i18n-title="menuOpenLabel">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="12" cy="19" r="2"></circle></svg>
+          </button>
+          <div class="rtly-overflow-menu" id="overflowMenu" role="menu" hidden></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="popup__main">
+      <!-- Current site (rendered by popup.js) -->
+      <div id="hero"></div>
+
+      <section class="sites" aria-labelledby="sitesTitle">
+        <div class="sites__head">
+          <h2 class="sites__title" id="sitesTitle" data-i18n="allSites">All sites</h2>
+          <div class="sites__count num" id="sitesCount"></div>
+        </div>
+        <div class="sites__list" id="sitesList" role="list"></div>
+      </section>
+    </main>
+
+    <!-- Monthly support nudge (mounted by popup.js when due) -->
+    <div id="supportNudgeMount"></div>
+
+    <!-- Rotating footer (footer.js) -->
+    <div class="rtly-footer-mount" id="footerMount"></div>
+
+    <!-- About dialog (mounted by popup.js when opened) -->
+    <div id="aboutModalRoot"></div>
+  </div>
+
+  <!-- footer-config.js sets window.FOOTER_NAV_CONFIG before footer.js reads it -->
+  <script src="../../shared/footer-config.js"></script>
+  <script src="../../shared/footer.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

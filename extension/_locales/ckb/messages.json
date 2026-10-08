@@ -1,0 +1,17 @@
+{
+  "extensionName": {
+    "message": "RTLY — ئامرازی RTL و فۆنت بۆ گفتوگۆکانی AI"
+  },
+  "extensionDescription": {
+    "message": "ئامرازی ڕێكخستنی RTL و فۆنت بۆ زمانە RTLەكان (عەرەبی، فارسی، عیبری، ئوردوو) لە ChatGPT، Claude، Gemini و ئامرازەكانی تری AI."
+  },
+  "commandToggleSite": {
+    "message": "RTLY: چالاک/ناچالاک كردن بۆ ئەم ماڵپەڕە"
+  },
+  "actionTitle": {
+    "message": "RTLY"
+  },
+  "contextMenuToggle": {
+    "message": "RTLY: چالاک/ناچالاک كردن بۆ ئەم ماڵپەڕە"
+  }
+}

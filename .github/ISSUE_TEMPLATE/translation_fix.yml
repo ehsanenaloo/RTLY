@@ -1,0 +1,47 @@
+name: Translation fix
+description: Report a wrong, awkward or missing translation.
+title: "[Translation]: "
+labels: ["translation", "needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping with translations. You can also send a pull request; see the Translations section of CONTRIBUTING.md.
+  - type: input
+    id: language
+    attributes:
+      label: Language
+      placeholder: "Persian (fa)"
+    validations:
+      required: true
+  - type: input
+    id: location
+    attributes:
+      label: Where does the text appear?
+      description: The screen and button, or the English text it replaces.
+      placeholder: "Popup, the switch label"
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: Current text
+    validations:
+      required: true
+  - type: textarea
+    id: suggested
+    attributes:
+      label: Suggested text
+      description: Keep placeholders such as $1 exactly as they are.
+    validations:
+      required: true
+  - type: dropdown
+    id: native
+    attributes:
+      label: Are you a native speaker of this language?
+      options:
+        - "Yes, I am a native speaker"
+        - "I am fluent but not a native speaker"
+        - "No, I used a translation tool"
+    validations:
+      required: true

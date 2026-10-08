@@ -1,0 +1,24 @@
+name: Question
+description: Ask how to use RTLY.
+title: "[Question]: "
+labels: ["question"]
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: What do you want to do?
+      description: Say what you tried and what happened.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: RTLY version and browser
+      placeholder: "2.0.0 on Chrome 150"
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and read the project site.
+          required: true

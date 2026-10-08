@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Hugging Face's signature 🤗 emoji-style mark -->
+  <!-- Face -->
+  <circle cx="16" cy="16" r="13" fill="#FFD21E"/>
+  <!-- Open smile -->
+  <path d="M10 17.5 C11.5 21.5 14 23 16 23 C18 23 20.5 21.5 22 17.5 C22 17 21.6 16.5 21 16.5 L11 16.5 C10.4 16.5 10 17 10 17.5 z" fill="#3A3B45"/>
+  <!-- Tongue/lower lip -->
+  <path d="M12.5 17.5 C13.5 19.5 14.7 20.4 16 20.4 C17.3 20.4 18.5 19.5 19.5 17.5 z" fill="#F94F6D"/>
+  <!-- Left eye (closed smile) -->
+  <path d="M9 12.5 c0.6 -1.2 1.7 -2 3 -2 s2.4 0.8 3 2" stroke="#3A3B45" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+  <!-- Right eye (closed smile) -->
+  <path d="M17 12.5 c0.6 -1.2 1.7 -2 3 -2 s2.4 0.8 3 2" stroke="#3A3B45" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+  <!-- Left blushy cheek -->
+  <circle cx="8" cy="18" r="1.6" fill="#FF8A8A" opacity="0.85"/>
+  <!-- Right blushy cheek -->
+  <circle cx="24" cy="18" r="1.6" fill="#FF8A8A" opacity="0.85"/>
+  <!-- Left hugging hand -->
+  <path d="M4.5 21 c-1.5 -0.5 -2.5 0.4 -2.5 1.7 c0 1.5 1.4 2.5 3 2.5 c1.5 0 3.2 -0.8 3.2 -2.5 c0 -0.6 -0.3 -1 -0.7 -1.3" fill="#FFD21E" stroke="#3A3B45" stroke-width="0.8"/>
+  <!-- Right hugging hand -->
+  <path d="M27.5 21 c1.5 -0.5 2.5 0.4 2.5 1.7 c0 1.5 -1.4 2.5 -3 2.5 c-1.5 0 -3.2 -0.8 -3.2 -2.5 c0 -0.6 0.3 -1 0.7 -1.3" fill="#FFD21E" stroke="#3A3B45" stroke-width="0.8"/>
+</svg>

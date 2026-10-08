@@ -1,0 +1,110 @@
+/* === ChatGPT === */
+/* ChatGPT */
+:root {
+  --sidebar-mask: linear-gradient(
+    -90deg,
+    #000,
+    #000 84%,
+    transparent 89%,
+    transparent
+  ) !important;
+}
+.rtly-chatgpt.rtly-with-font {
+  font-family: var(--rtly-font-family);
+}
+.rtly-chatgpt .rtl\:items-start {
+  align-items: start;
+}
+.rtly-chatgpt.rtly-with-font .katex {
+  font-family: var(--rtly-font-family);
+}
+.rtly-chatgpt.rtly-with-rtl .katex {
+  direction: ltr;
+}
+.rtly-chatgpt .katex {
+  display: inline-block;
+}
+.rtly-chatgpt.rtly-with-font code {
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
+    Liberation Mono, monospace, var(--rtly-font-family) !important;
+}
+
+.rtly-chatgpt.rtly-with-rtl .relative.grow.overflow-hidden.whitespace-nowrap {
+  text-align: right;
+}
+
+/* Direction will be set dynamically by JavaScript based on content analysis */
+/* .rtly-chatgpt #prompt-textarea {
+  direction: rtl;
+} */
+
+.rtly-chatgpt .ltr\:right-0:where([dir="ltr"], [dir="ltr"] *) {
+  left: 0;
+  right: unset;
+}
+
+.rtly-chatgpt .pr-2.rtl\:left-0 {
+  padding-left: 5px !important;
+}
+.rtly-chatgpt.rtly-with-rtl article table {
+  direction: rtl !important;
+}
+
+.rtly-chatgpt article table th:first-child {
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0.375rem !important;
+  padding-right: 0.75rem !important;
+}
+
+.rtly-chatgpt article table th:last-child {
+  border-left-width: 1px;
+  border-top-left-radius: 0.375rem;
+  border-top-right-radius: 0 !important;
+}
+
+.rtly-chatgpt article table tr:last-child td:last-child {
+  border-bottom-right-radius: 0 !important;
+  border-bottom-left-radius: 0.375rem;
+}
+
+.rtly-chatgpt article table tr:last-child td:first-child {
+  border-bottom-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+
+.rtly-chatgpt article table td {
+  border-left-width: 1px !important;
+}
+
+.rtly-chatgpt article table td:first-child {
+  border-right-width: 1px !important;
+}
+.rtly-chatgpt article table td, .rtly-chatgpt article table th {
+  text-align: center;
+}
+/* Protect menus and navigation from direction changes - ChatGPT */
+.rtly-chatgpt.rtly-with-font nav, .rtly-chatgpt.rtly-with-font aside, .rtly-chatgpt.rtly-with-font [role="navigation"], .rtly-chatgpt.rtly-with-font [role="menu"], .rtly-chatgpt.rtly-with-font header, .rtly-chatgpt.rtly-with-font [role="banner"], .rtly-chatgpt.rtly-with-font nav *, .rtly-chatgpt.rtly-with-font aside *, .rtly-chatgpt.rtly-with-font [role="navigation"] *, .rtly-chatgpt.rtly-with-font [role="menu"] *, .rtly-chatgpt.rtly-with-font header *, .rtly-chatgpt.rtly-with-font [role="banner"] * {
+  font-family: var(--rtly-font-family) !important;
+}
+.rtly-chatgpt.rtly-with-rtl nav, .rtly-chatgpt.rtly-with-rtl aside, .rtly-chatgpt.rtly-with-rtl [role="navigation"], .rtly-chatgpt.rtly-with-rtl [role="menu"], .rtly-chatgpt.rtly-with-rtl header, .rtly-chatgpt.rtly-with-rtl [role="banner"], .rtly-chatgpt.rtly-with-rtl nav *, .rtly-chatgpt.rtly-with-rtl aside *, .rtly-chatgpt.rtly-with-rtl [role="navigation"] *, .rtly-chatgpt.rtly-with-rtl [role="menu"] *, .rtly-chatgpt.rtly-with-rtl header *, .rtly-chatgpt.rtly-with-rtl [role="banner"] * {
+  direction: unset !important;
+  text-align: unset !important;
+}
+/* v1.8.18: ChatGPT code-block / styled-content containers ship with a
+   floating Copy button positioned at the inline-end corner. ChatGPT's own
+   CSS uses logical positioning for the button (so in RTL it correctly
+   moves from the top-right to the top-left), but the surrounding
+   container's padding is physical (padding-right in their stylesheet) —
+   so in RTL the reserved space ends up on the right (where text now
+   starts) while the button sits on the left with no buffer. The first
+   line's wrap-end therefore renders directly under the button.
+
+   Fix: reserve 3rem of top space inside <pre> containers that contain
+   RTL'd content. The button stays in its absolute/sticky position; the
+   text simply starts below it. Scoped to pre[dir="rtl"] / pre:has([dir="rtl"])
+   so English-only code blocks keep their original padding. */
+.rtly-chatgpt.rtly-with-rtl pre[dir="rtl"],
+.rtly-chatgpt.rtly-with-rtl pre:has([dir="rtl"]) {
+  padding-top: 3rem !important;
+}
+/* End ChatGPT */

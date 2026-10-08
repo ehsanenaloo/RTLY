@@ -1,0 +1,71 @@
+name: Broken site
+description: RTLY does not align text or apply the font correctly on a website.
+title: "[Site]: "
+labels: ["site-support", "needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Sites change their page layout often, and a URL plus a screenshot is the fastest way for us to fix it.
+        Please use a chat with no private content, or hide private text in the screenshot.
+  - type: input
+    id: url
+    attributes:
+      label: Page URL
+      description: The address where the problem happens.
+      placeholder: "https://claude.ai/chat/..."
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What goes wrong?
+      description: For example, "my messages are aligned left", "code blocks are flipped" or "the font is not applied".
+    validations:
+      required: true
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot
+      description: Drag and drop an image here. Most site fixes need one.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: RTLY version
+      description: Shown on the extensions page of your browser.
+      placeholder: "2.0.0"
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      placeholder: "Chrome 150 on Windows 11"
+    validations:
+      required: true
+  - type: dropdown
+    id: enabled
+    attributes:
+      label: Is RTLY turned on for this site in the popup?
+      options:
+        - "Yes"
+        - "No"
+        - "I am not sure"
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Other extensions that change the page, light or dark theme, or console errors if you know how to find them.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and did not find this problem.
+          required: true
+        - label: I did not include private chat text or personal data.
+          required: true

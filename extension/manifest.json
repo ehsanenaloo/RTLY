@@ -1,0 +1,299 @@
+{
+  "action": {
+    "default_popup": "pages/popup/popup.html",
+    "default_title": "__MSG_actionTitle__",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "author": "Ehsan Enaloo",
+  "background": {
+    "service_worker": "background/service-worker.js"
+  },
+  "commands": {
+    "toggle_site": {
+      "description": "__MSG_commandToggleSite__",
+      "suggested_key": {
+        "default": "Alt+Shift+R",
+        "mac": "Alt+Shift+R"
+      }
+    }
+  },
+  "content_scripts": [
+    {
+      "css": [
+        "content/base.css",
+        "content/sites/chatgpt.css"
+      ],
+      "js": [
+        "content/sites/chatgpt.js",
+        "content/content.js"
+      ],
+      "matches": [
+        "https://chat.openai.com/*",
+        "https://www.chat.openai.com/*",
+        "https://chatgpt.com/*"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "css": [
+        "content/base.css",
+        "content/sites/claude.css"
+      ],
+      "js": [
+        "content/sites/claude.js",
+        "content/content.js"
+      ],
+      "matches": [
+        "https://claude.ai/*"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "css": [
+        "content/base.css",
+        "content/sites/copilot.css"
+      ],
+      "js": [
+        "content/sites/copilot.js",
+        "content/content.js"
+      ],
+      "matches": [
+        "https://copilot.microsoft.com/*",
+        "https://www.copilot.microsoft.com/*",
+        "https://copilot.com/*",
+        "https://www.copilot.com/*"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "css": [
+        "content/base.css",
+        "content/sites/gemini.css"
+      ],
+      "js": [
+        "content/sites/gemini.js",
+        "content/content.js"
+      ],
+      "matches": [
+        "https://gemini.google.com/*",
+        "https://www.gemini.google.com/*"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "css": [
+        "content/base.css",
+        "content/sites/perplexity.css"
+      ],
+      "js": [
+        "content/sites/perplexity.js",
+        "content/content.js"
+      ],
+      "matches": [
+        "https://perplexity.ai/*",
+        "https://www.perplexity.ai/*"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "css": [
+        "content/base.css",
+        "content/sites/poe.css"
+      ],
+      "js": [
+        "content/sites/poe.js",
+        "content/content.js"
+      ],
+      "matches": [
+        "https://poe.com/*"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "css": [
+        "content/base.css",
+        "content/sites/aistudio.css"
+      ],
+      "js": [
+        "content/sites/aistudio.js",
+        "content/content.js"
+      ],
+      "matches": [
+        "https://aistudio.google.com/*"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "css": [
+        "content/base.css",
+        "content/sites/notebooklm.css"
+      ],
+      "js": [
+        "content/sites/notebooklm.js",
+        "content/content.js"
+      ],
+      "matches": [
+        "https://notebooklm.google.com/*"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "css": [
+        "content/base.css",
+        "content/sites/grok-zai.css"
+      ],
+      "js": [
+        "content/sites/grok-zai.js",
+        "content/content.js"
+      ],
+      "matches": [
+        "https://grok.com/*",
+        "https://chat.z.ai/*",
+        "https://z.ai/*"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "css": [
+        "content/base.css",
+        "content/sites/deepseek.css"
+      ],
+      "js": [
+        "content/sites/deepseek.js",
+        "content/content.js"
+      ],
+      "matches": [
+        "https://chat.deepseek.com/*"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "css": [
+        "content/base.css",
+        "content/sites/qwen.css"
+      ],
+      "js": [
+        "content/sites/qwen.js",
+        "content/content.js"
+      ],
+      "matches": [
+        "https://qwen.ai/*",
+        "https://www.qwen.ai/*",
+        "https://chat.qwen.ai/*"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "css": [
+        "content/base.css"
+      ],
+      "js": [
+        "content/sites/misc.js",
+        "content/content.js"
+      ],
+      "matches": [
+        "https://bing.com/*",
+        "https://www.bing.com/*",
+        "https://huggingface.co/chat/*",
+        "https://dashboard.cohere.com/*",
+        "https://chat.mistral.ai/*",
+        "https://coral.cohere.com/*"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "default_locale": "en",
+  "description": "__MSG_extensionDescription__",
+  "host_permissions": [
+    "https://chat.openai.com/*",
+    "https://www.chat.openai.com/*",
+    "https://chatgpt.com/*",
+    "https://claude.ai/*",
+    "https://copilot.microsoft.com/*",
+    "https://www.copilot.microsoft.com/*",
+    "https://gemini.google.com/*",
+    "https://www.gemini.google.com/*",
+    "https://perplexity.ai/*",
+    "https://www.perplexity.ai/*",
+    "https://poe.com/*",
+    "https://aistudio.google.com/*",
+    "https://notebooklm.google.com/*",
+    "https://grok.com/*",
+    "https://chat.z.ai/*",
+    "https://z.ai/*",
+    "https://chat.deepseek.com/*",
+    "https://qwen.ai/*",
+    "https://www.qwen.ai/*",
+    "https://chat.qwen.ai/*",
+    "https://bing.com/*",
+    "https://www.bing.com/*",
+    "https://huggingface.co/chat/*",
+    "https://dashboard.cohere.com/*",
+    "https://chat.mistral.ai/*",
+    "https://coral.cohere.com/*",
+    "https://copilot.com/*",
+    "https://www.copilot.com/*"
+  ],
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "manifest_version": 3,
+  "minimum_chrome_version": "111",
+  "name": "__MSG_extensionName__",
+  "options_ui": {
+    "open_in_tab": true,
+    "page": "pages/options/options.html"
+  },
+  "permissions": [
+    "storage",
+    "contextMenus"
+  ],
+  "short_name": "RTLY",
+  "version": "2.0.0",
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "https://chat.openai.com/*",
+        "https://www.chat.openai.com/*",
+        "https://chatgpt.com/*",
+        "https://claude.ai/*",
+        "https://copilot.microsoft.com/*",
+        "https://www.copilot.microsoft.com/*",
+        "https://gemini.google.com/*",
+        "https://www.gemini.google.com/*",
+        "https://perplexity.ai/*",
+        "https://www.perplexity.ai/*",
+        "https://poe.com/*",
+        "https://aistudio.google.com/*",
+        "https://notebooklm.google.com/*",
+        "https://grok.com/*",
+        "https://chat.z.ai/*",
+        "https://z.ai/*",
+        "https://chat.deepseek.com/*",
+        "https://qwen.ai/*",
+        "https://www.qwen.ai/*",
+        "https://chat.qwen.ai/*",
+        "https://bing.com/*",
+        "https://www.bing.com/*",
+        "https://huggingface.co/*",
+        "https://dashboard.cohere.com/*",
+        "https://chat.mistral.ai/*",
+        "https://coral.cohere.com/*",
+        "https://copilot.com/*",
+        "https://www.copilot.com/*"
+      ],
+      "resources": [
+        "fonts/iranyekan-regular.woff",
+        "fonts/iranyekan-bold.woff"
+      ]
+    }
+  ]
+}
