@@ -114,12 +114,10 @@
  * inline code run is a readability hint that's harmless (a no-op) in an LTR
  * context, so it needn't be mode-gated.
  * ============================================================ */
-.rtly-with-rtl textarea,
-.rtly-with-rtl input[type="text"],
-.rtly-with-rtl input[type="search"],
-.rtly-with-rtl input:not([type]),
-.rtly-with-rtl [contenteditable="true"],
-.rtly-with-rtl [contenteditable=""] {
+.rtly-with-rtl textarea[data-rtly-processed],
+.rtly-with-rtl input[data-rtly-processed],
+.rtly-with-rtl [contenteditable="true"][data-rtly-processed],
+.rtly-with-rtl [contenteditable=""][data-rtly-processed] {
   unicode-bidi: plaintext;
 }
 /* CRITICAL: descendants of contenteditable MUST also be plaintext.
@@ -130,8 +128,8 @@
    Persian editor stays RTL — exactly the bug we want to avoid. With
    plaintext on every descendant, each <p> independently auto-detects
    from its own first-strong character, line by line. */
-.rtly-with-rtl [contenteditable="true"] *,
-.rtly-with-rtl [contenteditable=""] * {
+.rtly-with-rtl [contenteditable="true"][data-rtly-processed] *,
+.rtly-with-rtl [contenteditable=""][data-rtly-processed] * {
   unicode-bidi: plaintext !important;
 }
 /* v1.9.24 — direction-aware isolation.
@@ -162,117 +160,22 @@
 }
 /* End bidi quality */
 
-/* Prevent chat input boxes from moving down due to top bar */
-:root {
-  --rtly-bar-height: 48px;
+/* Active-site tokens. Gated on the class RTLY only adds to <html> when it is active on this site,
+   so a disabled site (or any non-RTLY page) never receives these custom properties. */
+html.rtly-active {
   --rtly-font-family: "IranYekan", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
-/* Only apply padding to main content areas, not input boxes */
-html.rtly-active body {
-  padding-top: 0 !important;
-}
-/* Input boxes should stay in place */
-html.rtly-active textarea,
-html.rtly-active [contenteditable="true"],
-html.rtly-active input[type="text"] {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-}
+/* LAYOUT RULE (v2.0): RTLY never changes the host site's layout. The former rules that zeroed
+   body padding-top and the margin/padding of every text input were removed: they restyled site
+   chrome (page container, search fields, composer frame). */
+
 /* Don't apply any direction changes to sidebar, navigation, and menu - let them stay in their default state */
 /* JavaScript will skip processing these elements, so they won't be affected */
 
-/* Protect menus, navigation, and sidebars from direction changes - keep default direction */
-/* Only apply font, never change direction */
-/* These rules have maximum specificity to override any [dir="rtl"] rules */
-html.rtly-active nav,
-html.rtly-active nav[dir="rtl"],
-html.rtly-active nav[dir="ltr"],
-html.rtly-active aside,
-html.rtly-active aside[dir="rtl"],
-html.rtly-active aside[dir="ltr"],
-html.rtly-active [role="navigation"],
-html.rtly-active [role="navigation"][dir="rtl"],
-html.rtly-active [role="navigation"][dir="ltr"],
-html.rtly-active [role="menu"],
-html.rtly-active [role="menu"][dir="rtl"],
-html.rtly-active [role="menu"][dir="ltr"],
-html.rtly-active [role="menubar"],
-html.rtly-active [role="menubar"][dir="rtl"],
-html.rtly-active [role="menubar"][dir="ltr"],
-html.rtly-active [role="complementary"],
-html.rtly-active [role="complementary"][dir="rtl"],
-html.rtly-active [role="complementary"][dir="ltr"],
-html.rtly-active .sidebar,
-html.rtly-active .side-bar,
-html.rtly-active .navigation,
-html.rtly-active .nav,
-html.rtly-active .menu,
-html.rtly-active header,
-html.rtly-active header[dir="rtl"],
-html.rtly-active header[dir="ltr"],
-html.rtly-active [role="banner"],
-html.rtly-active [role="banner"][dir="rtl"],
-html.rtly-active [role="banner"][dir="ltr"],
-html.rtly-active [role="toolbar"],
-html.rtly-active [role="toolbar"][dir="rtl"],
-html.rtly-active [role="toolbar"][dir="ltr"],
-html.rtly-active .toolbar,
-html.rtly-active .mdc-top-app-bar,
-html.rtly-active [data-testid*="sidebar"],
-html.rtly-active [data-testid*="nav"],
-html.rtly-active [data-testid*="menu"],
-html.rtly-active [aria-label*="navigation" i],
-html.rtly-active [aria-label*="menu" i],
-html.rtly-active [aria-label*="sidebar" i],
-html.rtly-active [aria-label*="profile" i],
-html.rtly-active [aria-label*="settings" i],
-html.rtly-active [aria-label*="history" i],
-html.rtly-active [data-testid*="profile"],
-html.rtly-active [data-testid*="settings"],
-html.rtly-active [data-testid*="history"],
-html.rtly-active [data-testid*="user"],
-html.rtly-active .profile,
-html.rtly-active .settings,
-html.rtly-active .history,
-html.rtly-active .user-menu,
-html.rtly-active .account-menu,
-html.rtly-active nav *,
-html.rtly-active nav[dir="rtl"] *,
-html.rtly-active nav[dir="ltr"] *,
-html.rtly-active aside *,
-html.rtly-active aside[dir="rtl"] *,
-html.rtly-active aside[dir="ltr"] *,
-html.rtly-active [role="navigation"] *,
-html.rtly-active [role="navigation"][dir="rtl"] *,
-html.rtly-active [role="navigation"][dir="ltr"] *,
-html.rtly-active [role="menu"] *,
-html.rtly-active [role="menu"][dir="rtl"] *,
-html.rtly-active [role="menu"][dir="ltr"] *,
-html.rtly-active [role="menubar"] *,
-html.rtly-active [role="menubar"][dir="rtl"] *,
-html.rtly-active [role="menubar"][dir="ltr"] *,
-html.rtly-active [role="complementary"] *,
-html.rtly-active [role="complementary"][dir="rtl"] *,
-html.rtly-active [role="complementary"][dir="ltr"] *,
-html.rtly-active .sidebar *,
-html.rtly-active .side-bar *,
-html.rtly-active .navigation *,
-html.rtly-active .nav *,
-html.rtly-active .menu *,
-html.rtly-active header *,
-html.rtly-active header[dir="rtl"] *,
-html.rtly-active header[dir="ltr"] *,
-html.rtly-active [role="banner"] *,
-html.rtly-active [role="banner"][dir="rtl"] *,
-html.rtly-active [role="banner"][dir="ltr"] *,
-html.rtly-active [role="toolbar"] *,
-html.rtly-active [role="toolbar"][dir="rtl"] *,
-html.rtly-active [role="toolbar"][dir="ltr"] *,
-html.rtly-active .toolbar *,
-html.rtly-active .mdc-top-app-bar * {
-  direction: unset !important;
-  text-align: unset !important;
-}
+/* (v2.0) The former "protect menus" block forced direction/text-align: unset !important on every nav,
+   aside, header, toolbar and menu descendant. That overrode the site's own alignment on its chrome
+   (e.g. centred menu items) in ALL modes, so it was removed. RTLY now writes direction only on
+   message / composer text blocks, never on layout wrappers, so nothing needs undoing. */
 .rtly-topbar__text {
   flex: 0 1 auto;
   text-align: center;
@@ -422,26 +325,9 @@ html.rtly-active .mdc-top-app-bar * {
    *   - Copilot / MS apps             → FluentSystemIcons-Resizable
    *   - Generic                       → Material Icons, FontAwesome, etc.
    */
-  font-family:
-    var(--font-anthropicons, "Anthropicons-Variable"),
-    "Luminous Symbols",
-    "Material Symbols Outlined", "Material Symbols Rounded", "Material Symbols Sharp",
-    "Google Symbols",
-    "Material Icons", "Material Icons Outlined", "Material Icons Round", "Material Icons Sharp", "Material Icons Two Tone",
-    "Material Icons Extended",
-    "Font Awesome 6 Free", "Font Awesome 6 Brands", "Font Awesome 6 Pro",
-    "Font Awesome 5 Free", "Font Awesome 5 Brands", "Font Awesome 5 Pro",
-    "FontAwesome",
-    "FluentSystemIcons-Resizable", "FluentSystemIcons-Filled", "FluentSystemIcons-Regular",
-    "FabricMDL2Icons",
-    "anticon",
-    "iconfont",
-    "Phosphor", "Phosphor-Bold", "Phosphor-Fill",
-    "tabler-icons",
-    "remixicon",
-    "Feather",
-    "Glyphicons Halflings",
-    var(--rtly-font-family) !important;
+  /* (v2.0) font-family fallback list removed: RTLY no longer sets font-family on the page, so
+     icon fonts keep the site's own declaration (the old list also painted IranYekan over
+     any icon element whose icon font had not loaded). */
   direction: ltr !important;
 }
 /* End universal icon protection */

@@ -7,18 +7,6 @@
    [contenteditable] without a value, [role='textbox'], and explicitly
    excludes [contenteditable='false'] so we don't restyle accidentally-
    read-only widgets the site marks that way. */
-.rtly-grok.rtly-with-font,
-.rtly-grok.rtly-with-font input,
-.rtly-grok.rtly-with-font textarea,
-.rtly-grok.rtly-with-font [contenteditable]:not([contenteditable="false"]),
-.rtly-grok.rtly-with-font [role="textbox"],
-.rtly-zai.rtly-with-font,
-.rtly-zai.rtly-with-font input,
-.rtly-zai.rtly-with-font textarea,
-.rtly-zai.rtly-with-font [contenteditable]:not([contenteditable="false"]),
-.rtly-zai.rtly-with-font [role="textbox"] {
-  font-family: var(--rtly-font-family) !important;
-}
 
 /* v1.9.8: also force unicode-bidi:plaintext on z.ai's editor variants so
    that per-line direction works even when JS hasn't yet stamped dir.
@@ -39,10 +27,7 @@
   text-align: right !important;
 }
 /* Protect menus and navigation from direction changes - Grok, Z.ai */
-.rtly-grok.rtly-with-rtl nav, .rtly-grok.rtly-with-rtl aside, .rtly-grok.rtly-with-rtl [role="navigation"], .rtly-grok.rtly-with-rtl [role="menu"], .rtly-grok.rtly-with-rtl header, .rtly-grok.rtly-with-rtl [role="banner"], .rtly-grok.rtly-with-rtl nav *, .rtly-grok.rtly-with-rtl aside *, .rtly-grok.rtly-with-rtl [role="navigation"] *, .rtly-grok.rtly-with-rtl [role="menu"] *, .rtly-grok.rtly-with-rtl header *, .rtly-grok.rtly-with-rtl [role="banner"] *, .rtly-zai.rtly-with-rtl nav, .rtly-zai.rtly-with-rtl aside, .rtly-zai.rtly-with-rtl [role="navigation"], .rtly-zai.rtly-with-rtl [role="menu"], .rtly-zai.rtly-with-rtl header, .rtly-zai.rtly-with-rtl [role="banner"], .rtly-zai.rtly-with-rtl nav *, .rtly-zai.rtly-with-rtl aside *, .rtly-zai.rtly-with-rtl [role="navigation"] *, .rtly-zai.rtly-with-rtl [role="menu"] *, .rtly-zai.rtly-with-rtl header *, .rtly-zai.rtly-with-rtl [role="banner"] * {
-  direction: unset !important;
-  text-align: unset !important;
-}
+
 .rtly-grok.rtly-with-rtl textarea[dir="rtl"], .rtly-grok.rtly-with-rtl [contenteditable="true"][dir="rtl"], .rtly-zai.rtly-with-rtl textarea[dir="rtl"], .rtly-zai.rtly-with-rtl [contenteditable="true"][dir="rtl"] {
   direction: rtl !important;
   text-align: right !important;
@@ -52,7 +37,7 @@
   direction: rtl !important;
   text-align: right !important;
 }
-.rtly-grok table th, .rtly-grok table td, .rtly-zai table th, .rtly-zai table td {
+:is(.rtly-grok, .rtly-zai) :is(article, [role="article"], [class*="message" i], [data-message], [data-expanded]) :is(th, td) {
   text-align: center;
 }
 
@@ -83,15 +68,8 @@
 }
 
 /* Z.ai: Keep layout LTR, ensure main content fills space */
-.rtly-zai.rtly-with-rtl body > div, .rtly-zai.rtly-with-rtl body > div > div {
-  direction: ltr !important;
-}
+
 /* Main chat area: expand to fill space */
-.rtly-zai main, .rtly-zai [role="main"] {
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-  max-width: none !important;
-}
 
 /* ============================================================
  * v1.9.7-fix — Flex-flip protection for icon-bearing interactive

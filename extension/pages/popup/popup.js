@@ -167,6 +167,18 @@
     });
   }
 
+
+  // Fallback writer (only used when chrome.runtime.sendMessage is unavailable). The background
+  // service worker is the single writer of siteSettings; if we must write from a page we re-read
+  // the stored map IMMEDIATELY before the write instead of writing a possibly stale in-memory
+  // snapshot, so a toggle made elsewhere in the meantime (another tab, the background) survives.
+  async function writeSiteSettingFallback(siteId, status) {
+    const stored = await getStorage(["siteSettings"]);
+    const cur = canonicalizeLegacyKeys({ ...(stored.siteSettings || {}) });
+    cur[siteId] = status;
+    await setStorage({ siteSettings: cur });
+  }
+
   // ── Theme handling (popup edition) ───────────────────────────────
   function applyTheme(theme) {
     // Always write the *effective* theme so CSS needs a single dark selector.
@@ -413,7 +425,7 @@
         rollback();
       }
     } else {
-      setStorage({ siteSettings: { ...State.siteSettings, [siteId]: status } });
+      writeSiteSettingFallback(siteId, status);
     }
   }
 

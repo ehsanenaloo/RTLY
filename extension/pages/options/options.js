@@ -51,6 +51,18 @@
     });
   }
 
+
+  // Fallback writer (only used when chrome.runtime.sendMessage is unavailable). The background
+  // service worker is the single writer of siteSettings; if we must write from a page we re-read
+  // the stored map IMMEDIATELY before the write instead of writing a possibly stale in-memory
+  // snapshot, so a toggle made elsewhere in the meantime (another tab, the background) survives.
+  async function writeSiteSettingFallback(siteId, status) {
+    const stored = await getStorage(["siteSettings"]);
+    const cur = canonicalizeLegacyKeys({ ...(stored.siteSettings || {}) });
+    cur[siteId] = status;
+    await setStorage({ siteSettings: cur });
+  }
+
   // Debounce for slider
   function debounce(fn, wait) {
     let timer;
@@ -502,7 +514,7 @@
             rollback();
           }
         } else {
-          setStorage({ siteSettings: State.siteSettings }).then(flashSaved);
+          writeSiteSettingFallback(site.id, next).then(flashSaved);
         }
       });
       const track = document.createElement("span");

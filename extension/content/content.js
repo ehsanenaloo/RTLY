@@ -67,6 +67,12 @@ const canonicalSite = siteKey ? CANONICAL[siteKey] || siteKey : null;
 // ---------- Config ----------
 // فونت ثابت: ایران‌یکان برای همهٔ سایت‌ها
 const FONT_STACK = "'IranYekan', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+// v2.0: IranYekan draws ASCII digits as Persian digits. For text RTLY itself resolved as LTR
+// (English-majority text that merely contains some Persian, or an English island inside a
+// Persian message) a digits-only face is placed FIRST: "RTLY Latin Digits" maps U+0030-0039 to a
+// system font (see injectIranYekanFont), everything else falls through to IranYekan. Persian (RTL)
+// text keeps the Persian digit shapes.
+const FONT_STACK_LTR = "'RTLY Latin Digits', " + FONT_STACK;
 
 // Per-site config registry, populated by content/sites/*.js (loaded before
 // this file by the manifest). In production it holds only the current site's
@@ -93,6 +99,9 @@ let SETTINGS = {
 // enabled check passes). Gates page-level font scaling and live mode reapply
 // so neither takes effect on a domain the user has disabled RTLY for.
 let rtlyActive = false;
+// v2.0: set once when the site is switched off live (storage.onChanged). From then on every
+// entry point that could write to the page is a no-op; deactivateRTLY() already removed what we wrote.
+let rtlyStopped = false;
 
 function getPreferredFontFamily() {
   return FONT_STACK;
@@ -109,6 +118,21 @@ function getPreferredFontFamily() {
 const sidebarCache = new WeakMap();
 const iconCache = new WeakMap();
 const skipFontCache = new WeakMap();
+
+// Cheap text fingerprint: "<length>.<32-bit FNV-1a hash in base36>". Used for the
+// data-rtly-tc / data-rtly-text bookkeeping attributes instead of storing the full
+// text of every processed element (a long thread would otherwise keep a second copy
+// of every message in the DOM). The length makes a hash collision on a changed text
+// practically impossible. Written AND compared through this one function.
+function fp(text) {
+  const s = text || "";
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return s.length + "." + (h >>> 0).toString(36);
+}
 
 // Cache buster — bumped on settings change or SPA navigation so cached results
 // don't outlive layout/structural changes that could affect ancestor checks.
@@ -199,13 +223,31 @@ function getEffectiveMode() {
   return "full";
 }
 
+// The user's font scale is written as an inline font-size on <html>. We remember what the site had
+// there (some sites set one) and put it back when the scale returns to 100% or RTLY switches off,
+// instead of blindly deleting the property.
+let scaleOwnsFontSize = false;
+let prevRootFontSize = { value: "", priority: "" };
+function restoreRootFontSize(root) {
+  if (!scaleOwnsFontSize) return;
+  scaleOwnsFontSize = false;
+  root.style.removeProperty("font-size");
+  if (prevRootFontSize.value) root.style.setProperty("font-size", prevRootFontSize.value, prevRootFontSize.priority);
+}
+
 function applyGlobalFontScale() {
   try {
+    // v2.0: a site RTLY is not active on (disabled, or not yet past the enabled check) receives
+    // NOTHING: no :root custom properties, no font-size. Callers that run before activation
+    // (loadSettings, the storage listener) therefore have no side effect on disabled sites.
+    if (!rtlyActive) return;
     const root = document && document.documentElement ? document.documentElement : null;
     if (!root) return;
 
     const scale = (SETTINGS && SETTINGS.fontScale) || 100;
-    root.style.setProperty("--rtly-font-scale", String(scale));
+    // v2.0: no inline custom properties on <html> any more. --rtly-font-scale had no reader and
+    // --rtly-font-family now comes from the stylesheet (base.css, html.rtly-active), so the only
+    // thing RTLY ever writes on <html> is the user's font-size scale.
 
     // Apply scale ONCE on :root so child em/rem values cascade naturally without
     // compounding. Only when scale != 100 to avoid disturbing default UA size.
@@ -214,19 +256,17 @@ function applyGlobalFontScale() {
     // base to 16px and overrides a user's accessibility-adjusted browser
     // default font size. Percentage scales relative to whatever the user has
     // configured, preserving their setup.
-    // v1.9.20: apply the page-level font-size override ONLY when RTLY is
-    // active on this site. Previously applyGlobalFontScale ran at
-    // document_start (and again in loadSettings) BEFORE the per-site enabled
-    // check, so a site the user had explicitly disabled still got zoomed
-    // whenever the global fontScale != 100. The :root vars below stay set
-    // unconditionally (harmless — nothing reads them unless active).
-    if (rtlyActive && scale !== 100) {
+    // The page-level font-size override is the user's font scale (permitted layout input);
+    // at 100% nothing is written.
+    if (scale !== 100) {
+      if (!scaleOwnsFontSize) {
+        prevRootFontSize = { value: root.style.getPropertyValue("font-size"), priority: root.style.getPropertyPriority("font-size") };
+        scaleOwnsFontSize = true;
+      }
       root.style.setProperty("font-size", `${scale}%`, "important");
     } else {
-      root.style.removeProperty("font-size");
+      restoreRootFontSize(root);
     }
-
-    root.style.setProperty("--rtly-font-family", FONT_STACK);
   } catch (e) {
     log("applyGlobalFontScale error", e);
   }
@@ -240,6 +280,13 @@ const CONFIG = {
   // file (mirroring assets/css/sites/) instead of one monolithic literal.
   SITES: SITE_CFG,
 };
+
+// Joined response selectors of THIS site (used to recognise message-list wrappers, see
+// isMessageListWrapper). Empty on unknown sites.
+const RESPONSE_SELECTOR = (() => {
+  const c = SITE_CFG[siteKey];
+  return c && Array.isArray(c.responses) && c.responses.length ? c.responses.join(", ") : "";
+})();
 
 // ---------- Language Detection (Persian, Arabic, Hebrew, Urdu) ----------
 // Single broad-script regex used by guards that ask "does this text contain
@@ -649,9 +696,60 @@ function computeShouldSkipFont(el) {
   return false;
 }
 
+// True when `el` is the layout wrapper of a message list: it contains two or more TOP-LEVEL
+// response-selector matches with the same tag + class (i.e. repeated message roots). Nested
+// matches inside one message (e.g. .font-claude-response > .standard-markdown) do not count, and
+// neither do heterogeneous siblings, so a single message root is never mistaken for a wrapper.
+// Known limit: a thread holding a single message is not recognised (it behaves as before).
+function isMessageListWrapper(el) {
+  if (!RESPONSE_SELECTOR || typeof el.querySelector !== "function") return false;
+  try {
+    if (!el.querySelector(RESPONSE_SELECTOR)) return false;
+    const hits = el.querySelectorAll(RESPONSE_SELECTOR);
+    const seen = new Map();
+    let top = null;
+    for (let i = 0; i < hits.length; i++) {
+      const h = hits[i];
+      if (top && top.contains(h)) continue;
+      top = h;
+      const k = h.tagName + "|" + (h.getAttribute("class") || "");
+      const n = (seen.get(k) || 0) + 1;
+      if (n >= 2) return true;
+      seen.set(k, n);
+    }
+  } catch (_) {}
+  return false;
+}
+
+// Remove direction / font state RTLY itself wrote onto an element that turned out to be a layout
+// wrapper (ownership-aware: native dir / inline styles of the site are left alone).
+function releaseWrapper(el) {
+  if (el.dataset.rtlyDir !== undefined) {
+    el.removeAttribute("dir");
+    el.style.removeProperty("direction");
+    el.style.removeProperty("text-align");
+    el.removeAttribute("data-rtly-dir");
+  } else if (el.dataset.rtlyAutoDir === "1") {
+    el.removeAttribute("dir");
+    el.removeAttribute("data-rtly-auto-dir");
+  }
+  if (el.dataset.rtlyText !== undefined) el.removeAttribute("data-rtly-text");
+  if ((el.style.fontFamily || "").includes("IranYekan")) el.style.removeProperty("font-family");
+}
+
+// True when an ancestor carries an inline IranYekan font-family written by RTLY (so `el` inherits it).
+function inheritsInlineIranYekan(el) {
+  let p = el.parentElement;
+  for (let i = 0; p && i < 40 && p !== document.body; i++, p = p.parentElement) {
+    if (p.style && (p.style.fontFamily || "").indexOf("IranYekan") !== -1) return true;
+  }
+  return false;
+}
+
 function applyDirectionAndFont(el) {
   try {
     if (!el || !el.nodeType || el.nodeType !== 1) return;
+    if (rtlyStopped) return; // site was switched off live: never write again
     // --- Reflow-free fast-skip (v1.9.20) ---------------------------------
     // The generic per-mutation rescan (ChatGPT, Poe, Copilot, AI Studio,
     // Qwen, misc — every site without a special processing branch) calls
@@ -676,7 +774,7 @@ function applyDirectionAndFont(el) {
     if (siteKey !== "gemini.google.com" &&
         el.dataset && el.dataset.rtlyProcessed === "1" &&
         el.dataset.rtlyTc !== undefined &&
-        (el.textContent || "") === el.dataset.rtlyTc) {
+        fp(el.textContent) === el.dataset.rtlyTc) {
       return;
     }
     // Perplexity: never set direction on wrappers that contain the sidebar.
@@ -708,13 +806,16 @@ function applyDirectionAndFont(el) {
     // Check if element is in sidebar/menu - if so, only apply font, not direction
     const inMenu = isInSidebarOrMenu(el);
     const fontFamily = getPreferredFontFamily();
-    const applyFontOnly = (target) => {
+    // `ltr`: RTLY resolved this element's text as LTR. Such text gets the Latin-digits stack
+    // (see FONT_STACK_LTR) so ASCII digits in English / code / version strings are not drawn as
+    // Persian digits; RTL text keeps IranYekan's Persian digit shapes.
+    const applyFontOnly = (target, ltr = false) => {
       if (shouldSkipFont(target)) return;
       // v1.8.17: gate font application on the target's CURRENT text. IranYekan
       // is an Arabic-script face whose Latin glyphs have ascent/descent
-      // metrics different from typical site fonts (Söhne on ChatGPT,
+      // metrics different from typical site fonts (Soehne on ChatGPT,
       // ABC Diatype on Claude, etc.). Painting it over a textarea containing
-      // only English caused visible vertical-baseline shift — descenders of
+      // only English caused visible vertical-baseline shift - descenders of
       // "j" / "g" / "p" rendered at a different Y position than the textarea's
       // native baseline. Restrict the paint to elements whose text actually
       // contains Arabic-script characters; when text becomes Latin-only
@@ -723,24 +824,34 @@ function applyDirectionAndFont(el) {
       //
       // Text source: el.value for <textarea>/<input> (replaced elements whose
       // textContent does NOT reflect their value); textContent for everything
-      // else (cheap, no reflow — innerText would force layout).
+      // else (cheap, no reflow - innerText would force layout).
       //
-      // Empty text → wantFont is false → no paint, no harm. First Persian
+      // Empty text -> wantFont is false -> no paint, no harm. First Persian
       // keystroke triggers the next mutation cycle which re-paints.
       const txt = target.value !== undefined
         ? target.value
         : (target.textContent || "");
-      const wantFont = AR_FA_WORD.test(txt);
-      const applied = (target.style.fontFamily || "").includes("IranYekan");
-      if (wantFont && !applied) {
-        target.style.setProperty("font-family", fontFamily, "important");
-      } else if (!wantFont && applied) {
+      // v2.0: an LTR island (no Arabic-script text of its own) nested inside a block RTLY already
+      // painted with IranYekan inherits that font, Persian digits included. Re-state the font on
+      // the island with the Latin-digits stack. It is only ever set where IranYekan is already
+      // inherited, so the island's glyphs do not change except for the digits.
+      const hasAr = AR_FA_WORD.test(txt);
+      const island = ltr && !hasAr && inheritsInlineIranYekan(target);
+      const wantFont = hasAr || island;
+      const cur = target.style.fontFamily || "";
+      const applied = cur.includes("IranYekan");
+      if (wantFont) {
+        const hasLatin = cur.includes("RTLY Latin Digits");
+        if (!applied || hasLatin !== ltr) {
+          target.style.setProperty("font-family", ltr ? FONT_STACK_LTR : fontFamily, "important");
+        }
+      } else if (applied) {
         target.style.removeProperty("font-family");
       }
       // NOTE: font-size scaling is intentionally NOT applied per-element here.
       // Using `1em * scale` recursively compounded across nested elements
       // (e.g. message > p > span > strong in Claude). Scale is applied once on
-      // :root via applyGlobalFontScale() — child elements using rem/em scale
+      // :root via applyGlobalFontScale() - child elements using rem/em scale
       // proportionally, and px-based UIs are left untouched.
     };
 
@@ -846,21 +957,26 @@ function applyDirectionAndFont(el) {
         el.querySelector('textarea, [contenteditable="true"], [contenteditable=""]')) {
       // Never set direction on a wrapper. Strip any state we (or an earlier
       // version) imposed so the input below can inherit a neutral context.
-      if (el.hasAttribute("data-rtly-dir") ||
-          el.hasAttribute("dir") ||
-          el.style.direction ||
-          el.style.textAlign) {
-        el.removeAttribute("data-rtly-dir");
-        el.removeAttribute("data-rtly-text");
-        el.removeAttribute("data-rtly-processed");
-        el.removeAttribute("dir");
-        el.style.removeProperty("direction");
-        el.style.removeProperty("text-align");
-      }
-      const effectiveMode = getEffectiveMode();
-      if (effectiveMode === "full" || effectiveMode === "font_only") {
-        applyFontOnly(el);
-      }
+      // v2.0: only strip what RTLY itself wrote (ownership markers). The old check
+      // removed ANY dir / inline direction / text-align from the wrapper, which
+      // deleted the site's own values on its layout containers.
+      releaseWrapper(el);
+      // v2.0: a wrapper around the composer is page chrome / layout. It must not be painted with
+      // the font either: an inline font-family here would cascade over the whole subtree
+      // (toolbars, buttons, other messages). The composer itself is styled by its own pass.
+      return;
+    }
+
+    // v2.0: layout wrapper around the whole message list (thread container, <main>, app shell):
+    // it contains two or more repeated message roots. Direction / alignment / font must live on
+    // the message text blocks, never on the container that holds all of them (and the site
+    // chrome around them), so the wrapper is left alone and only bookkeeping is stamped so the
+    // fast-skip and the heuristic scan don't revisit it every tick.
+    if (isMessageListWrapper(el)) {
+      releaseWrapper(el);
+      if (el.dataset.rtlyProcessed !== "1") el.dataset.rtlyProcessed = "1";
+      const tcWrap = fp(el.textContent);
+      if (el.dataset.rtlyTc !== tcWrap) el.dataset.rtlyTc = tcWrap;
       return;
     }
 
@@ -934,19 +1050,20 @@ function applyDirectionAndFont(el) {
     // run.
     if (text.length > 5000) {
       // Still apply font (cheap, idempotent), but never set direction.
-      if (effectiveMode === "full" || effectiveMode === "font_only") applyFontOnly(el);
+      if (effectiveMode === "full" || effectiveMode === "font_only") applyFontOnly(el, false);
       // v1.9.20: stamp processed + reflow-free text marker so the next
       // observer tick fast-skips this big container (the innerText read above
       // is itself a reflow we want to avoid repeating once the text settles).
       if (el.dataset.rtlyProcessed !== "1") el.dataset.rtlyProcessed = "1";
-      const tcLarge = el.textContent || "";
+      const tcLarge = fp(el.textContent);
       if (el.dataset.rtlyTc !== tcLarge) el.dataset.rtlyTc = tcLarge;
       return;
     }
 
     const normalized = text.trim();
     const alreadyDir = el.dataset.rtlyDir;
-    const alreadyText = el.dataset.rtlyText === normalized;
+    const normalizedFp = fp(normalized);
+    const alreadyText = el.dataset.rtlyText === normalizedFp;
 
     const dir = detectDirection(normalized);
     if (dir === "none") return;
@@ -982,7 +1099,7 @@ function applyDirectionAndFont(el) {
       // v1.9.22: stamp the reflow-free marker so the next observer tick
       // fast-skips this element at the top of the function instead of
       // re-reading innerText.
-      const tcIcon = el.textContent || "";
+      const tcIcon = fp(el.textContent);
       if (el.dataset.rtlyTc !== tcIcon) el.dataset.rtlyTc = tcIcon;
       return;
     }
@@ -1039,7 +1156,7 @@ function applyDirectionAndFont(el) {
         "svg, img, picture, mat-icon, [data-icon], [data-icon-name], [data-lucide], [data-cds='Icon'], [data-cds='icon'], [data-mat-icon-name], [data-mat-icon-type], [style*='anthropicons' i], [style*='Anthropicons'], [style*='Material Symbols'], [style*='Material Icons'], [style*='Google Symbols'], [style*='Luminous Symbols'], [style*='lumi-symbols' i], [style*='FluentSystemIcons' i], [class*='icon' i], [class*='lucide' i], [class*='anthropicon' i], [class*='material-icons' i], [class*='material-symbols' i], [class*='google-symbols' i], [class*='lumi-symbols' i], [class*='lm-icon' i], [class*='mat-ligature-font' i], [class*='fluent-icon' i], [class*='ms-Icon' i], [class*='ant-icon' i], [class*='tabler-icon' i], [class*='phosphor' i], .anticon"
       );
     if (containsIcon) {
-      if (effectiveMode === "full" || effectiveMode === "font_only") applyFontOnly(el);
+      if (effectiveMode === "full" || effectiveMode === "font_only") applyFontOnly(el, dir === "ltr");
       // v1.9.10: guard same-value write — see v1.8.10 input-like branch comment.
       if (el.dataset.rtlyProcessed !== "1") el.dataset.rtlyProcessed = "1";
       // v1.9.22 (ChatGPT hang, real fix): stamp the reflow-free marker HERE.
@@ -1049,7 +1166,7 @@ function applyDirectionAndFont(el) {
       // forced reflow) and running the big subtree icon `querySelector`. Without
       // rtlyTc the top-of-function fast-skip could never catch them. With it, an
       // unchanged icon-bearing container short-circuits reflow-free next tick.
-      const tcIcon = el.textContent || "";
+      const tcIcon = fp(el.textContent);
       if (el.dataset.rtlyTc !== tcIcon) el.dataset.rtlyTc = tcIcon;
       return;
     }
@@ -1079,7 +1196,7 @@ function applyDirectionAndFont(el) {
     }
     
     // Apply font for full or font_only
-    if (effectiveMode === "full" || effectiveMode === "font_only") applyFontOnly(el);
+    if (effectiveMode === "full" || effectiveMode === "font_only") applyFontOnly(el, dir === "ltr");
     
     // Mark as processed.
     //
@@ -1090,12 +1207,12 @@ function applyDirectionAndFont(el) {
     // text element churns its data-* attributes hundreds of times per page.
     // Same pattern as the input-like branch (~line 954) already uses.
     if (el.dataset.rtlyProcessed !== "1") el.dataset.rtlyProcessed = "1";
-    if (el.dataset.rtlyText !== normalized) el.dataset.rtlyText = normalized;
+    if (el.dataset.rtlyText !== normalizedFp) el.dataset.rtlyText = normalizedFp;
     if (applyDir && el.dataset.rtlyDir !== dir) el.dataset.rtlyDir = dir;
     // v1.9.20: reflow-free text marker for the fast-skip at the top of this
     // function. Stored from textContent (not innerText) so the next-tick
     // compare never forces a layout. Guarded same-value write, like the rest.
-    const tcDone = el.textContent || "";
+    const tcDone = fp(el.textContent);
     if (el.dataset.rtlyTc !== tcDone) el.dataset.rtlyTc = tcDone;
   } catch (e) {
     log("applyDirectionAndFont error", e);
@@ -1122,7 +1239,7 @@ function applyDirectionAndFont(el) {
 // Persian-label gate keeps English cards / other group/row chrome LTR;
 // isInSidebarOrMenu keeps Persian sidebar-history rows out.
 function markClaudeChoiceCards() {
-  if (siteKey !== "claude.ai") return;
+  if (siteKey !== "claude.ai" || rtlyStopped) return;
   try {
     const mode = getEffectiveMode();
     if (mode !== "full" && mode !== "rtl_only") return;
@@ -1173,6 +1290,7 @@ function injectIranYekanFont() {
     const base = chrome.runtime.getURL("fonts/");
     const regular = base + "iranyekan-regular.woff";
     const bold = base + "iranyekan-bold.woff";
+    if (document.getElementById("rtly-font-face")) return;
     const style = document.createElement("style");
     style.id = "rtly-font-face";
     style.textContent = `
@@ -1189,31 +1307,47 @@ function injectIranYekanFont() {
   font-weight: bold;
   font-style: normal;
   font-display: swap;
+}
+/* IranYekan draws every ASCII digit as a Persian digit. This digits-only face (U+0030-0039) maps
+   to a system font and is listed FIRST for text RTLY resolved as LTR (see FONT_STACK_LTR).
+   No size-adjust / metric override: it only swaps the digit glyphs. Same idea as the extension
+   pages' "RTLY Digits" in shared/ui.css. */
+@font-face {
+  font-family: "RTLY Latin Digits";
+  src: local("Segoe UI"), local("Helvetica Neue"), local("Roboto"), local("Arial");
+  unicode-range: U+0030-0039;
 }`;
     (document.head || document.documentElement).appendChild(style);
   } catch (_) {}
 }
 
 async function bootstrap() {
-  // v1.9.12: patchHistory() + setupMessageListener() are registered AFTER the
-  // per-site enabled check (moved further down, just before initRTLY). They
-  // both have a page-observable side effect — patchHistory monkey-patches
-  // history.pushState/replaceState; setupMessageListener registers a runtime
-  // onMessage handler — so neither should run on a domain the user has
-  // explicitly disabled RTLY for. They still live inside bootstrap (not at top
-  // level), so a duplicate content-script injection can't stack listeners or
-  // double-patch history (the window.__RTLY_CONTENT_V1__ gate guarantees
-  // bootstrap runs at most once per document).
-  injectIranYekanFont();
-  applyGlobalFontScale();
+  // v2.0: bootstrap writes NOTHING to the page until the per-site enabled check passes. The
+  // @font-face <style>, the :root custom properties (--rtly-font-scale / --rtly-font-family) and
+  // the font scale itself used to be applied before that check, so a site the user had switched
+  // off still got a style element and :root variables. They now live in initRTLY() (active only).
+  //
+  // v1.9.12: patchHistory() + setupMessageListener() are likewise registered only AFTER the
+  // enabled check; they have page-observable side effects. They still live inside bootstrap
+  // (not at top level), so a duplicate content-script injection can't stack listeners or
+  // double-patch history (the window.__RTLY_CONTENT_V1__ gate guarantees bootstrap runs at most
+  // once per document).
   await loadSettings();
   if (chrome?.storage?.onChanged?.addListener) {
     chrome.storage.onChanged.addListener((changes, area) => {
       if (area !== "local") return;
       if (changes.fontScale) {
         SETTINGS.fontScale = Number(changes.fontScale.newValue) || 100;
-        applyGlobalFontScale();
+        applyGlobalFontScale(); // no-op unless RTLY is active on this site
         bustCaches();
+      }
+      // v2.0: the site was toggled from another tab, the popup or the options page. Only the
+      // disable direction is handled live (stop + clean up); enabling goes through the
+      // background's tab reload, so a fresh content script picks it up.
+      if (changes.siteSettings) {
+        const next = changes.siteSettings.newValue;
+        const stillEnabled = !next || typeof next !== "object" || next[canonicalSite] !== false;
+        if (!stillEnabled && rtlyActive && !rtlyStopped) deactivateRTLY();
       }
       if (changes.siteModes && changes.siteModes.newValue) {
         // Compute the effective mode for THIS site before and after the
@@ -1223,17 +1357,17 @@ async function bootstrap() {
         SETTINGS.siteModes = changes.siteModes.newValue;
         const nextMode = getEffectiveMode();
         bustCaches();
-        applyModeStyles();
+        if (rtlyActive && !rtlyStopped) applyModeStyles();
         // v1.9.20: live mode propagation, no reload. applyModeStyles() only
         // toggles the .rtly-with-font / .rtly-with-rtl body-class gates that
         // drive the STATIC stylesheet rules. The inline dir / direction /
         // text-align / font-family that applyDirectionAndFont wrote DIRECTLY
-        // onto elements are not class-gated, so a full→font_only switch from
+        // onto elements are not class-gated, so a full->font_only switch from
         // the Options page used to leave stale RTL on already-processed
         // elements until a manual reload. reapplyRTLY() strips that inline
         // state and re-runs under the new effective mode. Gated on rtlyActive
         // so it never fires on a disabled site, and on an actual mode change.
-        if (rtlyActive && prevMode !== nextMode) reapplyRTLY();
+        if (rtlyActive && !rtlyStopped && prevMode !== nextMode) reapplyRTLY();
       }
     });
   }
@@ -1242,10 +1376,44 @@ async function bootstrap() {
     log("Site disabled via settings, exiting");
     return;
   }
-  // Site is enabled — now safe to take page-observable side effects.
+  // Site is enabled - now safe to take page-observable side effects.
   patchHistory();
   setupMessageListener();
   initRTLY();
+}
+
+// v2.0: live "site switched off" path. Stops every observer / interval, strips the marks and
+// inline state RTLY wrote (ownership-aware, same helper as the popup's "reapply"), and removes the
+// page-level additions: html/body classes and data-rtly-mode, the :root custom properties and
+// font scale, and the injected @font-face <style>. Event listeners that cannot be unregistered
+// (they are anonymous) stay attached but are inert: every writer checks rtlyStopped.
+function deactivateRTLY() {
+  if (rtlyStopped) return;
+  rtlyStopped = true;
+  try { runTeardown(); } catch (_) {}
+  try {
+    document.querySelectorAll("[data-rtly-processed], [data-rtly-dir], [data-rtly-auto-dir], [data-rtly-card-rtl], [data-rtly-listeners-added]").forEach((el) => {
+      cleanupRTLYElement(el);
+      el.removeAttribute("data-rtly-card-rtl");
+      el.removeAttribute("data-rtly-listeners-added");
+    });
+    const root = document.documentElement;
+    restoreRootFontSize(root);
+    rtlyActive = false;
+    for (const t of [document.documentElement, document.body]) {
+      if (!t) continue;
+      const cls = [getBodyClassName(), "rtly-active", "rtly-with-font", "rtly-with-rtl"].filter(Boolean);
+      t.classList.remove(...cls);
+      if (!t.getAttribute("class")) t.removeAttribute("class");
+      t.removeAttribute("data-rtly-mode");
+    }
+    if (!root.getAttribute("style")) root.removeAttribute("style");
+    const face = document.getElementById("rtly-font-face");
+    if (face) face.remove();
+  } catch (e) {
+    log("deactivateRTLY error", e);
+  }
+  rtlyActive = false;
 }
 
 function initRTLY() {
@@ -1257,6 +1425,7 @@ function initRTLY() {
   // this tab. Mark it so applyGlobalFontScale() applies the page-level scale
   // (it is a no-op until this point) and so live mode changes can reapply.
   rtlyActive = true;
+  injectIranYekanFont(); // v2.0: only on active sites (was unconditional in bootstrap)
   // v1.9.33: drive the Claude choice-card marking on a small standalone
   // interval. The card is static once rendered and the main observer only
   // watches childList, so process() alone fired at most once after the card
@@ -1430,6 +1599,7 @@ function initRTLY() {
  */
 function applyModeStyles() {
   try {
+    if (rtlyStopped) return;
     const mode = getEffectiveMode();
     // Stamp on documentElement too: it exists at document_start (body may
     // not), so html[data-rtly-mode] selectors are live before first paint.
@@ -1453,6 +1623,7 @@ function setupCopyDirectionPreservation() {
     "copy",
     (e) => {
       try {
+        if (rtlyStopped) return;
         const sel = window.getSelection();
         if (!sel || sel.isCollapsed) return;
         const anchor = sel.anchorNode;
@@ -1488,16 +1659,20 @@ function setupMenuProtection() {
 
   // Function to remove direction from menu elements (debounced and optimized)
   const protectMenus = debounce(() => {
-    if (isProtecting) return; // Prevent re-entrance
+    if (isProtecting || rtlyStopped) return; // Prevent re-entrance
     isProtecting = true;
 
     try {
-      // DeepSeek/Z.ai: keep body and layout LTR so sidebar stays on left
+      // DeepSeek/Z.ai/Claude/...: the top-level layout must keep the direction the SITE gave it.
+      // v2.0: this used to force dir="ltr" + inline "direction: ltr !important" on <body> and its
+      // first two descendants unconditionally - a write onto page chrome that also overrode a
+      // natively RTL site UI. RTLY no longer writes direction on layout containers at all
+      // (message-list wrappers are skipped, see isMessageListWrapper), so the only thing left to
+      // do here is to release a direction mark RTLY itself may have left there.
       if (LAYOUT_LTR_SITES.has(siteKey)) {
         [document.body, document.body?.firstElementChild, document.body?.firstElementChild?.firstElementChild].forEach((el) => {
           if (!el) return;
-          el.setAttribute("dir", "ltr");
-          el.style.setProperty("direction", "ltr", "important");
+          if (el.dataset.rtlyDir !== undefined || el.dataset.rtlyAutoDir === "1") releaseWrapper(el);
         });
       }
 
@@ -1634,12 +1809,10 @@ function setupMenuProtection() {
         if (!el) return;
         // Read attribute first (cheap). Only fall back to computed style when
         // the attribute is unset — saves a forced layout on the common path.
-        const dirAttr = el.getAttribute("dir");
-        const isRtl = dirAttr === "rtl" || (!dirAttr && getComputedStyle(el).direction === "rtl");
-        if (isLayoutContainer(el) && isRtl) {
-          el.setAttribute("dir", "ltr");
-          el.style.setProperty("direction", "ltr", "important");
-        }
+        // v2.0: revert only a direction RTLY itself put there (ownership marker). Forcing
+        // ltr whenever the container merely *computes* rtl also overrode sites whose own UI
+        // is right-to-left.
+        if (el.dataset.rtlyDir !== undefined && isLayoutContainer(el)) releaseWrapper(el);
       });
     };
     const debouncedForceLayoutLTR = debounce(forceLayoutLTR, 150);
@@ -1651,13 +1824,11 @@ function setupMenuProtection() {
       // layouts per second when the site re-renders messages.
       mutations.forEach((m) => {
         const el = m.target;
-        if (el?.nodeType === 1 && el.getAttribute("dir") === "rtl") {
-          const txt = (el.innerText || el.textContent || "").slice(0, 400);
+        // v2.0: only a direction RTLY wrote is reverted (see forceLayoutLTR).
+        if (el?.nodeType === 1 && el.dataset.rtlyDir !== undefined && el.getAttribute("dir") === "rtl") {
+          const txt = (el.textContent || "").slice(0, 400);
           const hasChatArea = el.querySelector?.("textarea, .ds-message, main, article");
-          if (/new\s*chat/i.test(txt) && hasChatArea && el.childElementCount >= 2) {
-            el.setAttribute("dir", "ltr");
-            el.style.setProperty("direction", "ltr", "important");
-          }
+          if (/new\s*chat/i.test(txt) && hasChatArea && el.childElementCount >= 2) releaseWrapper(el);
         }
       });
       debouncedForceLayoutLTR();
@@ -1752,6 +1923,7 @@ function getBodyClassName() {
 }
 
 function syncBodyClass() {
+  if (rtlyStopped) return;
   const className = getBodyClassName();
   if (!className) return;
   const mode = getEffectiveMode();
@@ -1834,6 +2006,7 @@ async function setupInputs(cfg) {
   // input(s) and attach listeners only where missing (dataset-guarded — never
   // double-binds, never stacks observers).
   const rebindInputs = debounce(() => {
+    if (rtlyStopped) return;
     cfg.inputs.forEach((sel) => {
       try {
         document.querySelectorAll(sel).forEach((inputEl) => {
@@ -1854,13 +2027,14 @@ async function setupInputs(cfg) {
   // Gemini: check for new inputs less aggressively (reduces input lag)
   if (siteKey === "gemini.google.com") {
     const checkInputs = debounce(() => {
+      if (rtlyStopped) return;
       const activeEl = document.activeElement;
       if (activeEl && (activeEl.tagName === "TEXTAREA" || activeEl.getAttribute?.("contenteditable") === "true")) return;
       cfg.inputs.forEach((sel) => {
         try {
           document.querySelectorAll(sel).forEach((inputEl) => {
             if (isInSidebarOrMenu(inputEl)) return;
-            const txt = (inputEl.value ?? inputEl.innerText ?? inputEl.textContent ?? "").trim();
+            const txt = (inputEl.value ?? inputEl.textContent ?? "").trim();
             if (txt) requestAnimationFrame(() => applyDirectionAndFont(inputEl));
             if (!inputEl.dataset.rtlyListenersAdded) {
               ["input", "keyup", "paste", "compositionend"].forEach((evt) =>
@@ -1974,7 +2148,7 @@ function setupResponses(cfg) {
           const inputs = document.querySelectorAll(sel);
           inputs.forEach((inputEl) => {
             if (!isInSidebarOrMenu(inputEl)) {
-              const txt = inputEl.value !== undefined ? inputEl.value : inputEl.innerText || inputEl.textContent || "";
+              const txt = inputEl.value !== undefined ? inputEl.value : inputEl.textContent || "";
               if (txt && txt.trim()) {
                 applyDirectionAndFont(inputEl);
               }
@@ -1997,7 +2171,7 @@ function setupResponses(cfg) {
               if (childCount >= maxChildren) return;
               if (isInSidebarOrMenu(childEl)) return;
               if (childEl.closest("code, pre")) return;
-              const childTxt = childEl.innerText || childEl.textContent || "";
+              const childTxt = childEl.textContent || "";
               if (childTxt && childTxt.trim().length >= 2) {
                 applyDirectionAndFont(childEl);
                 childCount++;
@@ -2020,7 +2194,15 @@ function setupResponses(cfg) {
 
         // Already-processed elements skipped early — applyDirectionAndFont
         // would short-circuit anyway, but checking the dataset attribute
-        // first avoids the innerText read which is the heaviest step.
+        // first avoids the text read.
+        //
+        // v2.0: processGemini reads textContent, never innerText. innerText forces a
+        // synchronous layout, and this pass runs over up to ~150 elements per tick on
+        // Gemini. textContent differs only for hidden/collapsed text and whitespace,
+        // and every use here is a "does this have >= 2 chars / any Persian" gate whose
+        // outcome is then re-decided by applyDirectionAndFont (which itself uses
+        // textContent), so the swap cannot change which elements end up styled in any
+        // way that matters.
         if (el.dataset.rtlyProcessed === "1" && !el.dataset.rtlyText) {
           // safe: explicitly tagged as processed via non-text path
           continue;
@@ -2028,7 +2210,7 @@ function setupResponses(cfg) {
 
         if (el.closest("code, pre")) continue;
 
-        const txt = el.innerText || el.textContent || "";
+        const txt = el.textContent || "";
         if (!txt || txt.trim().length < 2) continue;
 
         const normalized = txt.trim();
@@ -2049,7 +2231,7 @@ function setupResponses(cfg) {
       for (let i = 0; i < messageElements.length && messageCount < maxMessages; i++) {
         const el = messageElements[i];
         if (isInSidebarOrMenu(el)) continue;
-        const txt = el.innerText || el.textContent || "";
+        const txt = el.textContent || "";
         if (!txt || txt.trim().length < 2) continue;
         applyDirectionAndFont(el);
         messageCount++;
@@ -2059,7 +2241,7 @@ function setupResponses(cfg) {
         for (let j = 0; j < kidLimit; j++) {
           const child = kids[j];
           if (isInSidebarOrMenu(child)) continue;
-          const childTxt = child.innerText || child.textContent || "";
+          const childTxt = child.textContent || "";
           if (childTxt && childTxt.trim().length >= 2) {
             applyDirectionAndFont(child);
           }
@@ -2126,7 +2308,7 @@ function setupResponses(cfg) {
         const stableBefore =
           el.dataset.rtlyProcessed === "1" &&
           el.dataset.rtlyTc !== undefined &&
-          (el.textContent || "") === el.dataset.rtlyTc;
+          fp(el.textContent) === el.dataset.rtlyTc;
 
         applyDirectionAndFont(el);
         if (stableBefore) return;
@@ -2413,13 +2595,14 @@ function cleanupRTLYElement(el) {
     el.removeAttribute("data-rtly-auto-dir");
     el.removeAttribute("data-rtly-text");
     el.removeAttribute("data-rtly-tc");
-    el.style.removeProperty("font-family");
-    el.style.removeProperty("font-size");
+    // v2.0: only remove a font-family RTLY wrote (the old code also deleted any inline
+    // font-size, which RTLY never sets per element, i.e. it removed the SITE's own value).
+    if ((el.style.fontFamily || "").includes("IranYekan")) el.style.removeProperty("font-family");
   } catch (_) {}
 }
 
 function reapplyRTLY() {
-  if (!siteKey || !CONFIG.SITES[siteKey]) return;
+  if (!siteKey || !CONFIG.SITES[siteKey] || rtlyStopped) return;
   // Cache bust — settings or display state may have changed; force a fresh
   // pass through isInSidebarOrMenu / isIcon / shouldSkipFont.
   bustCaches();

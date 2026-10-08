@@ -1,9 +1,6 @@
 /* === Copilot === */
 /* Copilot */
 
-.rtly-copilot.rtly-with-font {
-  font-family: var(--rtly-font-family);
-}
 .rtly-copilot.rtly-with-rtl .font-mono {
   direction: ltr !important;
 }
@@ -13,17 +10,11 @@
 } */
 
 /* Protect menus and navigation from direction changes - Copilot */
-.rtly-copilot.rtly-with-rtl nav, .rtly-copilot.rtly-with-rtl aside, .rtly-copilot.rtly-with-rtl [role="navigation"], .rtly-copilot.rtly-with-rtl [role="menu"], .rtly-copilot.rtly-with-rtl header, .rtly-copilot.rtly-with-rtl [role="banner"], .rtly-copilot.rtly-with-rtl nav *, .rtly-copilot.rtly-with-rtl aside *, .rtly-copilot.rtly-with-rtl [role="navigation"] *, .rtly-copilot.rtly-with-rtl [role="menu"] *, .rtly-copilot.rtly-with-rtl header *, .rtly-copilot.rtly-with-rtl [role="banner"] * {
-  direction: unset !important;
-  text-align: unset !important;
-}
 
 .rtly-copilot.rtly-with-rtl [data-content="user-message"] {
   direction: rtl !important;
 }
-.rtly-copilot [data-content="user-message"] {
-  flex-direction: row;
-}
+
 .rtly-copilot.rtly-with-rtl div[data-content="ai-message"] {
   direction: rtl;
 }
@@ -31,7 +22,7 @@
   text-align: center;
 }
 
-.rtly-copilot.rtly-with-font code, .rtly-copilot.rtly-with-font kbd, .rtly-copilot.rtly-with-font samp, .rtly-copilot.rtly-with-font pre {
+.rtly-copilot.rtly-with-font [style*="IranYekan"] code, .rtly-copilot.rtly-with-font [style*="IranYekan"] kbd, .rtly-copilot.rtly-with-font [style*="IranYekan"] samp, .rtly-copilot.rtly-with-font [style*="IranYekan"] pre {
   font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
     Liberation Mono, monospace, var(--rtly-font-family) !important;
 }

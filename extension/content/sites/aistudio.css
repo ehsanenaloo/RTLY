@@ -1,13 +1,7 @@
 /* === Google AI Studio === */
 /* AI Studio */
-.rtly-aistudio.rtly-with-font, .rtly-aistudio.rtly-with-font p, .rtly-aistudio.rtly-with-font h1, .rtly-aistudio.rtly-with-font h2, .rtly-aistudio.rtly-with-font h3, .rtly-aistudio.rtly-with-font h4, .rtly-aistudio.rtly-with-font h5, .rtly-aistudio.rtly-with-font h6, .rtly-aistudio.rtly-with-font div, .rtly-aistudio.rtly-with-font li, .rtly-aistudio.rtly-with-font a, .rtly-aistudio.rtly-with-font ul, .rtly-aistudio.rtly-with-font ol, .rtly-aistudio.rtly-with-font table, .rtly-aistudio.rtly-with-font th, .rtly-aistudio.rtly-with-font td, .rtly-aistudio.rtly-with-font tr, .rtly-aistudio.rtly-with-font label, .rtly-aistudio.rtly-with-font input, .rtly-aistudio.rtly-with-font textarea, .rtly-aistudio.rtly-with-font button {
-  font-family: var(--rtly-font-family) !important;
-}
-.rtly-aistudio.rtly-with-font span {
-  font-family: var(--rtly-font-family);
-}
 
-.rtly-aistudio.rtly-with-font ms-code-block, .rtly-aistudio.rtly-with-font code, .rtly-aistudio.rtly-with-font kbd, .rtly-aistudio.rtly-with-font samp, .rtly-aistudio.rtly-with-font pre, .rtly-aistudio.rtly-with-font .inline-code {
+.rtly-aistudio.rtly-with-font [style*="IranYekan"] ms-code-block, .rtly-aistudio.rtly-with-font [style*="IranYekan"] code, .rtly-aistudio.rtly-with-font [style*="IranYekan"] kbd, .rtly-aistudio.rtly-with-font [style*="IranYekan"] samp, .rtly-aistudio.rtly-with-font [style*="IranYekan"] pre, .rtly-aistudio.rtly-with-font [style*="IranYekan"] .inline-code {
   font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
     Liberation Mono, monospace, var(--rtly-font-family) !important;
 }
@@ -15,15 +9,11 @@
   direction: ltr;
 }
 
-.rtly-aistudio table {
+.rtly-aistudio .chat-turn-container table {
   text-align: center !important;
 }
 
 .rtly-aistudio.rtly-with-rtl .ms-text-chunk {
-  direction: rtl;
-}
-
-.rtly-aistudio.rtly-with-rtl .chat-view-container.ng-star-inserted {
   direction: rtl;
 }
 
@@ -35,12 +25,7 @@
 .rtly-aistudio.rtly-with-rtl .chat-turn-container {
   direction: rtl !important;
 }
-.rtly-aistudio .user-prompt-container {
-  align-self: start !important;
-}
+
 /* Protect menus and navigation from direction changes - AI Studio */
-.rtly-aistudio.rtly-with-rtl nav, .rtly-aistudio.rtly-with-rtl aside, .rtly-aistudio.rtly-with-rtl [role="navigation"], .rtly-aistudio.rtly-with-rtl [role="menu"], .rtly-aistudio.rtly-with-rtl header, .rtly-aistudio.rtly-with-rtl [role="banner"], .rtly-aistudio.rtly-with-rtl nav *, .rtly-aistudio.rtly-with-rtl aside *, .rtly-aistudio.rtly-with-rtl [role="navigation"] *, .rtly-aistudio.rtly-with-rtl [role="menu"] *, .rtly-aistudio.rtly-with-rtl header *, .rtly-aistudio.rtly-with-rtl [role="banner"] * {
-  direction: unset !important;
-  text-align: unset !important;
-}
+
 /* End AI Studio */

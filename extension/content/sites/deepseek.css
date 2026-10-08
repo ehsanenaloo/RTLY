@@ -1,18 +1,13 @@
 /* === DeepSeek === */
 /* DeepSeek */
-.rtly-deepseek.rtly-with-font {
-  font-family: var(--rtly-font-family) !important;
-}
+
 /* Direction will be set dynamically by JavaScript based on content analysis */
 .rtly-deepseek.rtly-with-rtl [dir="rtl"]:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]), .rtly-deepseek.rtly-with-rtl [dir="rtl"] *:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]):not(nav *):not(aside *):not([role="navigation"] *):not([role="menu"] *):not(header *):not([role="banner"] *):not(code):not(kbd):not(samp):not(pre):not(var):not(tt):not(code *):not(pre *):not(kbd *):not(samp *) {
   direction: rtl !important;
   text-align: right !important;
 }
 /* Protect menus and navigation from direction changes - DeepSeek */
-.rtly-deepseek.rtly-with-rtl nav, .rtly-deepseek.rtly-with-rtl aside, .rtly-deepseek.rtly-with-rtl [role="navigation"], .rtly-deepseek.rtly-with-rtl [role="menu"], .rtly-deepseek.rtly-with-rtl header, .rtly-deepseek.rtly-with-rtl [role="banner"], .rtly-deepseek.rtly-with-rtl nav *, .rtly-deepseek.rtly-with-rtl aside *, .rtly-deepseek.rtly-with-rtl [role="navigation"] *, .rtly-deepseek.rtly-with-rtl [role="menu"] *, .rtly-deepseek.rtly-with-rtl header *, .rtly-deepseek.rtly-with-rtl [role="banner"] * {
-  direction: unset !important;
-  text-align: unset !important;
-}
+
 .rtly-deepseek.rtly-with-rtl textarea[dir="rtl"], .rtly-deepseek.rtly-with-rtl [contenteditable="true"][dir="rtl"] {
   direction: rtl !important;
   text-align: right !important;
@@ -22,10 +17,8 @@
   direction: rtl !important;
   text-align: right !important;
 }
-.rtly-deepseek.rtly-with-font p, .rtly-deepseek.rtly-with-font h1, .rtly-deepseek.rtly-with-font h2, .rtly-deepseek.rtly-with-font h3, .rtly-deepseek.rtly-with-font h4, .rtly-deepseek.rtly-with-font h5, .rtly-deepseek.rtly-with-font h6, .rtly-deepseek.rtly-with-font li, .rtly-deepseek.rtly-with-font a, .rtly-deepseek.rtly-with-font ul, .rtly-deepseek.rtly-with-font ol, .rtly-deepseek.rtly-with-font span, .rtly-deepseek.rtly-with-font div, .rtly-deepseek.rtly-with-font article, .rtly-deepseek.rtly-with-font section {
-  font-family: var(--rtly-font-family) !important;
-}
-.rtly-deepseek.rtly-with-font code, .rtly-deepseek.rtly-with-font kbd, .rtly-deepseek.rtly-with-font samp, .rtly-deepseek.rtly-with-font pre {
+
+.rtly-deepseek.rtly-with-font [style*="IranYekan"] code, .rtly-deepseek.rtly-with-font [style*="IranYekan"] kbd, .rtly-deepseek.rtly-with-font [style*="IranYekan"] samp, .rtly-deepseek.rtly-with-font [style*="IranYekan"] pre {
   font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
     Liberation Mono, monospace, var(--rtly-font-family) !important;
 }
@@ -34,24 +27,11 @@
 }
 /* DeepSeek: Move sidebar to left - full vertical menu */
 /* Force layout wrappers (sidebar+main) to LTR - DeepSeek uses divs not aside/nav */
-.rtly-deepseek.rtly-with-rtl body > div, .rtly-deepseek.rtly-with-rtl body > div > div, .rtly-deepseek.rtly-with-rtl body > div > div > div, .rtly-deepseek.rtly-with-rtl body > div > div > div > div {
-  direction: ltr !important;
-}
+
 /* Force sidebar (aside/nav) to appear first (left) via flex order */
-.rtly-deepseek aside, .rtly-deepseek nav[class*="sidebar" i], .rtly-deepseek nav[class*="Sidebar" i], .rtly-deepseek [class*="sidebar" i]:not(main):not([role="main"]), .rtly-deepseek [class*="Sidebar" i]:not(main):not([role="main"]) {
-  order: -1 !important;
-}
+
 /* If sidebar uses position:fixed, switch from right to left */
-.rtly-deepseek body > div > aside, .rtly-deepseek body > div > nav, .rtly-deepseek body > div > div > aside, .rtly-deepseek body > div > div > nav, .rtly-deepseek body > div > [class*="sidebar" i], .rtly-deepseek body > div > div > [class*="sidebar" i] {
-  right: auto !important;
-  left: 0 !important;
-}
+
 /* Ensure parent uses flex so order works */
-.rtly-deepseek.rtly-with-rtl body > div:has(aside), .rtly-deepseek.rtly-with-rtl body > div:has(nav), .rtly-deepseek.rtly-with-rtl body > div > div:has(aside), .rtly-deepseek.rtly-with-rtl body > div > div:has(nav) {
-  direction: ltr !important;
-}
-.rtly-deepseek body > div:has(aside), .rtly-deepseek body > div:has(nav), .rtly-deepseek body > div > div:has(aside), .rtly-deepseek body > div > div:has(nav) {
-  display: flex !important;
-  flex-direction: row !important;
-}
+
 /* End DeepSeek */

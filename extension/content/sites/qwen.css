@@ -1,31 +1,20 @@
 /* === Qwen === */
 /* Qwen - default plugin font */
-.rtly-qwen.rtly-with-font {
-  font-family: var(--rtly-font-family) !important;
-}
-.rtly-qwen.rtly-with-font input, .rtly-qwen.rtly-with-font textarea, .rtly-qwen.rtly-with-font [contenteditable="true"], .rtly-qwen.rtly-with-font [placeholder] {
-  font-family: var(--rtly-font-family) !important;
-}
+
 /* Direction will be set dynamically by JavaScript based on content analysis */
 .rtly-qwen.rtly-with-rtl [dir="rtl"]:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]), .rtly-qwen.rtly-with-rtl [dir="rtl"] *:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]):not(nav *):not(aside *):not([role="navigation"] *):not([role="menu"] *):not(header *):not([role="banner"] *):not(code):not(kbd):not(samp):not(pre):not(var):not(tt):not(code *):not(pre *):not(kbd *):not(samp *) {
   direction: rtl !important;
   text-align: right !important;
 }
 /* Protect menus and navigation from direction changes - Qwen */
-.rtly-qwen.rtly-with-rtl nav, .rtly-qwen.rtly-with-rtl aside, .rtly-qwen.rtly-with-rtl [role="navigation"], .rtly-qwen.rtly-with-rtl [role="menu"], .rtly-qwen.rtly-with-rtl header, .rtly-qwen.rtly-with-rtl [role="banner"], .rtly-qwen.rtly-with-rtl nav *, .rtly-qwen.rtly-with-rtl aside *, .rtly-qwen.rtly-with-rtl [role="navigation"] *, .rtly-qwen.rtly-with-rtl [role="menu"] *, .rtly-qwen.rtly-with-rtl header *, .rtly-qwen.rtly-with-rtl [role="banner"] * {
-  direction: unset !important;
-  text-align: unset !important;
-}
-.rtly-qwen.rtly-with-font p, .rtly-qwen.rtly-with-font h1, .rtly-qwen.rtly-with-font h2, .rtly-qwen.rtly-with-font h3, .rtly-qwen.rtly-with-font h4, .rtly-qwen.rtly-with-font h5, .rtly-qwen.rtly-with-font h6, .rtly-qwen.rtly-with-font li, .rtly-qwen.rtly-with-font a, .rtly-qwen.rtly-with-font ul, .rtly-qwen.rtly-with-font ol, .rtly-qwen.rtly-with-font span, .rtly-qwen.rtly-with-font div, .rtly-qwen.rtly-with-font article, .rtly-qwen.rtly-with-font section, .rtly-qwen.rtly-with-font label, .rtly-qwen.rtly-with-font button {
-  font-family: var(--rtly-font-family) !important;
-}
-.rtly-qwen.rtly-with-rtl table {
+
+.rtly-qwen.rtly-with-rtl :is(.markdown, .message, .chat-message, .message-item, article, [class*="message" i]) table {
   direction: rtl !important;
 }
-.rtly-qwen table th, .rtly-qwen table td {
+.rtly-qwen :is(.markdown, .message, .chat-message, .message-item, article, [class*="message" i]) :is(th, td) {
   text-align: center !important;
 }
-.rtly-qwen.rtly-with-font code, .rtly-qwen.rtly-with-font kbd, .rtly-qwen.rtly-with-font samp, .rtly-qwen.rtly-with-font pre {
+.rtly-qwen.rtly-with-font [style*="IranYekan"] code, .rtly-qwen.rtly-with-font [style*="IranYekan"] kbd, .rtly-qwen.rtly-with-font [style*="IranYekan"] samp, .rtly-qwen.rtly-with-font [style*="IranYekan"] pre {
   font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
     Liberation Mono, monospace, var(--rtly-font-family) !important;
 }

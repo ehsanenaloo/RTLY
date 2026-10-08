@@ -6,6 +6,18 @@ The format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/
 
 ## [Unreleased]
 
+### Fixed
+
+- RTLY no longer changes the layout of the sites it supports. It now sets only text direction and font on message and composer text. Sidebars, headers, navigation, buttons, icons and the composer frame are left exactly as the site draws them. Earlier versions applied the font page-wide and forced direction, alignment, padding and flex rules onto site chrome. A new browser test compares every non-message element with and without the extension, in all three modes.
+- A site you switched off now gets nothing from RTLY: no injected style, no variables, no classes, no attributes. Switching a site off in another tab or from the popup now stops RTLY in open tabs without a reload.
+- Latin digits in English text (versions, dates, code) are no longer drawn as Persian digits. Persian text keeps Persian digits.
+- Long chats use less memory: RTLY stores a short fingerprint of each message instead of a copy of its text.
+- Two quick toggles of different sites (popup and shortcut) can no longer overwrite each other.
+
+### Changed
+
+- Some site CSS rules that moved or realigned site elements were removed. If RTL messages look wrong on a site, report it with a screenshot.
+
 ## [2.0.0] - 2026-10-08
 
 RTLY 2.0.0 is the first open-source release. It has a new popup and settings page, a cleaner permission list, fixes for pages that were restored from the browser's back/forward cache and for single-page navigation, two more supported sites, and an experimental Firefox build. The project was also reorganized: the extension now lives in `extension/`, with tests, build scripts and a user guide next to it.

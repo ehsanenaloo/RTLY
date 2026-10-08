@@ -160,6 +160,17 @@ chrome.commands.onCommand.addListener((command, tab) => {
 });
 
 // ── Messages from popup/options ──────────────────────────────────────
+// The service worker is the single writer of siteSettings. Every toggle is a get -> modify -> set
+// round trip, and two quick toggles (popup + options, or two clicks) would otherwise interleave:
+// both read the same snapshot and the second set drops the first change. Run them one at a time.
+let toggleQueue = Promise.resolve();
+function enqueueToggle(task) {
+  const run = toggleQueue.then(() => new Promise((resolve) => {
+    try { task(resolve); } catch (_) { resolve(); }
+  }));
+  toggleQueue = run.catch(() => {});
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // Defense-in-depth: only accept messages from our own extension's pages.
   // Strict equality — previously `sender.id && sender.id !== ...` allowed
@@ -180,29 +191,36 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       return true;
     }
 
-    chrome.storage.local.get(["siteSettings"], (result) => {
-      if (chrome.runtime.lastError) {
-        console.error("RTLY: storage get error", chrome.runtime.lastError);
-        sendResponse({ success: false, error: chrome.runtime.lastError.message });
-        return;
-      }
-      try {
-        const settings = canonicalizeSettings(result.siteSettings || {});
-        applyToggleToSettings(settings, site, status);
+    enqueueToggle((done) => {
+      chrome.storage.local.get(["siteSettings"], (result) => {
+        if (chrome.runtime.lastError) {
+          console.error("RTLY: storage get error", chrome.runtime.lastError);
+          sendResponse({ success: false, error: chrome.runtime.lastError.message });
+          done();
+          return;
+        }
+        try {
+          const settings = canonicalizeSettings(result.siteSettings || {});
+          applyToggleToSettings(settings, site, status);
 
-        chrome.storage.local.set({ siteSettings: settings }, () => {
-          if (chrome.runtime.lastError) {
-            console.error("RTLY: storage set error", chrome.runtime.lastError);
-            sendResponse({ success: false, error: chrome.runtime.lastError.message });
-            return;
-          }
+          chrome.storage.local.set({ siteSettings: settings }, () => {
+            // The write is complete: let the next queued toggle read the fresh map. The tab
+            // reload below does not touch storage, so it does not need to hold the queue.
+            done();
+            if (chrome.runtime.lastError) {
+              console.error("RTLY: storage set error", chrome.runtime.lastError);
+              sendResponse({ success: false, error: chrome.runtime.lastError.message });
+              return;
+            }
 
-          reloadSiteTabs(site, null, (count) => sendResponse({ success: true, reloadedTabs: count }));
-        });
-      } catch (error) {
-        console.error("RTLY: error updating settings", error);
-        sendResponse({ success: false, error: error.message });
-      }
+            reloadSiteTabs(site, null, (count) => sendResponse({ success: true, reloadedTabs: count }));
+          });
+        } catch (error) {
+          console.error("RTLY: error updating settings", error);
+          sendResponse({ success: false, error: error.message });
+          done();
+        }
+      });
     });
   } catch (error) {
     console.error("RTLY: error handling message", error);

@@ -135,3 +135,24 @@ describe('toggleSiteStatus message handler', () => {
 });
 
 void chrome;
+
+describe('toggleSiteStatus is a serialised get-modify-set (single writer)', () => {
+  test('two overlapping toggles with a slow storage both survive', async () => {
+    const env = loadServiceWorker();
+    // Make storage genuinely asynchronous: get reads the snapshot at call time, delivers later;
+    // set lands later. Without serialisation the second toggle would overwrite the first.
+    const lat = () => new Promise((r) => setTimeout(r, 5));
+    env.chrome.storage.local.get = (_k, cb) => {
+      const snap = structuredClone(env.store.siteSettings);
+      lat().then(() => cb({ siteSettings: snap }));
+    };
+    env.chrome.storage.local.set = (o, cb) => { lat().then(() => { Object.assign(env.store, o); cb && cb(); }); };
+    const handler = env.listeners.onMessage[0];
+    const send = (site, status) => new Promise((resolve) => handler({ action: 'toggleSiteStatus', site, status }, { id: 'self-id' }, resolve));
+    const [a, b] = await Promise.all([send('claude.ai', false), send('gemini.google.com', false)]);
+    assert.equal(a.success, true);
+    assert.equal(b.success, true);
+    assert.equal(env.store.siteSettings['claude.ai'], false);
+    assert.equal(env.store.siteSettings['gemini.google.com'], false);
+  });
+});

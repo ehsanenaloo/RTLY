@@ -1,20 +1,6 @@
 /* === ChatGPT === */
 /* ChatGPT */
-:root {
-  --sidebar-mask: linear-gradient(
-    -90deg,
-    #000,
-    #000 84%,
-    transparent 89%,
-    transparent
-  ) !important;
-}
-.rtly-chatgpt.rtly-with-font {
-  font-family: var(--rtly-font-family);
-}
-.rtly-chatgpt .rtl\:items-start {
-  align-items: start;
-}
+
 .rtly-chatgpt.rtly-with-font .katex {
   font-family: var(--rtly-font-family);
 }
@@ -24,13 +10,9 @@
 .rtly-chatgpt .katex {
   display: inline-block;
 }
-.rtly-chatgpt.rtly-with-font code {
+.rtly-chatgpt.rtly-with-font [style*="IranYekan"] code {
   font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
     Liberation Mono, monospace, var(--rtly-font-family) !important;
-}
-
-.rtly-chatgpt.rtly-with-rtl .relative.grow.overflow-hidden.whitespace-nowrap {
-  text-align: right;
 }
 
 /* Direction will be set dynamically by JavaScript based on content analysis */
@@ -38,14 +20,6 @@
   direction: rtl;
 } */
 
-.rtly-chatgpt .ltr\:right-0:where([dir="ltr"], [dir="ltr"] *) {
-  left: 0;
-  right: unset;
-}
-
-.rtly-chatgpt .pr-2.rtl\:left-0 {
-  padding-left: 5px !important;
-}
 .rtly-chatgpt.rtly-with-rtl article table {
   direction: rtl !important;
 }
@@ -83,13 +57,7 @@
   text-align: center;
 }
 /* Protect menus and navigation from direction changes - ChatGPT */
-.rtly-chatgpt.rtly-with-font nav, .rtly-chatgpt.rtly-with-font aside, .rtly-chatgpt.rtly-with-font [role="navigation"], .rtly-chatgpt.rtly-with-font [role="menu"], .rtly-chatgpt.rtly-with-font header, .rtly-chatgpt.rtly-with-font [role="banner"], .rtly-chatgpt.rtly-with-font nav *, .rtly-chatgpt.rtly-with-font aside *, .rtly-chatgpt.rtly-with-font [role="navigation"] *, .rtly-chatgpt.rtly-with-font [role="menu"] *, .rtly-chatgpt.rtly-with-font header *, .rtly-chatgpt.rtly-with-font [role="banner"] * {
-  font-family: var(--rtly-font-family) !important;
-}
-.rtly-chatgpt.rtly-with-rtl nav, .rtly-chatgpt.rtly-with-rtl aside, .rtly-chatgpt.rtly-with-rtl [role="navigation"], .rtly-chatgpt.rtly-with-rtl [role="menu"], .rtly-chatgpt.rtly-with-rtl header, .rtly-chatgpt.rtly-with-rtl [role="banner"], .rtly-chatgpt.rtly-with-rtl nav *, .rtly-chatgpt.rtly-with-rtl aside *, .rtly-chatgpt.rtly-with-rtl [role="navigation"] *, .rtly-chatgpt.rtly-with-rtl [role="menu"] *, .rtly-chatgpt.rtly-with-rtl header *, .rtly-chatgpt.rtly-with-rtl [role="banner"] * {
-  direction: unset !important;
-  text-align: unset !important;
-}
+
 /* v1.8.18: ChatGPT code-block / styled-content containers ship with a
    floating Copy button positioned at the inline-end corner. ChatGPT's own
    CSS uses logical positioning for the button (so in RTL it correctly

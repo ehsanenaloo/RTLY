@@ -65,13 +65,19 @@ const EXT_ID = sw.url().split('/')[2];
 
 // Serve fixtures for supported hosts; abort every other http(s) request (hermetic, no network).
 const FIXTURES = new Map(); // host -> html
-await ctx.route(/^https?:\/\//, (route) => {
+const installRoute = (c) => c.route(/^https?:\/\//, (route) => {
   const u = new URL(route.request().url());
   if (FIXTURES.has(u.hostname) && route.request().resourceType() === 'document') {
     return route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: FIXTURES.get(u.hostname) });
   }
   return route.abort();
 });
+await installRoute(ctx);
+
+// A second, extension-free browser: the ground truth for "the page without RTLY".
+const plainBrowser = await chromium.launch({ channel: 'chromium', headless: !process.env.RTLY_HEADED });
+const plainCtx = await plainBrowser.newContext();
+await installRoute(plainCtx);
 
 /** Run fn inside the extension context (service worker, falling back to an extension page). */
 async function extEval(fn, arg) {
@@ -202,15 +208,42 @@ const SITE_DEFS = {
 };
 
 function pageHtml(def, thread = '') {
+  // Site chrome. Everything outside #thread and the composer is chrome and must never be touched by RTLY.
+  // The "zoo" deliberately uses the tags / class names the per-site stylesheets target (a, span, button,
+  // table, h*, .gds-label-m-alt, .font-sans, ...) so a site rule that leaks onto chrome shows up.
+  const zoo = '<div id="zoo">' +
+    '<div id="zoo-label" class="gds-label-m-alt conversation-title font-sans font-display rtl:items-start">Previous 7 days</div>' +
+    '<h3 id="zoo-h">Today</h3><ul id="zoo-ul"><li id="zoo-li"><a id="zoo-a" href="/c/2">Chat 2025 notes</a> <span id="zoo-span">v2.1.0</span></li></ul>' +
+    '<table id="zoo-table"><tr><th>Plan</th><td id="zoo-td">Pro 5x</td></tr></table>' +
+    '<label id="zoo-lbl">Search <input id="zoo-input" type="text" value="abc 123"></label>' +
+    '<div id="zoo-center" style="text-align:center;width:200px">Centered 7 days</div><div id="zoo-ltr" dir="ltr" style="text-align:center">Native ltr 3</div>' +
+    '<div role="menu" id="zoo-menu"><div role="menuitem" id="zoo-mi" style="text-align:right">Item 5</div></div>' +
+    '<p id="zoo-p">Free plan</p><code id="zoo-code" class="font-mono">npm i 1.2.3</code></div>';
   const side = '<nav id="sidebar" aria-label="Sidebar"><a href="/new" id="nav-new">New chat</a>' +
     '<a href="/c/1" id="nav-hist">Previous conversation about React</a>' +
     `<button id="nav-btn" aria-label="Open menu">${SVG}</button>` +
-    '<span class="material-symbols-outlined" id="nav-ligature">menu</span></nav>';
+    `<span class="material-symbols-outlined" id="nav-ligature">menu</span>${zoo}</nav>`;
   const sidebar = def.sidebarWrap ? def.sidebarWrap(side) : side;
+  const header = '<header id="topbar"><h1 id="hdr-title">Project Alpha 2025</h1><button id="hdr-btn">Share 3</button>' +
+    `<div role="toolbar" id="toolbar"><button id="tb-1">Bold</button><button id="tb-2" aria-label="More">${SVG}</button></div></header>`;
+  const banner = '<div id="banner"><span id="banner-span">Upgrade plan 50% off</span><button id="banner-btn">Upgrade</button></div>';
+  const footer = '<div id="foot"><textarea id="foot-ta" rows="2">Feedback 123</textarea><input id="foot-in" type="search" value="find 9"></div>';
+  const composerRow = `<form id="composer-form">${def.input}<button type="button" id="send-btn" aria-label="Send">${SVG}</button></form>`;
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${def.host} fixture</title>
-<style>body{font-family:Arial,sans-serif;margin:0} #thread>*{margin:8px}</style></head>
+<style>
+body{font-family:Arial,sans-serif;margin:0;display:flex}
+#sidebar{width:240px;flex:none;padding:8px;box-sizing:border-box}
+#app{flex:1;min-width:0}
+#topbar{display:flex;gap:8px;align-items:center;padding:4px 8px}
+#thread{height:420px;overflow:auto}
+#thread>*{margin:8px}
+#composer-form{display:flex;gap:8px;align-items:flex-start;padding:8px}
+/* what real sites do: icon fonts are declared on the icon class, so they never inherit the message font */
+.material-symbols-outlined{font-family:"Material Symbols Outlined",Arial,sans-serif}
+[data-fx="composer"]{flex:1;height:48px;overflow:auto;box-sizing:border-box;border:1px solid #ccc;resize:none}
+</style></head>
 <body>${sidebar}
-<div id="app"><main><div id="thread">${thread}</div><form id="composer-form">${def.input}</form></main></div>
+<div id="app">${header}${banner}<main><div id="thread">${thread}</div>${composerRow}</main>${footer}</div>
 </body></html>`;
 }
 
@@ -440,6 +473,269 @@ for (const key of ['chatgpt.com', 'mistral.ai'].filter(selected)) {
   });
 }
 
+// ---- 3b. LAYOUT INVARIANCE ---------------------------------------------------------------
+// HARD RULE: RTLY may only set direction/alignment and font on message / composer text (and apply the
+// user's font scale). It must never move, resize or restyle site chrome. For every site fixture we load the
+// page WITHOUT the extension (plainCtx, ground truth) and WITH it in each mode, then compare:
+//   * getBoundingClientRect of every element outside #thread descendants / the composer (tolerance 0.5px)
+//   * dir / style / class attributes of those elements (pure chrome: every attribute)
+// #thread has a fixed height and the composer a fixed height in the fixture, so message text may reflow
+// inside them without legitimately moving anything else.
+const RECT_TOL = 0.5;
+const COMPOSER_TEXT = 'سلام دنیا، این یک آزمایش است';
+
+async function openIn(c, key, { thread = BASE_THREAD } = {}) {
+  const def = SITE_DEFS[key];
+  FIXTURES.set(def.host, pageHtml(def, msgHtml(def, thread)));
+  const page = await c.newPage();
+  await page.goto(`https://${def.host}/`, { waitUntil: 'load' });
+  return page;
+}
+async function fillComposer(page) {
+  await page.evaluate((t) => {
+    const c = document.querySelector('[data-fx="composer"]');
+    if (c.tagName === 'TEXTAREA') { c.value = t; c.dispatchEvent(new Event('input', { bubbles: true })); }
+    else c.innerHTML = '<p>' + t + '</p>';
+  }, COMPOSER_TEXT);
+}
+const layoutSnapshot = (page) => page.evaluate(() => {
+  const thread = document.getElementById('thread');
+  const composer = document.querySelector('[data-fx="composer"]');
+  const kindOf = (el) => {
+    if ((thread.contains(el) && el !== thread) || composer.contains(el)) return 'C';
+    if (el.contains(thread) || el.contains(composer)) return 'A';
+    return 'X'; // pure chrome
+  };
+  const rec = (el, i) => {
+    const r = el.getBoundingClientRect();
+    const attrs = {};
+    for (const a of el.attributes) attrs[a.name] = a.value;
+    return {
+      i, tag: el.tagName, id: el.id, kind: el === document.documentElement || el === document.body ? 'R' : kindOf(el),
+      textEntry: el.matches('textarea, input[type="text"], input[type="search"], input:not([type]), [contenteditable]'),
+      icon: el.matches('[data-fx="iconbtn"], [data-fx="iconbtn"] *, [data-fx="ligature"]'),
+      attrs, rect: [r.x, r.y, r.width, r.height],
+    };
+  };
+  const all = [document.documentElement, document.body, ...document.querySelectorAll('body *')];
+  return all.map(rec);
+});
+function diffLayout(base, cur) {
+  const problems = [];
+  if (base.length !== cur.length) return [`element count differs: ${base.length} vs ${cur.length}`];
+  const norm = (attrs, root) => {
+    const o = { ...attrs };
+    if (root) {
+      delete o['data-rtly-mode'];
+      if (o.class !== undefined) o.class = o.class.split(/\s+/).filter((t) => t && !/^rtly-/.test(t)).join(' ');
+      if (o.style !== undefined) o.style = o.style.replace(/--rtly-[a-z-]+\s*:[^;]*;?/g, '').trim();
+      for (const k of Object.keys(o)) if (o[k] === '' && (k === 'class' || k === 'style')) delete o[k];
+    }
+    return o;
+  };
+  const label = (e) => `${e.tag.toLowerCase()}${e.id ? '#' + e.id : ''}[${e.i}]`;
+  const sameAttrs = (a, b, keys) => {
+    const out = [];
+    for (const k of keys ?? new Set([...Object.keys(a), ...Object.keys(b)])) if ((a[k] ?? null) !== (b[k] ?? null)) out.push(`${k}: ${JSON.stringify(a[k] ?? null)} -> ${JSON.stringify(b[k] ?? null)}`);
+    return out;
+  };
+  for (let i = 0; i < base.length; i++) {
+    const b = base[i], c = cur[i];
+    if (b.tag !== c.tag || b.id !== c.id) { problems.push(`DOM order differs at ${label(b)} vs ${label(c)}`); continue; }
+    if (b.kind === 'R') {
+      for (const d of sameAttrs(norm(b.attrs, true), norm(c.attrs, true))) problems.push(`${label(b)} attribute ${d}`);
+      continue;
+    }
+    if (b.kind === 'C' && !b.icon) continue; // message / composer text is allowed to change
+    // icon buttons inside messages only keep their size: their position follows the text above them
+    const dims = b.kind === 'C' ? [2, 3] : [0, 1, 2, 3];
+    for (const k of dims) {
+      if (Math.abs(b.rect[k] - c.rect[k]) > RECT_TOL) {
+        problems.push(`${label(b)} (${b.kind}) rect ${JSON.stringify(b.rect.map((n) => +n.toFixed(1)))} -> ${JSON.stringify(c.rect.map((n) => +n.toFixed(1)))}`);
+        break;
+      }
+    }
+    // ancestors and in-message icons may carry data-rtly-* bookkeeping; dir / style / class must never change
+    // Text-entry controls anywhere on the page (a feedback box, a rename field) may get dir="auto" so
+    // typed Persian renders RTL; that is text direction, not layout. Their style / class stay untouched.
+    const keys = b.textEntry ? ['style', 'class'] : (b.kind === 'A' || b.icon ? ['dir', 'style', 'class'] : undefined);
+    for (const d of sameAttrs(b.attrs, c.attrs, keys)) problems.push(`${label(b)} (${b.kind}) attribute ${d}`);
+    if (b.textEntry && b.attrs.dir === undefined && c.attrs.dir !== undefined && c.attrs.dir !== 'auto') problems.push(`${label(b)} text entry got dir="${c.attrs.dir}" (only "auto" is allowed)`);
+  }
+  return problems;
+}
+const fixtureMsgSettled = (page, mode) => until(page, `RTLY applied (${mode})`, (m) => {
+  const el = document.querySelector('[data-fx="msg"]');
+  return m === 'font_only' ? /IranYekan/.test(el.style.fontFamily) : el.getAttribute('dir') === 'rtl';
+}, mode);
+
+for (const key of Object.keys(SITE_DEFS).filter(selected)) {
+  await scenario(`${key}: LAYOUT INVARIANCE - chrome is identical to the page without RTLY (rtl_only, font_only, full)`, async () => {
+    await resetStorage();
+    const plain = await openIn(plainCtx, key);
+    await fillComposer(plain);
+    await plain.evaluate(() => new Promise((r) => setTimeout(r, 300)));
+    const base = await layoutSnapshot(plain);
+    await plain.close();
+    ok(base.length > 30, 'fixture too small');
+    const all = [];
+    for (const mode of ['rtl_only', 'font_only', 'full']) {
+      await setStorage({ siteModes: { [key]: mode } });
+      const page = await openIn(ctx, key);
+      await fixtureMsgSettled(page, mode);
+      await fillComposer(page);
+      await page.evaluate(() => new Promise((r) => setTimeout(r, 1500)));
+      const cur = await layoutSnapshot(page);
+      await page.close();
+      all.push(...diffLayout(base, cur).map((p) => `[${mode}] ${p}`));
+    }
+    await resetStorage();
+    if (all.length) throw new Error(`${all.length} chrome change(s):\n` + all.slice(0, 25).join('\n'));
+  });
+}
+
+// A disabled site must be indistinguishable from a page without the extension: same DOM, same computed
+// styles, no injected <style>, no :root vars, no classes. (Static CSS cannot be conditional, so every rule is
+// gated behind the classes RTLY only adds when active.)
+const domAndStyles = (page) => page.evaluate(() => {
+  const props = ['--rtly-bar-height', '--rtly-font-scale', '--rtly-font-family', '--sidebar-mask', '--font-fk-grotesk-neue'];
+  const styles = [];
+  for (const el of document.querySelectorAll('html, body, body *')) {
+    const cs = getComputedStyle(el);
+    const o = [];
+    for (let i = 0; i < cs.length; i++) { const p = cs[i]; o.push(p + ':' + cs.getPropertyValue(p)); }
+    for (const p of props) o.push(p + ':' + cs.getPropertyValue(p));
+    styles.push((el.id || el.tagName) + '|' + o.join(';'));
+  }
+  return { html: document.documentElement.outerHTML, styles, fonts: document.fonts.size };
+});
+for (const key of Object.keys(SITE_DEFS).filter(selected)) {
+  await scenario(`${key}: DISABLED site is indistinguishable from the page without the extension (DOM + computed styles)`, async () => {
+    await resetStorage();
+    const plain = await openIn(plainCtx, key);
+    await plain.evaluate(() => new Promise((r) => setTimeout(r, 1200)));
+    const base = await domAndStyles(plain);
+    await plain.close();
+    await setStorage({ siteSettings: { [key]: false }, fontScale: 120 });
+    const page = await openIn(ctx, key);
+    await page.evaluate(() => new Promise((r) => setTimeout(r, 1500)));
+    const cur = await domAndStyles(page);
+    await page.close();
+    await resetStorage();
+    const problems = [];
+    if (base.html !== cur.html) {
+      let i = 0; while (i < base.html.length && base.html[i] === cur.html[i]) i++;
+      problems.push(`outerHTML differs near: ...${JSON.stringify(base.html.slice(Math.max(0, i - 40), i + 80))} vs ${JSON.stringify(cur.html.slice(Math.max(0, i - 40), i + 80))}`);
+    }
+    if (base.fonts !== cur.fonts) problems.push(`document.fonts.size ${base.fonts} -> ${cur.fonts}`);
+    base.styles.forEach((s, i) => {
+      if (s === cur.styles[i]) return;
+      const a = s.split(';'), b = (cur.styles[i] || '').split(';');
+      const d = a.filter((x, j) => x !== b[j]).slice(0, 4).map((x) => `${x} -> ${b[a.indexOf(x)]}`);
+      if (problems.length < 12) problems.push(`computed style of ${s.split('|')[0]} differs: ${d.join(' ; ')}`);
+    });
+    if (problems.length) throw new Error(problems.join('\n'));
+  });
+}
+
+// ---- 3c. DIGITS: IranYekan draws ASCII digits as Persian digits ---------------------------
+// Persian (RTL) text keeps the Persian digit shapes; text RTLY resolved as LTR (English with a Persian
+// word, or an English island inside a Persian message) must draw ASCII digits with a Latin face.
+// Measured by the width of the "2025" run, compared with reference spans in known fonts.
+const DIGITS_THREAD = [
+  ['assistant', 'نسخه 2025 منتشر شد و همه چیز خوب است'],
+  ['assistant', 'Use React hooks 2025 times when you really need them سلام'],
+  ['assistant', 'این را اجرا کنید <span data-fx="island">version 2025 stable</span> و سپس ادامه دهید'],
+];
+for (const key of Object.keys(SITE_DEFS).filter(selected)) {
+  await scenario(`${key}: digits - Persian text keeps Persian digits, LTR text and LTR islands draw Latin digits`, async () => {
+    await resetStorage();
+    const page = await openIn(ctx, key, { thread: DIGITS_THREAD });
+    await until(page, 'all digit messages processed', () => {
+      const m = [...document.querySelectorAll('[data-fx="msg"]')];
+      return m.length === 3 && m.every((e) => e.getAttribute('dir')) && /IranYekan/.test(document.querySelector('[data-fx="island"]').style.fontFamily);
+    }, {});
+    const r = await page.evaluate(async () => {
+      const runWidth = (el) => {
+        const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        for (let n; (n = w.nextNode());) {
+          const i = n.data.indexOf('2025');
+          if (i < 0) continue;
+          const rg = document.createRange(); rg.setStart(n, i); rg.setEnd(n, i + 4);
+          return rg.getBoundingClientRect().width;
+        }
+        return null;
+      };
+      const ref = (family, size) => {
+        const s = document.createElement('span');
+        s.style.cssText = `position:absolute;visibility:hidden;white-space:nowrap;font-size:${size};font-family:${family}`;
+        s.textContent = '2025'; document.body.appendChild(s);
+        const w = s.getBoundingClientRect().width; s.remove(); return w;
+      };
+      await document.fonts.load('16px IranYekan', '2025');
+      await document.fonts.load('16px "RTLY Latin Digits"', '2025');
+      const msgs = [...document.querySelectorAll('[data-fx="msg"]')];
+      const size = (el) => getComputedStyle(el).fontSize;
+      const out = {};
+      for (const [name, el] of [['fa', msgs[0]], ['ltrMixed', msgs[1]], ['island', document.querySelector('[data-fx="island"]')]]) {
+        out[name] = { w: runWidth(el), persian: ref('IranYekan', size(el)), latin: ref('"RTLY Latin Digits", IranYekan', size(el)), dir: el.getAttribute('dir'), font: el.style.fontFamily };
+      }
+      return out;
+    });
+    const near = (a, b) => Math.abs(a - b) < 0.6;
+    ok(!near(r.fa.persian, r.fa.latin), 'no local Latin digit font on this machine: cannot tell the digit shapes apart (set up Arial/Segoe UI/Roboto)');
+    eq(r.fa.dir, 'rtl', 'Persian message dir');
+    ok(near(r.fa.w, r.fa.persian), `Persian text must keep Persian digits (run ${r.fa.w}, Persian ${r.fa.persian}, Latin ${r.fa.latin})`);
+    eq(r.ltrMixed.dir, 'ltr', 'English message with one Persian word is ltr');
+    ok(near(r.ltrMixed.w, r.ltrMixed.latin), `LTR text with a Persian word must draw Latin digits (run ${r.ltrMixed.w}, Persian ${r.ltrMixed.persian}, Latin ${r.ltrMixed.latin}; font "${r.ltrMixed.font}")`);
+    eq(r.island.dir, 'ltr', 'English island dir');
+    ok(near(r.island.w, r.island.latin), `LTR island inside Persian text must draw Latin digits (run ${r.island.w}, Persian ${r.island.persian}, Latin ${r.island.latin}; font "${r.island.font}")`);
+    await page.close();
+  });
+}
+
+// ---- 3d. Memory: bookkeeping attributes hold a fingerprint, never the text ------------------
+if (selected('chatgpt')) {
+  await scenario('chatgpt.com: data-rtly-tc / data-rtly-text store a short fingerprint, not the message text', async () => {
+    await resetStorage();
+    const long = 'سلام '.repeat(200);
+    const { page } = await openSite('chatgpt.com', { thread: [['user', long], ['assistant', EN]] });
+    await until(page, 'long message processed', () => document.querySelector('[data-fx="msg"]').getAttribute('dir') === 'rtl', {});
+    const vals = await page.evaluate(() => [...document.querySelectorAll('[data-rtly-tc], [data-rtly-text]')]
+      .flatMap((e) => [e.getAttribute('data-rtly-tc'), e.getAttribute('data-rtly-text')]).filter((v) => v !== null));
+    ok(vals.length > 0, 'expected processed elements');
+    ok(vals.every((v) => /^\d+\.[0-9a-z]+$/.test(v) && v.length < 20), `bookkeeping values must be fingerprints, got: ${vals.map((v) => v.slice(0, 30)).join(' | ')}`);
+    await page.close();
+  });
+}
+
+// ---- 3e. Live disable: toggling the site off from elsewhere stops RTLY and cleans up ---------
+for (const key of ['chatgpt.com', 'claude.ai', 'mistral.ai'].filter(selected)) {
+  await scenario(`${key}: switching the site off live (storage change) stops RTLY and removes its marks`, async () => {
+    await resetStorage();
+    const { page } = await openSite(key);
+    await settled(page);
+    await until(page, 'all messages processed', () => [...document.querySelectorAll('[data-fx="msg"]')].every((e) => e.getAttribute('dir')), {});
+    await setStorage({ siteSettings: { [key]: false } });
+    await until(page, 'RTLY removed everything', () => {
+      const msgs = [...document.querySelectorAll('[data-fx="msg"]')];
+      const html = document.documentElement.outerHTML;
+      return msgs.every((e) => !e.hasAttribute('dir') && !e.style.fontFamily && !e.style.direction)
+        && !document.getElementById('rtly-font-face')
+        && !/rtly-|data-rtly/.test(html.replace(/<style[\s\S]*?<\/style>/g, ''));
+    }, {});
+    // ...and stays off: new content is not touched.
+    await page.evaluate((html) => document.getElementById('thread').insertAdjacentHTML('beforeend', html), SITE_DEFS[key].assistant(FA));
+    await page.evaluate(() => new Promise((r) => setTimeout(r, 1200)));
+    const late = await page.evaluate(() => { const m = [...document.querySelectorAll('[data-fx="msg"]')].pop(); return { dir: m.getAttribute('dir'), font: m.style.fontFamily, cls: document.body.className + document.documentElement.className }; });
+    eq(late.dir, null, 'message added after the live disable must not get dir');
+    ok(!/IranYekan/.test(late.font), 'message added after the live disable must not get the font');
+    ok(!/rtly/.test(late.cls), 'rtly classes must not come back');
+    await page.close();
+    await resetStorage();
+  });
+}
+
 // legacy alias: chat.openai.com uses the same canonical storage key as chatgpt.com
 if (selected('chatgpt')) {
   await scenario('chat.openai.com: legacy host shares the canonical chatgpt.com setting', async () => {
@@ -524,6 +820,7 @@ if (selected('options') || !filters.length) {
 
 // =====================================================================================
 await ctx.close();
+await plainBrowser.close();
 try { fs.rmSync(profile, { recursive: true, force: true }); } catch {}
 const failed = results.filter((r) => !r.ok);
 console.log(`\n${results.length - failed.length} passed, ${failed.length} failed (${results.length} scenarios)`);
