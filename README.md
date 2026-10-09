@@ -81,11 +81,11 @@ Sites change their page markup without notice. When that happens RTLY can stop w
 | Browser | Status | How |
 | --- | --- | --- |
 | **Chrome** (111 or newer) | Tested | [Chrome Web Store](https://chromewebstore.google.com/detail/hhifipkafndnildgldggiohfkbpikmkd) |
-| **Microsoft Edge** | Same package as Chrome | Install from the Chrome Web Store page, or unzip the Chrome zip from [Releases](https://github.com/ehsanenaloo/RTLY/releases) and load it unpacked. |
+| **Microsoft Edge** | Tested package, same as Chrome | [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/rtly-rtl-font-tool-for-ai-chats/babdpiodfdcobcfpkolpbpfofihllooa), or unzip the Chrome zip from [Releases](https://github.com/ehsanenaloo/RTLY/releases) and load it unpacked. |
 | **Firefox 128+** (desktop) | Experimental | [Temporary install from the Releases page](#firefox-experimental) |
 | **Safari** | Not supported | |
 
-**Chrome and Edge:** open the store page, click **Add to Chrome**, then click the puzzle icon in the toolbar and pin RTLY. Tabs that were already open before you installed need a reload.
+**Chrome and Edge:** open the store page, click **Add to Chrome** (or **Get** in Edge), then click the puzzle icon in the toolbar and pin RTLY. Tabs that were already open before you installed need a reload.
 
 <a id="firefox-experimental"></a>
 

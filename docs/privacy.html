@@ -1,14 +1,54 @@
 <!doctype html>
-<html lang="en" dir="ltr">
+<html lang="en" data-root="./">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>This page moved</title>
-<meta name="robots" content="noindex">
-<link rel="canonical" href="https://enaloo.com/apps/rtly/docs/privacy-policy/">
-<meta http-equiv="refresh" content="0; url=https://enaloo.com/apps/rtly/docs/privacy-policy/">
+<title>Privacy policy | RTLY user guide</title>
+<meta name="description" content="The RTLY privacy policy: what the extension accesses, what it stores on your device, and what leaves your browser.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" type="image/svg+xml" href="./assets/logo.svg">
+<link rel="canonical" href="https://ehsanenaloo.github.io/RTLY/privacy.html">
+<link rel="alternate" hreflang="fa" href="https://ehsanenaloo.github.io/RTLY/fa/privacy.html">
+<link rel="stylesheet" href="./styles.css">
+<script>try{var t=localStorage.getItem("rtly-docs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script defer src="./app.js"></script>
 </head>
 <body>
-<p>This page moved to <a href="https://enaloo.com/apps/rtly/docs/privacy-policy/">https://enaloo.com/apps/rtly/docs/privacy-policy/</a>.</p>
+<a class="skip" href="#main">Skip to content</a><header class="site-header"><div class="shell header-inner"><a class="brand" href="./index.html"><img src="./assets/logo.svg" width="34" height="34" alt=""><span>RTLY<small>User guide</small></span></a><nav class="top-nav" aria-label="Primary"><a href="./index.html">Overview</a><a href="./guides/quick-start.html">Quick start</a><a href="./guides/index.html">All guides</a><a href="./guides/troubleshooting-faq.html">Help</a><a href="./fa/index.html" hreflang="fa" lang="fa">فارسی</a><a href="https://github.com/ehsanenaloo/RTLY" rel="noopener">GitHub &#8599;</a></nav><div class="header-tools"><span data-search-host></span><button type="button" class="icon-button" data-theme-toggle hidden>Theme</button></div></div></header>
+<main id="main">
+<div class="shell page-intro"><p class="breadcrumbs"><a href="index.html">Home</a> / Policy</p><h1>Privacy policy</h1><p class="lead">RTLY runs in your browser, has no server and collects nothing. This is the full policy.</p><p class="meta-line">Last updated 2026-10-08. The same text is <code>docs/PRIVACY.md</code> in the repository.</p></div>
+<div class="shell doc-layout has-toc">
+<aside class="sidebar"><details open><summary>Browse the guides</summary><nav aria-label="Guides"><a href="guides/index.html">All guides</a><a href="guides/privacy-and-data.html">Privacy, permissions and data</a><a href="privacy.html" aria-current="page">Privacy policy</a><a href="guides/limits.html">Limits and known problems</a></nav></details></aside>
+<article class="prose">
+<p>Last updated: 2026-10-08. This policy applies to RTLY 2.0.0 and later versions until it is updated.</p>
+<h2 id="p1">Summary<a class="anchor" href="#p1" aria-label="#">#</a></h2>
+<p>RTLY runs inside your browser. It has no server, no account and no analytics. It does not collect, store or send the content of your chats. It saves a few settings on your device.</p>
+<h2 id="p2">What RTLY can access<a class="anchor" href="#p2" aria-label="#">#</a></h2>
+<ul><li><strong>Pages of the supported AI chat sites.</strong> RTLY runs only on the sites listed in the <a href="https://ehsanenaloo.github.io/RTLY/guides/supported-sites.html" rel="noopener">user guide</a> (27 address patterns for 16 sites). On those pages it reads the text to decide whether each block is right-to-left, and it changes the page's text direction, alignment and font. The text is read in memory. RTLY does not save it, copy it, log it or send it anywhere.</li><li><strong>The address of the active tab, on those sites only.</strong> The extension uses it to know which site the shortcut or the right-click menu refers to, and whether to show the support heart on the toolbar icon.</li><li>RTLY cannot access other websites, your bookmarks, history, cookies, downloads or files, or the content of your other tabs.</li></ul>
+<h2 id="p3">What RTLY stores on your device<a class="anchor" href="#p3" aria-label="#">#</a></h2>
+<p>RTLY keeps these settings in your browser's extension storage (<code>chrome.storage.local</code>). RTLY does not use browser sync for them.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table><thead><tr><th scope="col">Setting</th><th scope="col">Meaning</th></tr></thead><tbody><tr><td>Site switches</td><td>Which sites you turned off</td></tr><tr><td>Site modes</td><td>Full, Font or RTL for each site you changed</td></tr><tr><td>Pinned sites</td><td>The sites you pinned in the popup</td></tr><tr><td>Font size</td><td>A number from 85 to 120</td></tr><tr><td>Theme and color palette</td><td>Your choice for RTLY's own pages</td></tr><tr><td>Interface language</td><td>The language you picked</td></tr><tr><td>Support reminder</td><td>The time of installation and the time the reminder was last shown, so it can wait about a month</td></tr></tbody></table></div>
+<p>Your chats, prompts and answers are never stored by RTLY. The settings stay until you remove the extension. Removing the extension removes them.</p>
+<h2 id="p4">What leaves your browser<a class="anchor" href="#p4" aria-label="#">#</a></h2>
+<p>Nothing. RTLY makes no network requests. There is no server to receive data, and the extension contains no analytics, advertising, tracking or remote code.</p>
+<p>The popup and settings page have links to the project's GitHub page, to the Buy me a coffee page and to the store's reviews page. They open in a new tab only when you click them. Once opened, those sites receive your request from your browser and follow their own privacy policies.</p>
+<h2 id="p5">Permissions<a class="anchor" href="#p5" aria-label="#">#</a></h2>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table><thead><tr><th scope="col">Permission</th><th scope="col">Why</th></tr></thead><tbody><tr><td>Access to the supported sites (<code>https</code> only)</td><td>To run on those pages, read their text to choose a direction, and set direction, alignment and font</td></tr><tr><td><code>storage</code></td><td>To save the settings above</td></tr><tr><td><code>contextMenus</code></td><td>To add the right-click item that turns RTLY on or off for a site</td></tr></tbody></table></div>
+<p>RTLY does not request the tabs, history, cookies, downloads, notifications or alarms permissions.</p>
+<h2 id="p6">The websites you use<a class="anchor" href="#p6" aria-label="#">#</a></h2>
+<p>An AI chat site can see its own page after RTLY has changed it, for example the <code>dir</code> and <code>data-rtly-*</code> attributes and the styles RTLY adds. RTLY makes its two font files available to the supported sites so that its stylesheet can load them. A site could use this to detect that RTLY is installed. RTLY does not change what a site sends or receives.</p>
+<h2 id="p7">Third parties<a class="anchor" href="#p7" aria-label="#">#</a></h2>
+<ul><li><strong>Browser stores</strong> (Chrome Web Store, Microsoft Edge Add-ons, Firefox Add-ons) keep their own install statistics. RTLY does not see them.</li><li><strong>GitHub</strong> hosts the source code, the releases and the user guide. GitHub may record visits to those pages, as any web host does. The extension itself never contacts GitHub.</li><li><strong>Buy me a coffee</strong> is contacted only if you click a support link.</li></ul>
+<h2 id="p8">Children<a class="anchor" href="#p8" aria-label="#">#</a></h2>
+<p>RTLY collects no personal information from anyone, including children.</p>
+<h2 id="p9">Changes to this policy<a class="anchor" href="#p9" aria-label="#">#</a></h2>
+<p>If RTLY changes what it accesses or stores, this page will be updated with a new date, and the change will be listed in the changelog.</p>
+<h2 id="p10">Contact<a class="anchor" href="#p10" aria-label="#">#</a></h2>
+<p>Ask a question or report a problem in an <a href="https://github.com/ehsanenaloo/RTLY/issues" rel="noopener">issue</a>. Report a security problem privately through <a href="https://github.com/ehsanenaloo/RTLY/security/advisories/new" rel="noopener">GitHub private vulnerability reporting</a>. RTLY is written and maintained by Ehsan Enaloo.</p>
+</article>
+<nav class="toc" aria-label="On this page"><p>On this page</p><ol><li><a href="#p1">Summary</a></li><li><a href="#p2">What RTLY can access</a></li><li><a href="#p3">What RTLY stores on your device</a></li><li><a href="#p4">What leaves your browser</a></li><li><a href="#p5">Permissions</a></li><li><a href="#p6">The websites you use</a></li><li><a href="#p7">Third parties</a></li><li><a href="#p8">Children</a></li><li><a href="#p9">Changes to this policy</a></li><li><a href="#p10">Contact</a></li></ol></nav>
+</div>
+</main>
+<footer class="footer"><div class="shell footer-inner"><p>RTLY user guide &middot; MIT licensed &middot; Maintained by Ehsan Enaloo</p><div><a href="./guides/troubleshooting-faq.html">Troubleshooting</a><a href="./guides/limits.html">Limits</a><a href="./privacy.html">Privacy</a><a href="https://github.com/ehsanenaloo/RTLY" rel="noopener">Source repository &#8599;</a></div></div></footer>
 </body>
 </html>

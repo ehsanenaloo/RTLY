@@ -54,7 +54,7 @@ ChatGPT، Claude، Gemini، Perplexity، Microsoft Copilot، Google AI Studio، 
 | مرورگر | وضعیت | روش |
 | --- | --- | --- |
 | **Chrome** (نسخهٔ ۱۱۱ به بالا) | آزموده‌شده | [Chrome Web Store](https://chromewebstore.google.com/detail/hhifipkafndnildgldggiohfkbpikmkd) |
-| **Microsoft Edge** | همان بستهٔ Chrome | از صفحهٔ Chrome Web Store، یا بستهٔ Chrome را از [Releases](https://github.com/ehsanenaloo/RTLY/releases) بگیرید و بسته‌نشده بارگذاری کنید |
+| **Microsoft Edge** | همان بستهٔ Chrome | از [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/rtly-rtl-font-tool-for-ai-chats/babdpiodfdcobcfpkolpbpfofihllooa)، یا بستهٔ Chrome را از [Releases](https://github.com/ehsanenaloo/RTLY/releases) بگیرید و بسته‌نشده بارگذاری کنید |
 | **Firefox ۱۲۸+** (رایانه) | آزمایشی | نصب موقت از صفحهٔ Releases |
 
 **Firefox (آزمایشی):** فایل `rtly-<version>-firefox.zip` را از [Releases](https://github.com/ehsanenaloo/RTLY/releases) بگیرید، `about:debugging#/runtime/this-firefox` را باز کنید و **Load Temporary Add-on** را بزنید. Firefox افزونهٔ موقت را با بسته شدن حذف می‌کند. بستهٔ Firefox از `web-ext lint` می‌گذرد، ولی آزمون‌های این مخزن آن را در Firefox واقعی اجرا نکرده‌اند.

@@ -54,7 +54,7 @@ ChatGPT وClaude وGemini وPerplexity وMicrosoft Copilot وGoogle AI Studio و
 | المتصفح | الحالة | الطريقة |
 | --- | --- | --- |
 | **Chrome** (الإصدار 111 فأحدث) | مُختبَر | [Chrome Web Store](https://chromewebstore.google.com/detail/hhifipkafndnildgldggiohfkbpikmkd) |
-| **Microsoft Edge** | حزمة Chrome نفسها | من صفحة Chrome Web Store، أو نزّل حزمة Chrome من [Releases](https://github.com/ehsanenaloo/RTLY/releases) وحمّلها غير مضغوطة |
+| **Microsoft Edge** | حزمة Chrome نفسها | من [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/rtly-rtl-font-tool-for-ai-chats/babdpiodfdcobcfpkolpbpfofihllooa)، أو نزّل حزمة Chrome من [Releases](https://github.com/ehsanenaloo/RTLY/releases) وحمّلها غير مضغوطة |
 | **Firefox 128+** (حاسوب) | تجريبي | تثبيت مؤقت من صفحة Releases |
 
 **Firefox (تجريبي):** نزّل `rtly-<version>-firefox.zip` من [Releases](https://github.com/ehsanenaloo/RTLY/releases)، وافتح `about:debugging#/runtime/this-firefox`، ثم اختر **Load Temporary Add-on**. يزيل Firefox الإضافات المؤقتة عند إغلاقه. تجتاز حزمة Firefox فحص `web-ext lint`، لكن اختبارات هذا المستودع لم تشغّلها في Firefox حقيقي.

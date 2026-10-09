@@ -1,14 +1,71 @@
 <!doctype html>
-<html lang="en" dir="ltr">
+<html lang="en" data-root="../">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>This page moved</title>
-<meta name="robots" content="noindex">
-<link rel="canonical" href="https://enaloo.com/apps/rtly/docs/modes-and-direction/">
-<meta http-equiv="refresh" content="0; url=https://enaloo.com/apps/rtly/docs/modes-and-direction/">
+<title>Modes and direction | RTLY user guide</title>
+<meta name="description" content="What the Full, Font and RTL modes do, exactly how RTLY decides a block is right-to-left, what it leaves alone, and what happens when you type or copy.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" type="image/svg+xml" href="../assets/logo.svg">
+<link rel="canonical" href="https://ehsanenaloo.github.io/RTLY/guides/modes-and-direction.html">
+
+<link rel="stylesheet" href="../styles.css">
+<script>try{var t=localStorage.getItem("rtly-docs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script defer src="../app.js"></script>
 </head>
 <body>
-<p>This page moved to <a href="https://enaloo.com/apps/rtly/docs/modes-and-direction/">https://enaloo.com/apps/rtly/docs/modes-and-direction/</a>.</p>
+<a class="skip" href="#main">Skip to content</a><header class="site-header"><div class="shell header-inner"><a class="brand" href="../index.html"><img src="../assets/logo.svg" width="34" height="34" alt=""><span>RTLY<small>User guide</small></span></a><nav class="top-nav" aria-label="Primary"><a href="../index.html">Overview</a><a href="../guides/quick-start.html">Quick start</a><a href="../guides/index.html">All guides</a><a href="../guides/troubleshooting-faq.html">Help</a><a href="../fa/index.html" hreflang="fa" lang="fa">فارسی</a><a href="https://github.com/ehsanenaloo/RTLY" rel="noopener">GitHub &#8599;</a></nav><div class="header-tools"><span data-search-host></span><button type="button" class="icon-button" data-theme-toggle hidden>Theme</button></div></div></header>
+<main id="main">
+<div class="shell page-intro"><p class="breadcrumbs"><a href="../index.html">Home</a> / <a href="index.html">Guides</a> / Using RTLY</p><h1>Modes and direction</h1><p class="lead">RTLY decides direction one block of text at a time, from the letters in it. This page explains the rule, the three modes and the things RTLY deliberately does not touch.</p><p class="meta-line">Checked against the source on 2026-10-08, RTLY 2.0.0.</p></div>
+<div class="shell doc-layout has-toc">
+<aside class="sidebar"><details open><summary>Browse the guides</summary><nav aria-label="Guides"><a href="index.html">All guides</a><p>Get started</p><a href="quick-start.html">Quick start</a><a href="installation.html">Installation</a><p>Using RTLY</p><a href="popup.html">The popup</a><a href="settings.html">The settings page</a><a href="modes-and-direction.html" aria-current="page">Modes and direction</a><a href="shortcut-and-menu.html">Shortcut and right-click menu</a><a href="supported-sites.html">Supported sites</a><a href="languages-and-appearance.html">Languages and appearance</a><p>Trust and support</p><a href="privacy-and-data.html">Privacy, permissions and data</a><a href="troubleshooting-faq.html">Troubleshooting and FAQ</a><a href="limits.html">Limits and known problems</a><a href="../privacy.html">Privacy policy</a></nav></details></aside>
+<article class="prose">
+
+<h2 id="modes">The three modes<a class="anchor" href="#modes" aria-label="Link to this section">#</a></h2>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Modes"><table><thead><tr><th scope="col">Mode</th><th scope="col">Direction and alignment</th><th scope="col">IranYekan font</th><th scope="col">Use it when</th></tr></thead><tbody><tr><td>Full (default)</td><td>Yes</td><td>Yes</td><td>You want both.</td></tr><tr><td>Font</td><td>No change</td><td>Yes</td><td>The site already handles direction, and you only want the font.</td></tr><tr><td>RTL</td><td>Yes</td><td>No</td><td>You like the site's own font and only want the direction fixed.</td></tr></tbody></table></div>
+<p>The mode is set per site, in the popup or on the settings page. A change applies to open tabs at once, without a reload. Switching a site <em>off</em> is separate: that stops RTLY on the site and reloads its tabs.</p>
+
+<h2 id="how-direction-is-chosen">How direction is chosen<a class="anchor" href="#how-direction-is-chosen" aria-label="Link to this section">#</a></h2>
+<p>For each block of text (a paragraph, a list item, a heading), RTLY counts letters:</p>
+<ul>
+  <li>Letters from right-to-left scripts count as right-to-left: Arabic (which includes Persian, Urdu and others), Hebrew, Syriac, Thaana, N'Ko, Samaritan, Mandaic and Adlam.</li>
+  <li>The English letters <code>A</code> to <code>Z</code> and <code>a</code> to <code>z</code> count as left-to-right.</li>
+  <li>Digits, punctuation, spaces, emoji and letters of other scripts (Cyrillic, Chinese and so on) are not counted at all.</li>
+</ul>
+<p>If at least <strong>30%</strong> of the counted letters are right-to-left, the block becomes right-to-left. The bar is <strong>20%</strong> when the block contains a mark that only Arabic-script text uses: the Arabic comma, semicolon or question mark, a vowel mark, or the zero-width non-joiner used in Persian. Otherwise the block stays left-to-right. A block with no counted letters gets no direction.</p>
+<p>The low bar is on purpose. Persian text is full of English terms such as <code>React</code> or <code>npm</code>, and it should still read right to left.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Direction examples"><table><thead><tr><th scope="col">Example</th><th scope="col">Result</th><th scope="col">Why</th></tr></thead><tbody><tr><td><code>Run npm install را اجرا کن</code></td><td>Right-to-left</td><td>8 of the 21 counted letters (about 38%) are Persian.</td></tr><tr><td><code>Please translate the word سلام for me</code></td><td>Left-to-right</td><td>4 of 31 counted letters (about 13%) are Persian.</td></tr><tr><td>A paragraph in English</td><td>Left-to-right</td><td>No right-to-left letters.</td></tr><tr><td><code>12345 + 678</code></td><td>No change</td><td>No letters are counted.</td></tr></tbody></table></div>
+<p>When a block is right-to-left, RTLY sets <code>dir</code>, <code>direction</code> and the alignment so the text sits on the right. Left-to-right blocks are set the same way to the left, which looks the same as the site's default. Persian lines inside an English-majority block are still ordered correctly, because each line works out its own base direction.</p>
+
+<h2 id="the-font">The font<a class="anchor" href="#the-font" aria-label="Link to this section">#</a></h2>
+<p>The IranYekan font is bundled in the extension. RTLY applies it only to elements whose text contains Arabic-script characters. If you delete the Persian text from such an element and type English, RTLY takes the font off again, so English text keeps the site's own font and its line height.</p>
+
+<h2 id="the-message-box">The message box<a class="anchor" href="#the-message-box" aria-label="Link to this section">#</a></h2>
+<p>The box where you type is not given a fixed direction. RTLY sets it to automatic and the browser follows the first strong letter of each line. Start a line in Persian and it is right-to-left. Start the next line in English and that line is left-to-right. In <strong>Font</strong> mode RTLY does not touch the direction of the box at all.</p>
+
+<h2 id="what-rtly-leaves-alone">What RTLY leaves alone<a class="anchor" href="#what-rtly-leaves-alone" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li><strong>Code.</strong> Code blocks and inline code stay left-to-right and are not processed.</li>
+  <li><strong>Sidebars, menus, headers and toolbars.</strong> RTLY recognizes them by their tags, roles and names. Conversation titles in the sidebar of Claude and Perplexity are the exception: a title that is mostly Persian is aligned to the right.</li>
+  <li><strong>Icons and buttons that contain icons.</strong> Flipping them would swap the icon and its label.</li>
+  <li><strong>Very long containers.</strong> A single element with more than 5000 characters of text gets the font but no direction. The paragraphs inside it are handled one by one.</li>
+  <li><strong>The page layout.</strong> On sites where Persian text could flip the whole page, RTLY keeps the top-level layout left-to-right so the sidebar stays on its side.</li>
+  <li><strong>Other frames.</strong> RTLY works in the top page only, not in embedded frames.</li>
+</ul>
+
+<h2 id="copying-text">Copying text<a class="anchor" href="#copying-text" aria-label="Link to this section">#</a></h2>
+<p>When you copy a selection that is mostly Persian from a right-to-left block, RTLY puts an invisible right-to-left mark in front of the text on your clipboard. This helps the text keep its direction where you paste it. Selections that are mostly English, and anything inside code, are copied as they are. For a Persian selection only plain text is copied, so formatting is not included.</p>
+
+<h2 id="font-size">Font size<a class="anchor" href="#font-size" aria-label="Link to this section">#</a></h2>
+<p>The font size setting scales the page's base font size by a percentage (85% to 120%). Text that the site sizes in relative units follows it. Text that the site sizes in fixed pixels does not.</p>
+
+<h2 id="streaming-answers">Streaming answers<a class="anchor" href="#streaming-answers" aria-label="Link to this section">#</a></h2>
+<p>While an answer is still being written, RTLY looks again after the page changes. A block can flip from left-to-right to right-to-left once enough Persian text has arrived.</p>
+<div class="reading-footer"><a class="prev" href="settings.html"><small>Previous</small>The settings page</a><a class="next" href="shortcut-and-menu.html"><small>Next</small>Shortcut and right-click menu</a></div>
+</article>
+<nav class="toc" aria-label="On this page"><p>On this page</p><ol><li><a href="#modes">The three modes</a></li><li><a href="#how-direction-is-chosen">How direction is chosen</a></li><li><a href="#the-font">The font</a></li><li><a href="#the-message-box">The message box</a></li><li><a href="#what-rtly-leaves-alone">What RTLY leaves alone</a></li><li><a href="#copying-text">Copying text</a></li><li><a href="#font-size">Font size</a></li><li><a href="#streaming-answers">Streaming answers</a></li></ol></nav>
+</div>
+</main>
+<footer class="footer"><div class="shell footer-inner"><p>RTLY user guide &middot; MIT licensed &middot; Maintained by Ehsan Enaloo</p><div><a href="../guides/troubleshooting-faq.html">Troubleshooting</a><a href="../guides/limits.html">Limits</a><a href="../privacy.html">Privacy</a><a href="https://github.com/ehsanenaloo/RTLY" rel="noopener">Source repository &#8599;</a></div></div></footer>
 </body>
 </html>

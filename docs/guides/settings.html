@@ -1,14 +1,51 @@
 <!doctype html>
-<html lang="en" dir="ltr">
+<html lang="en" data-root="../">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>This page moved</title>
-<meta name="robots" content="noindex">
-<link rel="canonical" href="https://enaloo.com/apps/rtly/docs/settings/">
-<meta http-equiv="refresh" content="0; url=https://enaloo.com/apps/rtly/docs/settings/">
+<title>The settings page | RTLY user guide</title>
+<meta name="description" content="The RTLY settings page: live preview, font size, interface language, color palette, theme and the sites table with modes, pins and switches.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" type="image/svg+xml" href="../assets/logo.svg">
+<link rel="canonical" href="https://ehsanenaloo.github.io/RTLY/guides/settings.html">
+
+<link rel="stylesheet" href="../styles.css">
+<script>try{var t=localStorage.getItem("rtly-docs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script defer src="../app.js"></script>
 </head>
 <body>
-<p>This page moved to <a href="https://enaloo.com/apps/rtly/docs/settings/">https://enaloo.com/apps/rtly/docs/settings/</a>.</p>
+<a class="skip" href="#main">Skip to content</a><header class="site-header"><div class="shell header-inner"><a class="brand" href="../index.html"><img src="../assets/logo.svg" width="34" height="34" alt=""><span>RTLY<small>User guide</small></span></a><nav class="top-nav" aria-label="Primary"><a href="../index.html">Overview</a><a href="../guides/quick-start.html">Quick start</a><a href="../guides/index.html">All guides</a><a href="../guides/troubleshooting-faq.html">Help</a><a href="../fa/index.html" hreflang="fa" lang="fa">فارسی</a><a href="https://github.com/ehsanenaloo/RTLY" rel="noopener">GitHub &#8599;</a></nav><div class="header-tools"><span data-search-host></span><button type="button" class="icon-button" data-theme-toggle hidden>Theme</button></div></div></header>
+<main id="main">
+<div class="shell page-intro"><p class="breadcrumbs"><a href="../index.html">Home</a> / <a href="index.html">Guides</a> / Using RTLY</p><h1>The settings page</h1><p class="lead">The settings page shows a live before and after preview and holds the options that are not in the popup: the interface language, the color palette and the full sites table.</p><p class="meta-line">Checked against the source on 2026-10-08, RTLY 2.0.0.</p></div>
+<div class="shell doc-layout has-toc">
+<aside class="sidebar"><details open><summary>Browse the guides</summary><nav aria-label="Guides"><a href="index.html">All guides</a><p>Get started</p><a href="quick-start.html">Quick start</a><a href="installation.html">Installation</a><p>Using RTLY</p><a href="popup.html">The popup</a><a href="settings.html" aria-current="page">The settings page</a><a href="modes-and-direction.html">Modes and direction</a><a href="shortcut-and-menu.html">Shortcut and right-click menu</a><a href="supported-sites.html">Supported sites</a><a href="languages-and-appearance.html">Languages and appearance</a><p>Trust and support</p><a href="privacy-and-data.html">Privacy, permissions and data</a><a href="troubleshooting-faq.html">Troubleshooting and FAQ</a><a href="limits.html">Limits and known problems</a><a href="../privacy.html">Privacy policy</a></nav></details></aside>
+<article class="prose">
+
+<p>Open it from the popup menu (<strong>Settings</strong>), or from your browser's extensions page (the extension's <strong>Details</strong> and <strong>Extension options</strong>). It opens in its own tab. Changes are saved as you make them, and a "Saved" note flashes at the top.</p>
+<figure class="shot "><div class="frame"><img class="for-light" src="../assets/screenshots/options-light.png" data-file="options-light.png" alt="The RTLY settings page with the live preview at the top, then the display card and the sites table (light theme)" loading="lazy" decoding="async" width="2560" height="1800"><img class="for-dark" src="../assets/screenshots/options-dark.png" data-file="options-dark.png" alt="The RTLY settings page with the live preview at the top, then the display card and the sites table (dark theme)" loading="lazy" decoding="async" width="2560" height="1800"></div><figcaption>The settings page.</figcaption></figure>
+
+<h2 id="header">Header<a class="anchor" href="#header" aria-label="Link to this section">#</a></h2>
+<p>At the top are the RTLY name, a heart button (support) and the theme switch: light, dark or system. The theme is shared with the popup.</p>
+
+<h2 id="live-preview">Live preview<a class="anchor" href="#live-preview" aria-label="Link to this section">#</a></h2>
+<p>Two panes show the same short chat, "Without RTLY" and "With RTLY". Tabs above them switch the sample language. The preview follows the font size slider as you drag it, and it follows the interface language you choose. The preview is a picture of the effect, not a live page: it does not read any site.</p>
+
+<h2 id="display">Display<a class="anchor" href="#display" aria-label="Link to this section">#</a></h2>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Display settings"><table><thead><tr><th scope="col">Setting</th><th scope="col">Choices</th><th scope="col">Notes</th></tr></thead><tbody><tr><td>Font size</td><td>85% to 120% in steps of 5. Default 100%.</td><td>Scales chat text on all sites. The popup's A+ and A&minus; buttons change the same value.</td></tr><tr><td>UI language</td><td>15 languages, shown by their own names.</td><td>Changes the popup and this page. It does not change what the chat sites show. Right-to-left languages flip the layout.</td></tr><tr><td>Color palette</td><td>Teal (default), blue, indigo, neutral.</td><td>Changes the accent color of the popup and this page.</td></tr></tbody></table></div>
+
+<h2 id="sites">Sites<a class="anchor" href="#sites" aria-label="Link to this section">#</a></h2>
+<p>A table lists all 16 supported sites with a search box above it. For each site you can:</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Sites table columns"><table><thead><tr><th scope="col">Column</th><th scope="col">What it does</th></tr></thead><tbody><tr><td>Site</td><td>The site name and its address, with its logo.</td></tr><tr><td>Mode</td><td>Three buttons: Full, Font, RTL. See <a href="modes-and-direction.html">Modes and direction</a>. Applies to open tabs at once.</td></tr><tr><td>Pin</td><td>A star. Pinned sites are listed first in the popup. Without any choice from you, ChatGPT, Claude, Gemini and Perplexity are pinned.</td></tr><tr><td>Status</td><td>A switch. Off means RTLY does nothing on that site. RTLY reloads the site's open tabs when you change it.</td></tr></tbody></table></div>
+<figure class="shot "><div class="frame"><img src="../assets/screenshots/sites-list.png" data-file="sites-list.png" alt="The sites table with the 16 supported sites, their mode buttons, pin stars and switches" loading="lazy" decoding="async" width="2000" height="2180"></div><figcaption>The sites table.</figcaption></figure>
+
+<h2 id="narrow-screens">Narrow windows<a class="anchor" href="#narrow-screens" aria-label="Link to this section">#</a></h2>
+<p>The page adapts to a narrow window, for example when you resize the tab or split the screen.</p>
+<figure class="shot narrow"><div class="frame"><img src="../assets/screenshots/options-mobile.png" data-file="options-mobile.png" alt="The settings page in a narrow window" loading="lazy" decoding="async" width="780" height="1688"></div><figcaption>The settings page in a narrow window.</figcaption></figure>
+<div class="reading-footer"><a class="prev" href="popup.html"><small>Previous</small>The popup</a><a class="next" href="modes-and-direction.html"><small>Next</small>Modes and direction</a></div>
+</article>
+<nav class="toc" aria-label="On this page"><p>On this page</p><ol><li><a href="#header">Header</a></li><li><a href="#live-preview">Live preview</a></li><li><a href="#display">Display</a></li><li><a href="#sites">Sites</a></li><li><a href="#narrow-screens">Narrow windows</a></li></ol></nav>
+</div>
+</main>
+<footer class="footer"><div class="shell footer-inner"><p>RTLY user guide &middot; MIT licensed &middot; Maintained by Ehsan Enaloo</p><div><a href="../guides/troubleshooting-faq.html">Troubleshooting</a><a href="../guides/limits.html">Limits</a><a href="../privacy.html">Privacy</a><a href="https://github.com/ehsanenaloo/RTLY" rel="noopener">Source repository &#8599;</a></div></div></footer>
 </body>
 </html>

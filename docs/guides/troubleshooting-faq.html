@@ -1,14 +1,93 @@
 <!doctype html>
-<html lang="en" dir="ltr">
+<html lang="en" data-root="../">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>This page moved</title>
-<meta name="robots" content="noindex">
-<link rel="canonical" href="https://enaloo.com/apps/rtly/docs/troubleshooting-faq/">
-<meta http-equiv="refresh" content="0; url=https://enaloo.com/apps/rtly/docs/troubleshooting-faq/">
+<title>Troubleshooting and FAQ | RTLY user guide</title>
+<meta name="description" content="Answers to common RTLY problems: nothing changes, the font is missing, English is flipped, the shortcut does nothing, a reload happened, and how to report a broken site.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" type="image/svg+xml" href="../assets/logo.svg">
+<link rel="canonical" href="https://ehsanenaloo.github.io/RTLY/guides/troubleshooting-faq.html">
+
+<link rel="stylesheet" href="../styles.css">
+<script>try{var t=localStorage.getItem("rtly-docs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script defer src="../app.js"></script>
 </head>
 <body>
-<p>This page moved to <a href="https://enaloo.com/apps/rtly/docs/troubleshooting-faq/">https://enaloo.com/apps/rtly/docs/troubleshooting-faq/</a>.</p>
+<a class="skip" href="#main">Skip to content</a><header class="site-header"><div class="shell header-inner"><a class="brand" href="../index.html"><img src="../assets/logo.svg" width="34" height="34" alt=""><span>RTLY<small>User guide</small></span></a><nav class="top-nav" aria-label="Primary"><a href="../index.html">Overview</a><a href="../guides/quick-start.html">Quick start</a><a href="../guides/index.html">All guides</a><a href="../guides/troubleshooting-faq.html" aria-current="page">Help</a><a href="../fa/index.html" hreflang="fa" lang="fa">فارسی</a><a href="https://github.com/ehsanenaloo/RTLY" rel="noopener">GitHub &#8599;</a></nav><div class="header-tools"><span data-search-host></span><button type="button" class="icon-button" data-theme-toggle hidden>Theme</button></div></div></header>
+<main id="main">
+<div class="shell page-intro"><p class="breadcrumbs"><a href="../index.html">Home</a> / <a href="index.html">Guides</a> / Trust and support</p><h1>Troubleshooting and FAQ</h1><p class="lead">Most problems are one of three things: RTLY is off for the site, the mode is not the one you want, or the site changed its page.</p><p class="meta-line">Checked against the source on 2026-10-08, RTLY 2.0.0.</p></div>
+<div class="shell doc-layout has-toc">
+<aside class="sidebar"><details open><summary>Browse the guides</summary><nav aria-label="Guides"><a href="index.html">All guides</a><p>Get started</p><a href="quick-start.html">Quick start</a><a href="installation.html">Installation</a><p>Using RTLY</p><a href="popup.html">The popup</a><a href="settings.html">The settings page</a><a href="modes-and-direction.html">Modes and direction</a><a href="shortcut-and-menu.html">Shortcut and right-click menu</a><a href="supported-sites.html">Supported sites</a><a href="languages-and-appearance.html">Languages and appearance</a><p>Trust and support</p><a href="privacy-and-data.html">Privacy, permissions and data</a><a href="troubleshooting-faq.html" aria-current="page">Troubleshooting and FAQ</a><a href="limits.html">Limits and known problems</a><a href="../privacy.html">Privacy policy</a></nav></details></aside>
+<article class="prose">
+
+<h2 id="nothing-changes">Nothing changes on a site<a class="anchor" href="#nothing-changes" aria-label="Link to this section">#</a></h2>
+<ol>
+  <li>Check the address is one of the <a href="supported-sites.html">supported sites</a>. Open the popup: it should show the site name and "RTLY active".</li>
+  <li>If the switch is off, turn it on. RTLY reloads the tab.</li>
+  <li>If you installed RTLY while the tab was open, reload the tab once.</li>
+  <li>Check the mode. <strong>Font</strong> keeps the direction as the site sets it. <strong>RTL</strong> keeps the site's font.</li>
+  <li>Make sure there is Persian (or other right-to-left) text in the block. A block with no such letters is left as it is.</li>
+  <li>If everything is right and it still fails, the site has probably changed its page. <a href="#report">Report it</a>.</li>
+</ol>
+
+<h2 id="direction-but-no-font">The direction is right but the font is not<a class="anchor" href="#direction-but-no-font" aria-label="Link to this section">#</a></h2>
+<p>The font is applied only to text that contains Arabic-script characters, and not in <strong>RTL</strong> mode. In <strong>Full</strong> or <strong>Font</strong> mode, an element that RTLY skipped (for example one that contains an icon) may keep the site's font.</p>
+
+<h2 id="english-is-flipped">An English paragraph is aligned to the right, or a Persian one to the left<a class="anchor" href="#english-is-flipped" aria-label="Link to this section">#</a></h2>
+<p>Direction comes from the share of right-to-left letters in a block: at least 30% (or 20% with an Arabic-script punctuation or vowel mark). A Persian sentence made mostly of English terms can fall below that bar, and an English paragraph that quotes a lot of Persian can rise above it. See the examples in <a href="modes-and-direction.html">Modes and direction</a>. If a normal paragraph is wrong, report it.</p>
+
+<h2 id="code-blocks">A code block or table looks wrong<a class="anchor" href="#code-blocks" aria-label="Link to this section">#</a></h2>
+<p>RTLY leaves code blocks left-to-right and does not process them. If the surrounding text or a table is misaligned, it is probably a site-specific rule. Report it with a screenshot.</p>
+
+<h2 id="typing">I type Persian but the line does not go right<a class="anchor" href="#typing" aria-label="Link to this section">#</a></h2>
+<p>The message box follows the first strong letter of each line. A line that begins with an English word or a number is left-to-right. Begin the line with a Persian word, or press <kbd>Enter</kbd> and start a new line. In <strong>Font</strong> mode RTLY does not touch the box's direction.</p>
+
+<h2 id="shortcut">The shortcut does nothing<a class="anchor" href="#shortcut" aria-label="Link to this section">#</a></h2>
+<p>The shortcut works on supported sites only. Your browser may have given <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> to something else. Check the shortcuts page (see <a href="shortcut-and-menu.html">Shortcut and right-click menu</a>) and set a free key.</p>
+
+<h2 id="tab-reloaded">The page reloaded when I switched RTLY<a class="anchor" href="#tab-reloaded" aria-label="Link to this section">#</a></h2>
+<p>That is by design when you switch a site on or off. Changing the mode or the font size does not reload.</p>
+
+<h2 id="heart">A red heart appeared on the toolbar icon<a class="anchor" href="#heart" aria-label="Link to this section">#</a></h2>
+<p>That is the monthly <a href="popup.html#support-reminder">support reminder</a>. Open the popup to see it and to clear the heart.</p>
+
+<h2 id="english-in-the-ui">Some words in the RTLY popup are in English<a class="anchor" href="#english-in-the-ui" aria-label="Link to this section">#</a></h2>
+<p>In ten of the interface languages eight strings are still English. See <a href="languages-and-appearance.html">Languages and appearance</a>.</p>
+
+<h2 id="firefox">Firefox: RTLY disappeared after a restart<a class="anchor" href="#firefox" aria-label="Link to this section">#</a></h2>
+<p>The Firefox build is loaded as a temporary add-on, which Firefox removes when it closes. Load it again from <code>about:debugging</code>. See <a href="installation.html#firefox">Installation</a>.</p>
+
+<h2 id="report">How to report a problem<a class="anchor" href="#report" aria-label="Link to this section">#</a></h2>
+<p>Open a <a href="https://github.com/ehsanenaloo/RTLY/issues/new?template=broken_site.yml" rel="noopener">broken-site report</a> (for a site that looks wrong) or a <a href="https://github.com/ehsanenaloo/RTLY/issues/new?template=bug_report.yml" rel="noopener">bug report</a> (for RTLY itself). Include:</p>
+<ul>
+  <li>the page address (use a chat with no private content),</li>
+  <li>a screenshot, with private text hidden,</li>
+  <li>your browser and the RTLY version (shown in the popup header and on the extensions page),</li>
+  <li>whether RTLY is on for that site in the popup.</li>
+</ul>
+<p>Security problems must not go in a public issue. Use <a href="https://github.com/ehsanenaloo/RTLY/security/advisories/new" rel="noopener">private reporting</a>.</p>
+
+<h2 id="faq">Questions<a class="anchor" href="#faq" aria-label="Link to this section">#</a></h2>
+<dl>
+  <dt>Does RTLY read my conversations?</dt>
+  <dd>It reads the text of messages on the page, inside your browser, to choose a direction. It never stores or sends it.</dd>
+  <dt>Does it work offline?</dt>
+  <dd>Yes. It needs no server. The chat sites themselves need a connection.</dd>
+  <dt>Does it work in private (incognito) windows?</dt>
+  <dd>Only if you allow it for private windows in the browser's extension settings. This was not tested for this guide.</dd>
+  <dt>Does it slow the page down?</dt>
+  <dd>RTLY is written to do little work: it skips unchanged text, avoids layout reads and works in short slices. It has been checked by hand on long ChatGPT conversations, not by an automated performance test.</dd>
+  <dt>Can I use it on mobile?</dt>
+  <dd>RTLY is built for desktop browsers. Mobile browsers were not tested.</dd>
+  <dt>Why is it free?</dt>
+  <dd>It is a hobby project, released under the MIT license. If it saves you time, you can <a href="https://buymeacoffee.com/enaloo" rel="noopener">buy the author a coffee</a>.</dd>
+</dl>
+<div class="reading-footer"><a class="prev" href="privacy-and-data.html"><small>Previous</small>Privacy, permissions and data</a><a class="next" href="limits.html"><small>Next</small>Limits and known problems</a></div>
+</article>
+<nav class="toc" aria-label="On this page"><p>On this page</p><ol><li><a href="#nothing-changes">Nothing changes on a site</a></li><li><a href="#direction-but-no-font">The direction is right but the font is not</a></li><li><a href="#english-is-flipped">An English paragraph is aligned to the right, or a Persian one to the left</a></li><li><a href="#code-blocks">A code block or table looks wrong</a></li><li><a href="#typing">I type Persian but the line does not go right</a></li><li><a href="#shortcut">The shortcut does nothing</a></li><li><a href="#tab-reloaded">The page reloaded when I switched RTLY</a></li><li><a href="#heart">A red heart appeared on the toolbar icon</a></li><li><a href="#english-in-the-ui">Some words in the RTLY popup are in English</a></li><li><a href="#firefox">Firefox: RTLY disappeared after a restart</a></li><li><a href="#report">How to report a problem</a></li><li><a href="#faq">Questions</a></li></ol></nav>
+</div>
+</main>
+<footer class="footer"><div class="shell footer-inner"><p>RTLY user guide &middot; MIT licensed &middot; Maintained by Ehsan Enaloo</p><div><a href="../guides/troubleshooting-faq.html">Troubleshooting</a><a href="../guides/limits.html">Limits</a><a href="../privacy.html">Privacy</a><a href="https://github.com/ehsanenaloo/RTLY" rel="noopener">Source repository &#8599;</a></div></div></footer>
 </body>
 </html>

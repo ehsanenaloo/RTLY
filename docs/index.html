@@ -1,14 +1,63 @@
 <!doctype html>
-<html lang="en" dir="ltr">
+<html lang="en" data-root="./">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>This page moved</title>
-<meta name="robots" content="noindex">
-<link rel="canonical" href="https://enaloo.com/apps/rtly/">
-<meta http-equiv="refresh" content="0; url=https://enaloo.com/apps/rtly/">
+<title>RTLY user guide: right-to-left text and a Persian font for AI chats</title>
+<meta name="description" content="RTLY is a free browser extension that aligns Persian, Arabic, Hebrew and Urdu text right to left and sets the IranYekan font on 16 AI chat sites.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" type="image/svg+xml" href="./assets/logo.svg">
+<link rel="canonical" href="https://ehsanenaloo.github.io/RTLY/index.html">
+<link rel="alternate" hreflang="fa" href="https://ehsanenaloo.github.io/RTLY/fa/index.html">
+<link rel="stylesheet" href="./styles.css">
+<script>try{var t=localStorage.getItem("rtly-docs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script defer src="./app.js"></script>
 </head>
 <body>
-<p>This page moved to <a href="https://enaloo.com/apps/rtly/">https://enaloo.com/apps/rtly/</a>.</p>
+<a class="skip" href="#main">Skip to content</a><header class="site-header"><div class="shell header-inner"><a class="brand" href="./index.html"><img src="./assets/logo.svg" width="34" height="34" alt=""><span>RTLY<small>User guide</small></span></a><nav class="top-nav" aria-label="Primary"><a href="./index.html" aria-current="page">Overview</a><a href="./guides/quick-start.html">Quick start</a><a href="./guides/index.html">All guides</a><a href="./guides/troubleshooting-faq.html">Help</a><a href="./fa/index.html" hreflang="fa" lang="fa">فارسی</a><a href="https://github.com/ehsanenaloo/RTLY" rel="noopener">GitHub &#8599;</a></nav><div class="header-tools"><span data-search-host></span><button type="button" class="icon-button" data-theme-toggle hidden>Theme</button></div></div></header>
+<main id="main">
+<section class="hero"><div class="shell hero-grid"><div>
+<p class="eyebrow">Free and open source</p>
+<h1>Right-to-left text and a Persian font for AI chats</h1>
+<p class="lead">RTLY aligns Persian, Arabic, Hebrew and Urdu text from right to left on ChatGPT, Claude, Gemini and 13 other AI chat sites, and sets it in the IranYekan font. It runs in your browser only. No account, no tracking, no server.</p>
+<div class="actions"><a class="button primary" href="https://chromewebstore.google.com/detail/hhifipkafndnildgldggiohfkbpikmkd" rel="noopener">Add to Chrome</a><a class="button" href="guides/quick-start.html">Quick start</a><a class="button" href="guides/installation.html">Other browsers</a></div>
+<p class="hero-note">Works in Chrome 111 or newer and in Edge. A Firefox build is experimental.</p>
+</div>
+<figure class="shot hero-shot"><div class="frame"><img class="for-light" src="./assets/screenshots/before-after-light.png" data-file="before-after-light.png" alt="The same Persian chat answer without RTLY (left-aligned, default font) and with RTLY (right-aligned, IranYekan font) (light theme)" loading="lazy" decoding="async" width="1600" height="764"><img class="for-dark" src="./assets/screenshots/before-after-dark.png" data-file="before-after-dark.png" alt="The same Persian chat answer without RTLY (left-aligned, default font) and with RTLY (right-aligned, IranYekan font) (dark theme)" loading="lazy" decoding="async" width="1600" height="764"></div><figcaption>The same answer without and with RTLY.</figcaption></figure>
+</div>
+<div class="shell"><div class="stats"><div><strong>16</strong><span>supported AI chat sites</span></div><div><strong>3</strong><span>modes per site: Full, Font, RTL</span></div><div><strong>15</strong><span>interface languages</span></div><div><strong>0</strong><span>network requests, accounts or trackers</span></div></div></div>
+</section>
+
+<section class="section"><div class="shell">
+<div class="section-heading"><h2>What it does</h2><p>One job, done on the page itself, with the smallest set of permissions that makes it possible.</p></div>
+<div class="grid">
+<article class="card"><h3>Chooses direction per message</h3><p>Each block of text is checked by the letters in it. Mostly right-to-left text is aligned right. English stays on the left.</p></article>
+<article class="card"><h3>Applies a Persian font</h3><p>The bundled IranYekan font is used only on text that contains Arabic-script characters, so English keeps the site's font.</p></article>
+<article class="card"><h3>Leaves the rest alone</h3><p>Code blocks, icons, menus and sidebars are not flipped. The message box follows the language of each line you type.</p></article>
+<article class="card"><h3>Stays private</h3><p>No server, no analytics, no remote code. Settings stay in your browser. See the <a href="privacy.html">privacy policy</a>.</p></article>
+</div></div></section>
+
+<section class="section"><div class="shell">
+<div class="section-heading"><h2>Supported sites</h2><p>RTLY runs only on these sites and does nothing anywhere else. Details and addresses are in <a href="guides/supported-sites.html">Supported sites</a>.</p></div>
+<ul class="site-chips"><li>ChatGPT</li><li>Claude</li><li>Gemini</li><li>Perplexity</li><li>Microsoft Copilot</li><li>Google AI Studio</li><li>NotebookLM</li><li>Grok</li><li>Poe</li><li>Z.ai</li><li>DeepSeek</li><li>Qwen</li><li>Bing</li><li>Mistral</li><li>Hugging Face</li><li>Cohere</li></ul>
+</div></section>
+
+<section class="section"><div class="shell">
+<div class="section-heading"><h2>Start here</h2><p>The most useful pages. The full list is in <a href="guides/index.html">All guides</a>.</p></div>
+<div class="grid"><article class="card"><h3><a href="guides/quick-start.html">Quick start</a></h3><p>Install RTLY and see a Persian answer line up from right to left. About five minutes.</p><span class="card-link">Read &rarr;</span></article><article class="card"><h3><a href="guides/modes-and-direction.html">Modes and direction</a></h3><p>How RTLY decides a block is right-to-left, what the three modes do, and what it leaves alone.</p><span class="card-link">Read &rarr;</span></article><article class="card"><h3><a href="guides/popup.html">The popup</a></h3><p>Switch a site on or off, change its mode and the text size.</p><span class="card-link">Read &rarr;</span></article><article class="card"><h3><a href="guides/settings.html">The settings page</a></h3><p>Live preview, interface language, color palette and the sites table.</p><span class="card-link">Read &rarr;</span></article><article class="card"><h3><a href="guides/supported-sites.html">Supported sites</a></h3><p>The 16 AI chat sites RTLY works on.</p><span class="card-link">Read &rarr;</span></article><article class="card"><h3><a href="guides/limits.html">Limits and known problems</a></h3><p>What RTLY cannot do and what has not been tested.</p><span class="card-link">Read &rarr;</span></article></div>
+</div></section>
+
+<section class="section"><div class="shell">
+<div class="section-heading"><h2>Honest limits</h2><p>RTLY is a small project by one person.</p></div>
+<ul>
+<li>Chat sites change their page structure without notice. RTLY can stop working on a site until it is updated. Please <a href="https://github.com/ehsanenaloo/RTLY/issues/new?template=broken_site.yml" rel="noopener">report a broken site</a>.</li>
+<li>The automated tests use local copies of five sites' page structure, not the live sites.</li>
+<li>The Firefox build passes Mozilla's lint but has not been run in a real Firefox by the project's tests.</li>
+<li>Some interface translations are still partly in English.</li>
+</ul>
+<p>The full list is on <a href="guides/limits.html">Limits and known problems</a>.</p>
+</div></section>
+</main>
+<footer class="footer"><div class="shell footer-inner"><p>RTLY user guide &middot; MIT licensed &middot; Maintained by Ehsan Enaloo</p><div><a href="./guides/troubleshooting-faq.html">Troubleshooting</a><a href="./guides/limits.html">Limits</a><a href="./privacy.html">Privacy</a><a href="https://github.com/ehsanenaloo/RTLY" rel="noopener">Source repository &#8599;</a></div></div></footer>
 </body>
 </html>

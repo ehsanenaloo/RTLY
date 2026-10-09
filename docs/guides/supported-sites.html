@@ -1,14 +1,43 @@
 <!doctype html>
-<html lang="en" dir="ltr">
+<html lang="en" data-root="../">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>This page moved</title>
-<meta name="robots" content="noindex">
-<link rel="canonical" href="https://enaloo.com/apps/rtly/docs/supported-sites/">
-<meta http-equiv="refresh" content="0; url=https://enaloo.com/apps/rtly/docs/supported-sites/">
+<title>Supported sites | RTLY user guide</title>
+<meta name="description" content="The 16 AI chat sites RTLY works on, their addresses, and what to do if your site is not on the list.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" type="image/svg+xml" href="../assets/logo.svg">
+<link rel="canonical" href="https://ehsanenaloo.github.io/RTLY/guides/supported-sites.html">
+
+<link rel="stylesheet" href="../styles.css">
+<script>try{var t=localStorage.getItem("rtly-docs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script defer src="../app.js"></script>
 </head>
 <body>
-<p>This page moved to <a href="https://enaloo.com/apps/rtly/docs/supported-sites/">https://enaloo.com/apps/rtly/docs/supported-sites/</a>.</p>
+<a class="skip" href="#main">Skip to content</a><header class="site-header"><div class="shell header-inner"><a class="brand" href="../index.html"><img src="../assets/logo.svg" width="34" height="34" alt=""><span>RTLY<small>User guide</small></span></a><nav class="top-nav" aria-label="Primary"><a href="../index.html">Overview</a><a href="../guides/quick-start.html">Quick start</a><a href="../guides/index.html">All guides</a><a href="../guides/troubleshooting-faq.html">Help</a><a href="../fa/index.html" hreflang="fa" lang="fa">فارسی</a><a href="https://github.com/ehsanenaloo/RTLY" rel="noopener">GitHub &#8599;</a></nav><div class="header-tools"><span data-search-host></span><button type="button" class="icon-button" data-theme-toggle hidden>Theme</button></div></div></header>
+<main id="main">
+<div class="shell page-intro"><p class="breadcrumbs"><a href="../index.html">Home</a> / <a href="index.html">Guides</a> / Using RTLY</p><h1>Supported sites</h1><p class="lead">RTLY works on 16 AI chat sites and does nothing anywhere else.</p><p class="meta-line">Checked against the source on 2026-10-08, RTLY 2.0.0.</p></div>
+<div class="shell doc-layout has-toc">
+<aside class="sidebar"><details open><summary>Browse the guides</summary><nav aria-label="Guides"><a href="index.html">All guides</a><p>Get started</p><a href="quick-start.html">Quick start</a><a href="installation.html">Installation</a><p>Using RTLY</p><a href="popup.html">The popup</a><a href="settings.html">The settings page</a><a href="modes-and-direction.html">Modes and direction</a><a href="shortcut-and-menu.html">Shortcut and right-click menu</a><a href="supported-sites.html" aria-current="page">Supported sites</a><a href="languages-and-appearance.html">Languages and appearance</a><p>Trust and support</p><a href="privacy-and-data.html">Privacy, permissions and data</a><a href="troubleshooting-faq.html">Troubleshooting and FAQ</a><a href="limits.html">Limits and known problems</a><a href="../privacy.html">Privacy policy</a></nav></details></aside>
+<article class="prose">
+
+<div class="table-wrap" tabindex="0" role="region" aria-label="Supported sites"><table><thead><tr><th scope="col">Site</th><th scope="col">Address</th><th scope="col">Notes</th></tr></thead><tbody><tr><td>ChatGPT</td><td><code>chatgpt.com</code></td><td>The older address <code>chat.openai.com</code> is also covered.</td></tr><tr><td>Claude</td><td><code>claude.ai</code></td><td>&nbsp;</td></tr><tr><td>Gemini</td><td><code>gemini.google.com</code></td><td>&nbsp;</td></tr><tr><td>Perplexity</td><td><code>perplexity.ai</code></td><td>&nbsp;</td></tr><tr><td>Microsoft Copilot</td><td><code>copilot.microsoft.com</code></td><td>&nbsp;</td></tr><tr><td>Google AI Studio</td><td><code>aistudio.google.com</code></td><td>&nbsp;</td></tr><tr><td>NotebookLM</td><td><code>notebooklm.google.com</code></td><td>Only the chat section is processed.</td></tr><tr><td>Grok</td><td><code>grok.com</code></td><td>&nbsp;</td></tr><tr><td>Poe</td><td><code>poe.com</code></td><td>&nbsp;</td></tr><tr><td>Z.ai</td><td><code>z.ai</code>, <code>chat.z.ai</code></td><td>&nbsp;</td></tr><tr><td>DeepSeek</td><td><code>chat.deepseek.com</code></td><td>&nbsp;</td></tr><tr><td>Qwen</td><td><code>qwen.ai</code>, <code>chat.qwen.ai</code></td><td>&nbsp;</td></tr><tr><td>Bing</td><td><code>bing.com</code></td><td>RTLY runs on all of bing.com, not only the chat.</td></tr><tr><td>Mistral</td><td><code>mistral.ai</code>, <code>chat.mistral.ai</code></td><td>RTLY runs on the whole host.</td></tr><tr><td>Hugging Face</td><td><code>huggingface.co/chat</code></td><td>Only the <code>/chat</code> section.</td></tr><tr><td>Cohere</td><td><code>cohere.com</code>, <code>coral.cohere.com</code></td><td>RTLY runs on the whole host.</td></tr></tbody></table></div>
+
+<h2 id="how-well">How well each site works<a class="anchor" href="#how-well" aria-label="Link to this section">#</a></h2>
+<p>Each site has its own small set of rules, because each site builds its pages differently. The project tests five of them in a real Chromium browser, with local copies of their page structure: ChatGPT, Claude, Gemini, Perplexity and Mistral. The other eleven are covered by consistency checks only. None of the tests loads the live sites.</p>
+<aside class="callout known"><span class="callout-title">Sites change</span><p>AI sites change their page markup without notice. When that happens RTLY can stop working on a site, or work only partly, until its rules are updated. If a site looks wrong, <a href="https://github.com/ehsanenaloo/RTLY/issues/new?template=broken_site.yml" rel="noopener">send a broken-site report</a> with the address and a screenshot.</p></aside>
+
+<h2 id="not-supported">Sites that are not supported<a class="anchor" href="#not-supported" aria-label="Link to this section">#</a></h2>
+<p>Any site that is not in the table: other chat tools, search engines other than Bing's chat pages, social networks and so on. RTLY does not run there, and it has no permission to.</p>
+<p>The address matters. For example, <code>x.com</code> (Grok inside X) and Google's AI Overviews in search results are not covered. Hugging Face is covered only under <code>/chat</code>.</p>
+
+<h2 id="ask-for-a-site">Ask for another site<a class="anchor" href="#ask-for-a-site" aria-label="Link to this section">#</a></h2>
+<p>Open a <a href="https://github.com/ehsanenaloo/RTLY/issues/new?template=feature_request.yml" rel="noopener">feature request</a> with the site address. Adding a site means writing its rules and giving the extension permission for its address, so some requests will be declined to keep the permission list short. If you write code, the contributing guide in the repository explains how to add a site.</p>
+<div class="reading-footer"><a class="prev" href="shortcut-and-menu.html"><small>Previous</small>Shortcut and right-click menu</a><a class="next" href="languages-and-appearance.html"><small>Next</small>Languages and appearance</a></div>
+</article>
+<nav class="toc" aria-label="On this page"><p>On this page</p><ol><li><a href="#how-well">How well each site works</a></li><li><a href="#not-supported">Sites that are not supported</a></li><li><a href="#ask-for-a-site">Ask for another site</a></li></ol></nav>
+</div>
+</main>
+<footer class="footer"><div class="shell footer-inner"><p>RTLY user guide &middot; MIT licensed &middot; Maintained by Ehsan Enaloo</p><div><a href="../guides/troubleshooting-faq.html">Troubleshooting</a><a href="../guides/limits.html">Limits</a><a href="../privacy.html">Privacy</a><a href="https://github.com/ehsanenaloo/RTLY" rel="noopener">Source repository &#8599;</a></div></div></footer>
 </body>
 </html>

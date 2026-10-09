@@ -1,14 +1,51 @@
 <!doctype html>
-<html lang="en" dir="ltr">
+<html lang="en" data-root="../">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>This page moved</title>
-<meta name="robots" content="noindex">
-<link rel="canonical" href="https://enaloo.com/apps/rtly/docs/shortcut-and-menu/">
-<meta http-equiv="refresh" content="0; url=https://enaloo.com/apps/rtly/docs/shortcut-and-menu/">
+<title>Shortcut and right-click menu | RTLY user guide</title>
+<meta name="description" content="Turn RTLY on or off for the current site with Alt+Shift+R or the right-click menu, and change the shortcut in your browser.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" type="image/svg+xml" href="../assets/logo.svg">
+<link rel="canonical" href="https://ehsanenaloo.github.io/RTLY/guides/shortcut-and-menu.html">
+
+<link rel="stylesheet" href="../styles.css">
+<script>try{var t=localStorage.getItem("rtly-docs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script defer src="../app.js"></script>
 </head>
 <body>
-<p>This page moved to <a href="https://enaloo.com/apps/rtly/docs/shortcut-and-menu/">https://enaloo.com/apps/rtly/docs/shortcut-and-menu/</a>.</p>
+<a class="skip" href="#main">Skip to content</a><header class="site-header"><div class="shell header-inner"><a class="brand" href="../index.html"><img src="../assets/logo.svg" width="34" height="34" alt=""><span>RTLY<small>User guide</small></span></a><nav class="top-nav" aria-label="Primary"><a href="../index.html">Overview</a><a href="../guides/quick-start.html">Quick start</a><a href="../guides/index.html">All guides</a><a href="../guides/troubleshooting-faq.html">Help</a><a href="../fa/index.html" hreflang="fa" lang="fa">فارسی</a><a href="https://github.com/ehsanenaloo/RTLY" rel="noopener">GitHub &#8599;</a></nav><div class="header-tools"><span data-search-host></span><button type="button" class="icon-button" data-theme-toggle hidden>Theme</button></div></div></header>
+<main id="main">
+<div class="shell page-intro"><p class="breadcrumbs"><a href="../index.html">Home</a> / <a href="index.html">Guides</a> / Using RTLY</p><h1>Shortcut and right-click menu</h1><p class="lead">Two quick ways to switch RTLY on or off for the site you are on, without opening the popup.</p><p class="meta-line">Checked against the source on 2026-10-08, RTLY 2.0.0.</p></div>
+<div class="shell doc-layout has-toc">
+<aside class="sidebar"><details open><summary>Browse the guides</summary><nav aria-label="Guides"><a href="index.html">All guides</a><p>Get started</p><a href="quick-start.html">Quick start</a><a href="installation.html">Installation</a><p>Using RTLY</p><a href="popup.html">The popup</a><a href="settings.html">The settings page</a><a href="modes-and-direction.html">Modes and direction</a><a href="shortcut-and-menu.html" aria-current="page">Shortcut and right-click menu</a><a href="supported-sites.html">Supported sites</a><a href="languages-and-appearance.html">Languages and appearance</a><p>Trust and support</p><a href="privacy-and-data.html">Privacy, permissions and data</a><a href="troubleshooting-faq.html">Troubleshooting and FAQ</a><a href="limits.html">Limits and known problems</a><a href="../privacy.html">Privacy policy</a></nav></details></aside>
+<article class="prose">
+
+<h2 id="keyboard-shortcut">Keyboard shortcut<a class="anchor" href="#keyboard-shortcut" aria-label="Link to this section">#</a></h2>
+<p>Press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> on a supported site. RTLY flips the setting for that site and reloads its open tabs. The shortcut does nothing on a page that is not one of the <a href="supported-sites.html">supported sites</a>.</p>
+<p>The key is a suggestion. Your browser keeps another extension's or its own shortcut if it clashes. You can see and change the key here:</p>
+<ul>
+  <li>Chrome: <code>chrome://extensions/shortcuts</code></li>
+  <li>Edge: <code>edge://extensions/shortcuts</code></li>
+  <li>Firefox: <code>about:addons</code>, then the gear button and <strong>Manage Extension Shortcuts</strong></li>
+</ul>
+
+<h2 id="right-click-menu">Right-click menu<a class="anchor" href="#right-click-menu" aria-label="Link to this section">#</a></h2>
+<p>Right-click anywhere on the page, or right-click the RTLY toolbar icon, and choose the RTLY item (in English: "RTLY: Enable/disable for this site"). It does the same as the shortcut. The item is also translated into the browser languages that RTLY has a translation for.</p>
+
+<h2 id="what-happens">What happens<a class="anchor" href="#what-happens" aria-label="Link to this section">#</a></h2>
+<ol>
+  <li>RTLY finds which supported site the tab belongs to.</li>
+  <li>If the site was on (or never set), it turns it off. If it was off, it turns it on.</li>
+  <li>RTLY reloads every open tab of that site, so the change takes effect everywhere.</li>
+</ol>
+<aside class="callout warn"><span class="callout-title">Be careful</span><p>The reload loses anything you have not sent. If you were writing a message, copy it first.</p></aside>
+<p>There is no message on screen to confirm the change. Open the popup, or look at the page, to see the result.</p>
+<div class="reading-footer"><a class="prev" href="modes-and-direction.html"><small>Previous</small>Modes and direction</a><a class="next" href="supported-sites.html"><small>Next</small>Supported sites</a></div>
+</article>
+<nav class="toc" aria-label="On this page"><p>On this page</p><ol><li><a href="#keyboard-shortcut">Keyboard shortcut</a></li><li><a href="#right-click-menu">Right-click menu</a></li><li><a href="#what-happens">What happens</a></li></ol></nav>
+</div>
+</main>
+<footer class="footer"><div class="shell footer-inner"><p>RTLY user guide &middot; MIT licensed &middot; Maintained by Ehsan Enaloo</p><div><a href="../guides/troubleshooting-faq.html">Troubleshooting</a><a href="../guides/limits.html">Limits</a><a href="../privacy.html">Privacy</a><a href="https://github.com/ehsanenaloo/RTLY" rel="noopener">Source repository &#8599;</a></div></div></footer>
 </body>
 </html>
