@@ -1,17 +1,17 @@
 {
-   "actionTitle": {
-      "message": "RTLY"
-   },
-   "commandToggleSite": {
-      "message": "RTLY: فعال/غیرفعال برای این سایت"
-   },
-   "contextMenuToggle": {
-      "message": "RTLY: فعال/غیرفعال برای این سایت"
-   },
-   "extensionDescription": {
-      "message": "ابزار راست‌چین و فونت برای زبان‌های راست‌به‌چپ (فارسی، عربی، عبری، اردو) در ChatGPT، Claude، Gemini و دیگر ابزارهای هوش مصنوعی."
-   },
-   "extensionName": {
-      "message": "RTLY — ابزار راست‌چین و فونت برای چت‌های هوش مصنوعی"
-   }
+  "actionTitle": {
+    "message": "RTLY"
+  },
+  "commandToggleSite": {
+    "message": "RTLY: فعال/غیرفعال برای این سایت"
+  },
+  "contextMenuToggle": {
+    "message": "RTLY: فعال/غیرفعال برای این سایت"
+  },
+  "extensionDescription": {
+    "message": "راست‌چین‌سازی متن و فونت فارسی خوانا برای وب‌سایت‌های چت هوش مصنوعی. رایگان، خصوصی و متن‌باز."
+  },
+  "extensionName": {
+    "message": "RTLY — ابزار راست‌چین و فونت برای چت‌های هوش مصنوعی"
+  }
 }

@@ -1,17 +1,17 @@
 {
-   "actionTitle": {
-      "message": "RTLY"
-   },
-   "commandToggleSite": {
-      "message": "RTLY: הפעלה/השבתה לאתר זה"
-   },
-   "contextMenuToggle": {
-      "message": "RTLY: הפעלה/השבתה לאתר זה"
-   },
-   "extensionDescription": {
-      "message": "כלי יישור RTL וגופן לערבית, פרסית, עברית, אורדו ושפות RTL נוספות ב-ChatGPT, Claude, Gemini וכלי בינה מלאכותית נוספים."
-   },
-   "extensionName": {
-      "message": "RTLY — כלי RTL וגופן לצ׳אטים של בינה מלאכותית"
-   }
+  "actionTitle": {
+    "message": "RTLY"
+  },
+  "commandToggleSite": {
+    "message": "RTLY: הפעלה/השבתה לאתר זה"
+  },
+  "contextMenuToggle": {
+    "message": "RTLY: הפעלה/השבתה לאתר זה"
+  },
+  "extensionDescription": {
+    "message": "כיוון טקסט מימין לשמאל וגופן פרסי נקי לאתרי צ'אט של בינה מלאכותית. חינמי, פרטי ובקוד פתוח."
+  },
+  "extensionName": {
+    "message": "RTLY — כלי RTL וגופן לצ׳אטים של בינה מלאכותית"
+  }
 }

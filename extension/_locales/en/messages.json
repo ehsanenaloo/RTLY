@@ -1,17 +1,17 @@
 {
-   "actionTitle": {
-      "message": "RTLY"
-   },
-   "commandToggleSite": {
-      "message": "RTLY: Toggle for this site"
-   },
-   "contextMenuToggle": {
-      "message": "RTLY: Enable/disable for this site"
-   },
-   "extensionDescription": {
-      "message": "RTL alignment and font tool for Arabic, Persian, Hebrew, Urdu and other RTL languages in ChatGPT, Claude, Gemini and more."
-   },
-   "extensionName": {
-      "message": "RTLY — RTL & Font Tool for AI Chats"
-   }
+  "actionTitle": {
+    "message": "RTLY"
+  },
+  "commandToggleSite": {
+    "message": "RTLY: Toggle for this site"
+  },
+  "contextMenuToggle": {
+    "message": "RTLY: Enable/disable for this site"
+  },
+  "extensionDescription": {
+    "message": "Right-to-left text and a clean Persian font for AI chat websites. Free, private and open source."
+  },
+  "extensionName": {
+    "message": "RTLY — RTL & Font Tool for AI Chats"
+  }
 }

@@ -1,17 +1,17 @@
 {
-   "actionTitle": {
-      "message": "RTLY"
-   },
-   "commandToggleSite": {
-      "message": "RTLY: تفعيل/تعطيل لهذا الموقع"
-   },
-   "contextMenuToggle": {
-      "message": "RTLY: تفعيل/تعطيل لهذا الموقع"
-   },
-   "extensionDescription": {
-      "message": "أداة محاذاة RTL وخطوط للعربية والفارسية والعبرية والأردية واللغات الأخرى في ChatGPT وClaude وGemini وأدوات ذكاء اصطناعي أخرى."
-   },
-   "extensionName": {
-      "message": "RTLY — أداة RTL وخطوط لمحادثات الذكاء الاصطناعي"
-   }
+  "actionTitle": {
+    "message": "RTLY"
+  },
+  "commandToggleSite": {
+    "message": "RTLY: تفعيل/تعطيل لهذا الموقع"
+  },
+  "contextMenuToggle": {
+    "message": "RTLY: تفعيل/تعطيل لهذا الموقع"
+  },
+  "extensionDescription": {
+    "message": "اتجاه نص من اليمين إلى اليسار وخط فارسي واضح لمواقع محادثة الذكاء الاصطناعي. مجاني وخاص ومفتوح المصدر."
+  },
+  "extensionName": {
+    "message": "RTLY — أداة RTL وخطوط لمحادثات الذكاء الاصطناعي"
+  }
 }
