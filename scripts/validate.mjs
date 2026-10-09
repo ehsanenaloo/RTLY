@@ -255,6 +255,13 @@ const ROOT_ALLOW = new Set([
   // tooling artifacts that are never published / are gitignored:
   'package-lock.json', 'node_modules', '.git', 'dist',
 ]);
+// Development-only root files are listed (one per line) in technical-docs/dev-root-files.txt.
+// That folder is not published, so the public copy of this script allows nothing extra.
+try {
+  for (const line of fs.readFileSync(path.join(ROOT, 'technical-docs', 'dev-root-files.txt'), 'utf8').split(/\r?\n/)) {
+    if (line.trim() && !line.startsWith('#')) ROOT_ALLOW.add(line.trim());
+  }
+} catch { /* public tree: no technical-docs */ }
 check('repo root contains only allowlisted entries', () =>
   fs.readdirSync(ROOT).filter((n) => !ROOT_ALLOW.has(n)).map((n) => `unexpected root entry: ${n}`));
 
