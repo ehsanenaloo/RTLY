@@ -102,7 +102,7 @@ function layoutPopups({ head, sub, srcs, fa = false }) {
       <p class="sub" style="font-size:${fa ? 20 : 22}px;margin-top:16px">${sub}</p></div>
     <div style="display:flex;flex:none;gap:22px;direction:ltr;height:${ph + 40}px;align-items:flex-start">${pops}</div></div>`;
 }
-function layoutDark({ head, sub }) {
+function layoutDark({ head, sub, fa = false }) {
   return `<div style="position:absolute;inset:0;${BG_DARK}">
     <div style="position:absolute;left:80px;top:96px;width:420px"><div style="margin-bottom:26px">${mark(56)}</div>
       <h1 style="font-size:50px;color:#fff">${head}</h1><p class="sub" style="font-size:22px;margin-top:16px;color:#b9c6ca">${sub}</p></div>
@@ -137,6 +137,9 @@ export async function compose() {
     await render(layoutTop({ head: F.c1[0], sub: F.c1[1], src: baFa, w: 1180, top: 214, fa: true }), 1280, 800, out('chrome-fa-1-before-after.png'), { fa: true });
     await render(layoutPopups({ head: F.c2[0], sub: F.c2[1], srcs: [shot('popup-light'), shot('popup-menu')], fa: true }), 1280, 800, out('chrome-fa-2-popup.png'), { fa: true });
     await render(layoutTop({ head: F.c3[0], sub: F.c3[1], src: shot('options-light'), w: 1100, top: 214, fa: true }), 1280, 800, out('chrome-fa-3-options.png'), { fa: true });
+
+    await render(layoutDark({ head: 'حالت تاریک و پالت‌های رنگی', sub: 'RTLY با تم روشن، تاریک یا سیستم و چهار پالت رنگ، هماهنگ با ظاهر مرورگر شما.', fa: true }), 1280, 800, out('chrome-fa-4-dark.png'), { fa: true });
+    await render(layoutTop({ head: 'رابط کاربری به ۱۵ زبان', sub: 'فارسی، عربی، عبری، اردو، پشتو، کردی سورانی و زبان‌های دیگر راست‌به‌چپ.', src: shot('languages'), w: 1100, top: 214, fa: true }), 1280, 800, out('chrome-fa-5-languages.png'), { fa: true });
 
     // Small promo tile 440x280
     await render(`<div style="position:absolute;inset:0;background:linear-gradient(135deg,#0E7C95,#095F73);color:#fff;padding:26px 28px">
