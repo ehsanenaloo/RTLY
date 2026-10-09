@@ -22,7 +22,7 @@
 
 - [ ] `npm run validate` and `npm test` pass.
 - [ ] I tested in a real browser with the unpacked `extension/` folder (if the change touches the extension).
-- [ ] A new site is registered everywhere it must be: `content/sites/<site>.js`, `<site>.css`, `manifest.json` (content script, host permission, web-accessible resource) and the site lists. See [CONTRIBUTING.md](CONTRIBUTING.md#adding-a-new-site).
+- [ ] A new site is registered everywhere it must be: `content/sites/<site>.js`, `<site>.css`, `manifest.json` (content script, host permission, web-accessible resource) and the site lists. See [CONTRIBUTING.md](CONTRIBUTING.md#adding-a-site).
 - [ ] New or changed interface text goes through `_locales` and `shared/i18n.js`, not hard-coded strings.
 - [ ] I did not add permissions, network requests, analytics or remote code.
 - [ ] I updated `CHANGELOG.md` for user-visible changes.

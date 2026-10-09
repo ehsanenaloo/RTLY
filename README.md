@@ -158,7 +158,7 @@ Use the switch in the popup, the right-click menu item **RTLY: Enable/disable fo
 <details>
 <summary><b>Does it work on other AI sites?</b></summary>
 
-Only on the sites in the table above. Adding a site means adding its page selectors and a host permission. See [Contributing](.github/CONTRIBUTING.md#adding-a-new-site), or ask in a [feature request](https://github.com/ehsanenaloo/RTLY/issues/new?template=feature_request.yml).
+Only on the sites in the table above. Adding a site means adding its page selectors and a host permission. See [Contributing](.github/CONTRIBUTING.md#adding-a-site), or ask in a [feature request](https://github.com/ehsanenaloo/RTLY/issues/new?template=feature_request.yml).
 </details>
 
 <details>
