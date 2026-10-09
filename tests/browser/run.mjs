@@ -673,7 +673,10 @@ for (const key of Object.keys(SITE_DEFS).filter(selected)) {
         const w = s.getBoundingClientRect().width; s.remove(); return w;
       };
       await document.fonts.load('16px IranYekan', '2025');
-      await document.fonts.load('16px "RTLY Latin Digits"', '2025');
+      // The face maps to local system fonts (Segoe UI, Helvetica Neue, Roboto, Arial). A machine
+      // with none of them (e.g. a bare CI runner) rejects the load; the extension then falls back
+      // to the next font in the stack, so there is nothing to measure there.
+      try { await document.fonts.load('16px "RTLY Latin Digits"', '2025'); } catch (_) { return { noLocalLatinFont: true }; }
       const msgs = [...document.querySelectorAll('[data-fx="msg"]')];
       const size = (el) => getComputedStyle(el).fontSize;
       const out = {};
@@ -682,6 +685,11 @@ for (const key of Object.keys(SITE_DEFS).filter(selected)) {
       }
       return out;
     });
+    if (r.noLocalLatinFont) {
+      console.log(`SKIP  ${key}: digits - no local Latin digit font on this machine (Segoe UI, Helvetica Neue, Roboto or Arial)`);
+      await page.close();
+      return;
+    }
     const near = (a, b) => Math.abs(a - b) < 0.6;
     ok(!near(r.fa.persian, r.fa.latin), 'no local Latin digit font on this machine: cannot tell the digit shapes apart (set up Arial/Segoe UI/Roboto)');
     eq(r.fa.dir, 'rtl', 'Persian message dir');
