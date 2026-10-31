@@ -33,7 +33,7 @@ By taking part, you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 - **Tell us a site is broken.** AI chat sites change their pages, and RTLY then needs new selectors. Use the [broken site form](https://github.com/ehsanenaloo/RTLY/issues/new?template=broken_site.yml) with the page URL and a screenshot. This is the most useful report there is.
 - **Suggest a feature or a new site.** Use the [feature request form](https://github.com/ehsanenaloo/RTLY/issues/new?template=feature_request.yml). Describe the problem you have before the solution you want.
 - **Improve a translation.** Fix a wrong or awkward string, or add a language. See [Translations](#translations). If you do not want to edit files, use the [translation fix form](https://github.com/ehsanenaloo/RTLY/issues/new?template=translation_fix.yml).
-- **Improve the docs or screenshots.** The user guide is in [docs/](../docs/) and is published at <https://ehsanenaloo.github.io/RTLY/>. Fix errors, unclear steps, or outdated screenshots. Screenshots must not show private conversations.
+- **Improve the docs or screenshots.** The user guide is on <https://enaloo.com/apps/rtly/>. Report errors, unclear steps or outdated screenshots in an issue, with the page address. Screenshots must not show private conversations.
 - **Review pull requests.** Try a change in your own browser profile and say what you saw. This helps a lot, and anyone can do it.
 - **Fix an issue.** Pick one from the list below, say that you are on it, and open a pull request.
 

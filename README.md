@@ -12,7 +12,7 @@ A free, open-source browser extension for people who write in Persian, Arabic, H
 It runs in your browser only. No account, no tracking, no server.
 
 [![Add to Chrome](https://img.shields.io/badge/Chrome%20Web%20Store-Add%20to%20Chrome-4285F4?logo=googlechrome&logoColor=white&style=for-the-badge)](https://chromewebstore.google.com/detail/hhifipkafndnildgldggiohfkbpikmkd)
-[![User guide](https://img.shields.io/badge/User%20guide-Read%20online-0e7c95?logo=readthedocs&logoColor=white&style=for-the-badge)](https://ehsanenaloo.github.io/RTLY/)
+[![User guide](https://img.shields.io/badge/User%20guide-Read%20online-0e7c95?logo=readthedocs&logoColor=white&style=for-the-badge)](https://enaloo.com/apps/rtly/)
 [![Support RTLY](https://img.shields.io/badge/Support-enaloo.com-0E7490?style=for-the-badge)](https://enaloo.com/support/)
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
@@ -105,7 +105,7 @@ Firefox removes temporary add-ons when it closes, so you repeat these steps afte
 2. Click the RTLY toolbar icon to see the current site, the on/off switch, the mode and the font size.
 3. Open the settings (the three-dot menu in the popup, then **Settings**) for the live preview, the language and color options, and the full sites table.
 
-The [user guide](https://ehsanenaloo.github.io/RTLY/) covers every control, with screenshots.
+The [user guide](https://enaloo.com/apps/rtly/) covers every control, with screenshots.
 
 ## Privacy
 
@@ -115,15 +115,15 @@ The [user guide](https://ehsanenaloo.github.io/RTLY/) covers every control, with
 - It requests two extension permissions, `storage` and `contextMenus`, plus access to the sites listed above. It does not request the tabs, history, cookies or downloads permissions.
 - Links in the popup and settings (GitHub, the support page, the store page) open in a new tab only when you click them.
 
-Read the [privacy policy](docs/PRIVACY.md) for details.
+Read the [privacy policy](https://enaloo.com/apps/rtly/docs/privacy-policy/) for details.
 
 ## Documentation
 
 | | |
 | --- | --- |
-| [User guide](https://ehsanenaloo.github.io/RTLY/) | Every feature, with screenshots |
-| [Known limits](https://ehsanenaloo.github.io/RTLY/guides/limits.html) | What does not work or is untested |
-| [Privacy policy](docs/PRIVACY.md) | What the extension stores and what it can access |
+| [User guide](https://enaloo.com/apps/rtly/) | Every feature, with screenshots |
+| [Known limits](https://enaloo.com/apps/rtly/docs/limits/) | What does not work or is untested |
+| [Privacy policy](https://enaloo.com/apps/rtly/docs/privacy-policy/) | What the extension stores and what it can access |
 | [Changelog](CHANGELOG.md) | What changed in each release |
 | [Contributing](.github/CONTRIBUTING.md) | How to report bugs, add a site and send changes |
 | [Support](.github/SUPPORT.md) | Where to ask for help |

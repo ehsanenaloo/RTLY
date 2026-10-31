@@ -12,7 +12,7 @@
 فقط داخل مرورگر شما اجرا می‌شود. حساب کاربری، ردیابی و سرور ندارد.
 
 [![Add to Chrome](https://img.shields.io/badge/Chrome%20Web%20Store-Add%20to%20Chrome-4285F4?logo=googlechrome&logoColor=white&style=for-the-badge)](https://chromewebstore.google.com/detail/hhifipkafndnildgldggiohfkbpikmkd)
-[![User guide](https://img.shields.io/badge/User%20guide-Read%20online-0e7c95?style=for-the-badge)](https://ehsanenaloo.github.io/RTLY/fa/)
+[![User guide](https://img.shields.io/badge/User%20guide-Read%20online-0e7c95?style=for-the-badge)](https://enaloo.com/apps/rtly/docs/fa/)
 [![حمایت از RTLY](https://img.shields.io/badge/Support-enaloo.com-0E7490?style=for-the-badge)](https://enaloo.com/support/)
 
 </div>
@@ -68,11 +68,11 @@ ChatGPT، Claude، Gemini، Perplexity، Microsoft Copilot، Google AI Studio، 
 - RTLY برای تنظیم جهت و فونت به صفحهٔ سایت‌های بالا دسترسی دارد. متن را فقط برای تشخیص جهت می‌خواند و هرگز جایی نمی‌فرستد.
 - فقط دو مجوز `storage` و `contextMenus` را می‌خواهد، به‌علاوهٔ دسترسی به سایت‌های بالا.
 
-[سیاست حریم خصوصی](../PRIVACY.md) را بخوانید (متن مرجع انگلیسی؛ نسخهٔ فارسی در [راهنما](https://ehsanenaloo.github.io/RTLY/fa/privacy.html) است).
+[سیاست حریم خصوصی](https://enaloo.com/apps/rtly/docs/fa/privacy-policy/) را بخوانید.
 
 ## مستندات
 
-- [راهنمای کاربر](https://ehsanenaloo.github.io/RTLY/fa/) (صفحه‌های فارسی: شروع سریع، نصب، حریم خصوصی؛ راهنمای کامل به انگلیسی)
+- [راهنمای کاربر](https://enaloo.com/apps/rtly/docs/fa/) (صفحه‌های فارسی: شروع سریع، نصب، حریم خصوصی؛ راهنمای کامل به انگلیسی)
 - [تاریخچهٔ تغییرات](../../CHANGELOG.md)
 - [مشارکت](../../.github/CONTRIBUTING.md) · [پشتیبانی](../../.github/SUPPORT.md) · [امنیت](../../.github/SECURITY.md)
 

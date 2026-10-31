@@ -4,7 +4,7 @@ contact_links:
     url: https://github.com/ehsanenaloo/RTLY/security/advisories/new
     about: Please report security issues privately. Do not open a public issue.
   - name: Documentation
-    url: https://ehsanenaloo.github.io/RTLY/
+    url: https://enaloo.com/apps/rtly/
     about: Read the project site for installation and usage help before opening an issue.
   - name: Support and where to ask
     url: https://github.com/ehsanenaloo/RTLY/blob/main/.github/SUPPORT.md

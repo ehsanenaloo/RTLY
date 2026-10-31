@@ -8,7 +8,7 @@ RTLY runs inside your browser. It has no server, no account and no analytics. It
 
 ## What RTLY can access
 
-- **Pages of the supported AI chat sites.** RTLY runs only on the sites listed in the [user guide](https://ehsanenaloo.github.io/RTLY/guides/supported-sites.html) (27 address patterns for 16 sites). On those pages it reads the text to decide whether each block is right-to-left, and it changes the page's text direction, alignment and font. The text is read in memory. RTLY does not save it, copy it, log it or send it anywhere.
+- **Pages of the supported AI chat sites.** RTLY runs only on the sites listed in the [user guide](https://enaloo.com/apps/rtly/docs/supported-sites/) (27 address patterns for 16 sites). On those pages it reads the text to decide whether each block is right-to-left, and it changes the page's text direction, alignment and font. The text is read in memory. RTLY does not save it, copy it, log it or send it anywhere.
 - **The address of the active tab, on those sites only.** The extension uses it to know which site the shortcut or the right-click menu refers to, and whether to show the support heart on the toolbar icon.
 - RTLY cannot access other websites, your bookmarks, history, cookies, downloads or files, or the content of your other tabs.
 

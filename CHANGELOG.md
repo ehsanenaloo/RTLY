@@ -6,6 +6,10 @@ The format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/
 
 ## [Unreleased]
 
+### Changed
+
+- The help link in the popup opens the guide on enaloo.com.
+
 ## [2.1.0] - 2026-10-30
 
 ### Added

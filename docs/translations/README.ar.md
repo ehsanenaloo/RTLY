@@ -12,7 +12,7 @@
 تعمل داخل متصفحك فقط. بلا حساب ولا تتبّع ولا خادم.
 
 [![Add to Chrome](https://img.shields.io/badge/Chrome%20Web%20Store-Add%20to%20Chrome-4285F4?logo=googlechrome&logoColor=white&style=for-the-badge)](https://chromewebstore.google.com/detail/hhifipkafndnildgldggiohfkbpikmkd)
-[![User guide](https://img.shields.io/badge/User%20guide-Read%20online-0e7c95?style=for-the-badge)](https://ehsanenaloo.github.io/RTLY/)
+[![User guide](https://img.shields.io/badge/User%20guide-Read%20online-0e7c95?style=for-the-badge)](https://enaloo.com/apps/rtly/)
 [![دعم RTLY](https://img.shields.io/badge/Support-enaloo.com-0E7490?style=for-the-badge)](https://enaloo.com/support/)
 
 </div>
@@ -68,11 +68,11 @@ ChatGPT وClaude وGemini وPerplexity وMicrosoft Copilot وGoogle AI Studio و
 - تحتاج RTLY إلى الوصول إلى صفحات المواقع المذكورة لضبط الاتجاه والخط. تقرأ النص فقط لتحديد اتجاهه ولا ترسله إلى أي مكان.
 - تطلب إذني `storage` و`contextMenus` فقط، إضافةً إلى الوصول إلى المواقع المذكورة.
 
-اقرأ [سياسة الخصوصية](../PRIVACY.md) (بالإنجليزية).
+اقرأ [سياسة الخصوصية](https://enaloo.com/apps/rtly/docs/privacy-policy/) (بالإنجليزية).
 
 ## التوثيق
 
-- [دليل المستخدم](https://ehsanenaloo.github.io/RTLY/) (بالإنجليزية، مع صفحات فارسية)
+- [دليل المستخدم](https://enaloo.com/apps/rtly/) (بالإنجليزية، مع صفحات فارسية)
 - [سجل التغييرات](../../CHANGELOG.md)
 - [المساهمة](../../.github/CONTRIBUTING.md) · [الدعم](../../.github/SUPPORT.md) · [الأمان](../../.github/SECURITY.md)
 

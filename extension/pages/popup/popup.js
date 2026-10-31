@@ -22,7 +22,7 @@
 (function () {
   "use strict";
 
-  const HELP_URL = "https://ehsanenaloo.github.io/RTLY/";
+  const HELP_URL = "https://enaloo.com/apps/rtly/";
   const WEBSITE_URL = "https://www.enaloo.com";
   const SUPPORT_URL = "https://enaloo.com/support/";
   const FEEDBACK_URL = "https://enaloo.com/apps/rtly/feedback/";
