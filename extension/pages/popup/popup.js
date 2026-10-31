@@ -16,7 +16,7 @@
  * but the content script applied "rtl_only" via the liteMode fallback).
  *
  * New in 1.8: overflow menu (settings / about / theme / color palette), About
- * modal, support button (buymeacoffee), dynamic rotating footer (see footer.js
+ * modal, support button, dynamic rotating footer (see footer.js
  * + footerConfig.js), popup-level theme application, color palette feature.
  */
 (function () {
@@ -24,7 +24,26 @@
 
   const HELP_URL = "https://ehsanenaloo.github.io/RTLY/";
   const WEBSITE_URL = "https://www.enaloo.com";
-  const SUPPORT_URL = "https://buymeacoffee.com/enaloo";
+  const SUPPORT_URL = "https://enaloo.com/support/";
+  const FEEDBACK_URL = "https://enaloo.com/apps/rtly/feedback/";
+
+  // Report links carry only the version and the browser name and major version.
+  function feedbackUrl(kind) {
+    const ua = navigator.userAgent || "";
+    let b = "other", bv = "", m;
+    if ((m = /\bEdg\/(\d+)/.exec(ua))) { b = "edge"; bv = m[1]; }
+    else if ((m = /\bFirefox\/(\d+)/.exec(ua))) { b = "firefox"; bv = m[1]; }
+    else if (!/\bOPR\/|\bVivaldi\//.test(ua) && (m = /\bChrome\/(\d+)/.exec(ua))) { b = "chrome"; bv = m[1]; }
+    let v = "";
+    try { v = chrome.runtime.getManifest().version; } catch (_) {}
+    const q = new URLSearchParams({ kind });
+    if (v) q.set("v", v);
+    if (kind === "bug") {
+      q.set("b", b);
+      if (bv) q.set("bv", bv);
+    }
+    return `${FEEDBACK_URL}?${q}`;
+  }
 
   // ── Support nudge config ───────────────────────────────────────────
   // A quiet, in-popup banner shown at most once a month. The toolbar-icon
@@ -37,9 +56,9 @@
 
   // Public store listing (Chrome Web Store id). Edge installs the same listing;
   // Firefox has no listing yet, so it points to the GitHub repository.
+  // One rule for the whole UI: shared/footer.js picks the store the user installed from.
   function nudgeStoreUrl() {
-    if (/firefox/i.test(navigator.userAgent)) return "https://github.com/ehsanenaloo/RTLY";
-    return "https://chromewebstore.google.com/detail/hhifipkafndnildgldggiohfkbpikmkd/reviews";
+    return window.RTLY_FOOTER && window.RTLY_FOOTER.storeReviewUrl ? window.RTLY_FOOTER.storeReviewUrl() : "";
   }
   // Single source of the "is it time?" rule — mirrored in background.js.
   function nudgeIsDue(nudge, now) {
@@ -88,6 +107,7 @@
     "poe.com": "poe.com",
     "aistudio.google.com": "aistudio.google.com",
     "notebooklm.google.com": "notebooklm.google.com",
+    "notebook.google.com": "notebooklm.google.com",
     "grok.com": "grok.com",
     "chat.z.ai": "z.ai",
     "z.ai": "z.ai",
@@ -160,24 +180,26 @@
       chrome.storage.local.get(keys, (r) => resolve(chrome.runtime?.lastError ? {} : r));
     });
   }
+  // Resolves true when the write persisted, false when it failed. Never rejects.
   function setStorage(obj) {
     return new Promise((resolve) => {
-      if (!chrome?.storage?.local) return resolve();
-      chrome.storage.local.set(obj, () => resolve());
+      if (!chrome?.storage?.local) return resolve(false);
+      try {
+        chrome.storage.local.set(obj, () => {
+          if (chrome.runtime?.lastError) {
+            console.debug("RTLY: storage set failed", chrome.runtime.lastError.message);
+            resolve(false);
+            return;
+          }
+          resolve(true);
+        });
+      } catch (e) {
+        console.debug("RTLY: storage set threw", e);
+        resolve(false);
+      }
     });
   }
 
-
-  // Fallback writer (only used when chrome.runtime.sendMessage is unavailable). The background
-  // service worker is the single writer of siteSettings; if we must write from a page we re-read
-  // the stored map IMMEDIATELY before the write instead of writing a possibly stale in-memory
-  // snapshot, so a toggle made elsewhere in the meantime (another tab, the background) survives.
-  async function writeSiteSettingFallback(siteId, status) {
-    const stored = await getStorage(["siteSettings"]);
-    const cur = canonicalizeLegacyKeys({ ...(stored.siteSettings || {}) });
-    cur[siteId] = status;
-    await setStorage({ siteSettings: cur });
-  }
 
   // ── Theme handling (popup edition) ───────────────────────────────
   function applyTheme(theme) {
@@ -425,7 +447,8 @@
         rollback();
       }
     } else {
-      writeSiteSettingFallback(siteId, status);
+      // Only the service worker writes siteSettings; a page-side write could overwrite a concurrent change.
+      rollback();
     }
   }
 
@@ -434,8 +457,14 @@
     // (which reapplies under the new effective mode without a reload). No tab
     // matching / reload here — that removes the popup-only reload flash and
     // the chatgpt alias gap that used to miss open chat.openai.com tabs.
+    const previousMode = State.siteModes[siteId];
     State.siteModes[siteId] = mode;
-    setStorage({ siteModes: State.siteModes });
+    setStorage({ siteModes: State.siteModes }).then((ok) => {
+      if (ok) return;
+      if (previousMode === undefined) delete State.siteModes[siteId];
+      else State.siteModes[siteId] = previousMode;
+      renderSitesList(State.currentSite, State);
+    });
     renderSitesList(State.currentSite, State);
   }
 
@@ -444,8 +473,14 @@
     if (scale < 85) scale = 85;
     if (scale > 120) scale = 120;
     if (scale === State.fontScale) return;
+    const previousScale = State.fontScale;
     State.fontScale = scale;
-    setStorage({ fontScale: scale });
+    setStorage({ fontScale: scale }).then((ok) => {
+      if (ok) return;
+      State.fontScale = previousScale;
+      const v = document.getElementById("fontScaleValue");
+      if (v) v.textContent = previousScale + "%";
+    });
     // Update the value display + button disabled-states in place.
     const valueEl = document.getElementById("fontScaleValue");
     if (valueEl) valueEl.textContent = scale + "%";
@@ -602,15 +637,22 @@
       btn.setAttribute("aria-pressed", String(State.theme === item.mode));
       btn.classList.toggle("is-active", State.theme === item.mode);
       setSvg(btn, themeIconSvg(item.iconKey));
+      const paint = (mode) => themeButtons.querySelectorAll("[data-theme-pip]").forEach((b) => {
+        const active = b.dataset.themePip === mode;
+        b.classList.toggle("is-active", active);
+        b.setAttribute("aria-pressed", String(active));
+      });
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
+        const previous = State.theme;
         State.theme = item.mode;
         applyTheme(item.mode);
-        setStorage({ theme: item.mode });
-        themeButtons.querySelectorAll("[data-theme-pip]").forEach((b) => {
-          const active = b.dataset.themePip === item.mode;
-          b.classList.toggle("is-active", active);
-          b.setAttribute("aria-pressed", String(active));
+        paint(item.mode);
+        setStorage({ theme: item.mode }).then((ok) => {
+          if (ok) return;
+          State.theme = previous;
+          applyTheme(previous);
+          paint(previous);
         });
       });
       themeButtons.appendChild(btn);
@@ -635,15 +677,22 @@
       btn.classList.toggle("is-active", State.colorPalette === item.id);
       btn.style.setProperty("--swatch-color", item.color);
       btn.innerHTML = '<span class="rtly-palette-dot" aria-hidden="true"></span>';
+      const paint = (id) => paletteButtons.querySelectorAll("[data-palette-id]").forEach((b) => {
+        const active = b.dataset.paletteId === id;
+        b.classList.toggle("is-active", active);
+        b.setAttribute("aria-pressed", String(active));
+      });
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
+        const previous = State.colorPalette;
         State.colorPalette = item.id;
         applyPalette(item.id);
-        setStorage({ colorPalette: item.id });
-        paletteButtons.querySelectorAll("[data-palette-id]").forEach((b) => {
-          const active = b.dataset.paletteId === item.id;
-          b.classList.toggle("is-active", active);
-          b.setAttribute("aria-pressed", String(active));
+        paint(item.id);
+        setStorage({ colorPalette: item.id }).then((ok) => {
+          if (ok) return;
+          State.colorPalette = previous;
+          applyPalette(previous);
+          paint(previous);
         });
       });
       paletteButtons.appendChild(btn);
@@ -726,7 +775,14 @@
     supportActions.appendChild(coffeeBtn);
     support.appendChild(supportActions);
 
-    const body = el("div", { class: "rtly-about-body" }, hero, tagline, support);
+    const report = el("section", { class: "rtly-about-report" });
+    for (const [kind, key] of [["bug", "aboutReportBug"], ["feature", "aboutSuggestFeature"]]) {
+      report.appendChild(el("a", {
+        class: "rtly-about-link", href: feedbackUrl(kind), target: "_blank", rel: "noopener"
+      }, t(key)));
+    }
+
+    const body = el("div", { class: "rtly-about-body" }, hero, tagline, support, report);
     modal.append(head, body);
     overlay.appendChild(modal);
     root.appendChild(overlay);

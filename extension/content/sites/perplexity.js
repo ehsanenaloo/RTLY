@@ -26,6 +26,7 @@
       "main article",
       ".message"
     ],
-    "heuristicFaScan": true
+    "heuristicFaScan": true,
+    "listDirection": true
   };
 })();

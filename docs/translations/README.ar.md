@@ -13,25 +13,25 @@
 
 [![Add to Chrome](https://img.shields.io/badge/Chrome%20Web%20Store-Add%20to%20Chrome-4285F4?logo=googlechrome&logoColor=white&style=for-the-badge)](https://chromewebstore.google.com/detail/hhifipkafndnildgldggiohfkbpikmkd)
 [![User guide](https://img.shields.io/badge/User%20guide-Read%20online-0e7c95?style=for-the-badge)](https://ehsanenaloo.github.io/RTLY/)
-[![Buy me a coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/enaloo)
+[![دعم RTLY](https://img.shields.io/badge/Support-enaloo.com-0E7490?style=for-the-badge)](https://enaloo.com/support/)
 
 </div>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="../assets/screenshots/before-after-dark.png">
-  <img src="../assets/screenshots/before-after-light.png" alt="الإجابة الفارسية نفسها بدون RTLY (محاذاة لليسار) ومعه (محاذاة لليمين بخط IranYekan)">
+  <img src="../assets/screenshots/before-after-light.png" alt="الإجابة الفارسية نفسها بدون RTLY (محاذاة لليسار) ومعه (محاذاة لليمين بخط RTLY)">
 </picture>
 
 ## ما هي RTLY؟
 
 معظم مواقع الدردشة بالذكاء الاصطناعي مبنية للنص من اليسار إلى اليمين. عند الكتابة أو القراءة بالفارسية أو العربية أو العبرية تلتصق الأسطر بالجهة الخطأ، وتنتقل علامات الترقيم من مكانها، وتختلط الجمل التي تجمع الإنجليزية مع لغة أخرى، ويكون الخط الافتراضي غير مناسب غالبًا.
 
-تعالج RTLY ذلك في الصفحة نفسها. تفحص كل رسالة من حروفها، وإذا كانت في معظمها بكتابة من اليمين إلى اليسار تضبط الاتجاه وتطبّق خط IranYekan المرفق. تبقى الرسائل الإنجليزية من اليسار إلى اليمين بخط الموقع نفسه. وتترك RTLY كتل الشيفرة والأيقونات والقوائم والشريط الجانبي كما هي.
+تعالج RTLY ذلك في الصفحة نفسها. تفحص كل رسالة من حروفها، وإذا كانت في معظمها بكتابة من اليمين إلى اليسار تضبط الاتجاه وتطبّق خطًا فارسيًا أو عربيًا مرفقًا. تبقى الرسائل الإنجليزية من اليسار إلى اليمين بخط الموقع نفسه. وتترك RTLY كتل الشيفرة والأيقونات والقوائم والشريط الجانبي كما هي.
 
 ## المزايا
 
 - **اتجاه تلقائي** لكل رسالة اعتمادًا على الحروف.
-- **خط IranYekan** مرفق بالإضافة، ويُطبَّق فقط على النص الذي يحوي حروفًا عربية الكتابة.
+- **الخطوط** مرفقة بالإضافة (الافتراضي Vazirmatn، ويمكنك اختيار غيره من الإعدادات)، ويُطبَّق فقط على النص الذي يحوي حروفًا عربية الكتابة.
 - **ثلاثة أوضاع لكل موقع:** كامل، الخط فقط، الاتجاه فقط. يسري تغيير الوضع دون إعادة تحميل.
 - **تشغيل وإيقاف لكل موقع** من النافذة المنبثقة أو صفحة الإعدادات أو قائمة النقر الأيمن أو الاختصار `Alt+Shift+R`.
 - **حجم الخط** من 85٪ إلى 120٪.
@@ -82,8 +82,8 @@ ChatGPT وClaude وGemini وPerplexity وMicrosoft Copilot وGoogle AI Studio و
 
 ## المساهمة والدعم
 
-نرحب ببلاغات الأخطاء وبلاغات المواقع المعطلة وتصحيحات الترجمة والطلبات الصغيرة. وإذا وفّرت لك RTLY وقتًا فيمكنك [شراء قهوة](https://buymeacoffee.com/enaloo).
+نرحب ببلاغات الأخطاء وبلاغات المواقع المعطلة وتصحيحات الترجمة والطلبات الصغيرة. وإذا وفّرت لك RTLY وقتًا فيمكنك [دعم المشروع](https://enaloo.com/support/).
 
 ## الترخيص
 
-[MIT](../../LICENSE). حقوق النشر 2026 Ehsan Enaloo. يغطي ترخيص MIT شيفرة هذا المستودع؛ أما ملفات خط IranYekan وشعارات المواقع فهي مواد طرف ثالث ولها شروطها.
+[MIT](../../LICENSE). حقوق النشر 2026 Ehsan Enaloo. يغطي ترخيص MIT شيفرة هذا المستودع؛ أما ملفات الخطوط وشعارات المواقع فهي مواد طرف ثالث ولها شروطها.

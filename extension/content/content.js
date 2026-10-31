@@ -1,4 +1,4 @@
-// RTLY content script: sets text direction and the IranYekan font on supported
+// RTLY content script: sets text direction and the Persian and Arabic fonts on supported
 // AI chat sites. Performance-sensitive and domain-gated.
 //
 // Per-site selectors and flags live in content/sites/*.js (loaded first, they
@@ -25,6 +25,7 @@ const TARGET_DOMAINS = [
   "chat.z.ai",
   "z.ai",
   "notebooklm.google.com",
+  "notebook.google.com", // NotebookLM's new address ("Gemini Notebook")
   "chat.deepseek.com",
   "qwen.ai",
   // Note: chat.qwen.ai is intentionally NOT a separate TARGET_DOMAINS entry.
@@ -47,6 +48,7 @@ const CANONICAL = {
   "www.qwen.ai": "qwen.ai",
   "chat.qwen.ai": "qwen.ai",
   "chat.z.ai": "z.ai",
+  "notebook.google.com": "notebooklm.google.com",
   "www.bing.com": "bing.com",
 };
 
@@ -65,14 +67,168 @@ const canonicalSite = siteKey ? CANONICAL[siteKey] || siteKey : null;
 // is initialized before bootstrap() touches it.
 
 // ---------- Config ----------
-// فونت ثابت: ایران‌یکان برای همهٔ سایت‌ها
-const FONT_STACK = "'IranYekan', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-// v2.0: IranYekan draws ASCII digits as Persian digits. For text RTLY itself resolved as LTR
-// (English-majority text that merely contains some Persian, or an English island inside a
-// Persian message) a digits-only face is placed FIRST: "RTLY Latin Digits" maps U+0030-0039 to a
-// system font (see injectIranYekanFont), everything else falls through to IranYekan. Persian (RTL)
-// text keeps the Persian digit shapes.
+// One internal font family, filled by injectFonts() from the font the user picked. Inline styles and
+// CSS refer to this name only, so a font change just rewrites the @font-face rules. FONT_MARK is the
+// prefix any inline font-family written by RTLY contains.
+const FONT_MARK = "RTLY Font";
+const FONT_TAIL = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const FONT_STACK = "'" + FONT_MARK + "', " + FONT_TAIL;
+// True for an inline font-family written by RTLY. Older versions wrote "IranYekan"; a page can keep such
+// a style (a site that stores message HTML), so it counts as ours and is rewritten or removed.
+// Exact inline values older versions wrote. A page-authored font-family that merely mentions IranYekan
+// is not an RTLY leftover and is never touched.
+const LEGACY_FONT_VALUES = new Set([
+  'IranYekan, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  '"RTLY Latin Digits", IranYekan, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+]);
+const isLegacyRtlyFont = (value) => !!value && LEGACY_FONT_VALUES.has(value);
+const isRtlyFont = (value) => !!value && (value.includes(FONT_MARK) || isLegacyRtlyFont(value));
+
+// What the page had in the dir attribute before RTLY first wrote it, so a disable puts it back:
+// el -> { dir: { orig, ours } }. orig is null when the element already carried RTLY marks (restored HTML).
+const ownedOrig = new WeakMap();
+const ownedRecord = (el) => {
+  let rec = ownedOrig.get(el);
+  if (!rec) { rec = Object.create(null); ownedOrig.set(el, rec); }
+  return rec;
+};
+// Direction, alignment, bidi and font are not written as inline styles. Each one is an attribute
+// (data-rtly-s-*), and one stylesheet (ownedStyleCss) turns the attributes into !important declarations.
+// On a long page an attribute costs the browser much less than an inline style, and the page's own
+// inline styles are never touched. Values: direction rtl|ltr, text-align start|left|right,
+// text-align-last auto, unicode-bidi isolate|plaintext, font-family rtl (FONT_STACK) | ltr (FONT_STACK_LTR).
+const OWNED_STYLE_ATTR = {
+  "direction": "data-rtly-s-dir",
+  "text-align": "data-rtly-s-align",
+  "text-align-last": "data-rtly-s-last",
+  "unicode-bidi": "data-rtly-s-bidi",
+  "font-family": "data-rtly-s-font",
+};
+const OWNED_STYLE_SELECTOR = Object.values(OWNED_STYLE_ATTR).map((a) => "[" + a + "]").join(", ");
+const ownedStyleToken = (prop, value) => (prop === "font-family" ? (value === FONT_STACK_LTR ? "ltr" : "rtl") : value);
+
+function setOwnedStyle(el, prop, value) {
+  ensureOwnedStyleSheet();
+  const name = OWNED_STYLE_ATTR[prop];
+  const token = ownedStyleToken(prop, value);
+  if (el.getAttribute(name) !== token) el.setAttribute(name, token);
+}
+
+// The value RTLY set for `prop` on `el` (as passed to setOwnedStyle), or "" when it set none.
+function ownedStyle(el, prop) {
+  const token = el.getAttribute(OWNED_STYLE_ATTR[prop]);
+  if (token === null) return "";
+  if (prop === "font-family") return token === "ltr" ? FONT_STACK_LTR : FONT_STACK;
+  return token;
+}
+
+// Inline !important values written by an RTLY build that styled inline (a tab open during an update, or a
+// site that stores message HTML) are recognised by the marks next to them and by a value RTLY writes,
+// and removed too. Any other inline value belongs to the page.
+const INLINE_RTLY_VALUES = {
+  "direction": ["rtl", "ltr"],
+  "text-align": ["start", "left", "right"],
+  "text-align-last": ["auto"],
+  "unicode-bidi": ["isolate", "plaintext"],
+};
+const carriesInlineRtlyStyle = (el, prop) => {
+  if (!el.style) return false;
+  const value = el.style.getPropertyValue(prop);
+  if (!value) return false;
+  if (prop === "font-family") return isRtlyFont(el.style.fontFamily);
+  const d = el.dataset;
+  const marked = d.rtlyDir !== undefined || d.rtlyKeep !== undefined || d.rtlyLine !== undefined;
+  return marked && el.style.getPropertyPriority(prop) === "important" && INLINE_RTLY_VALUES[prop].includes(value);
+};
+
+function releaseOwnedStyle(el, prop) {
+  const name = OWNED_STYLE_ATTR[prop];
+  if (el.hasAttribute(name)) el.removeAttribute(name);
+  if (carriesInlineRtlyStyle(el, prop)) el.style.removeProperty(prop);
+}
+
+// The rules sit in a cascade layer in a <style> placed first in <head>. For !important declarations an
+// earlier layer beats every later layer and all unlayered rules, whatever their specificity, so the page's
+// !important rules (Tailwind utilities are layered) and RTLY's own site CSS cannot override them. Only an
+// inline !important value of the page itself wins.
+const OWNED_STYLE_ID = "rtly-owned-styles";
+function ownedStyleCss() {
+  const a = OWNED_STYLE_ATTR;
+  return `@layer rtly-owned {
+[${a["direction"]}="rtl"] { direction: rtl !important; }
+[${a["direction"]}="ltr"] { direction: ltr !important; }
+[${a["text-align"]}="start"] { text-align: start !important; }
+[${a["text-align"]}="left"] { text-align: left !important; }
+[${a["text-align"]}="right"] { text-align: right !important; }
+[${a["text-align-last"]}="auto"] { text-align-last: auto !important; }
+[${a["unicode-bidi"]}="isolate"] { unicode-bidi: isolate !important; }
+[${a["unicode-bidi"]}="plaintext"] { unicode-bidi: plaintext !important; }
+[${a["font-family"]}="rtl"] { font-family: ${FONT_STACK} !important; }
+[${a["font-family"]}="ltr"] { font-family: ${FONT_STACK_LTR} !important; }
+[data-rtly-keep="formula"], [data-rtly-keep="formula"] * { direction: ltr !important; }
+}`;
+}
+let ownedStyleEl = null;
+function ensureOwnedStyleSheet() {
+  if (ownedStyleEl && ownedStyleEl.isConnected) return;
+  try {
+    ownedStyleEl = document.getElementById(OWNED_STYLE_ID) || document.createElement("style");
+    ownedStyleEl.id = OWNED_STYLE_ID;
+    const css = ownedStyleCss();
+    if (ownedStyleEl.textContent !== css) ownedStyleEl.textContent = css;
+    const parent = document.head || document.documentElement;
+    if (parent.firstChild !== ownedStyleEl) parent.insertBefore(ownedStyleEl, parent.firstChild);
+  } catch (_) {}
+}
+function removeOwnedStyleSheet() {
+  const el = ownedStyleEl || document.getElementById(OWNED_STYLE_ID);
+  if (el) el.remove();
+  ownedStyleEl = null;
+}
+
+function setOwnedDir(el, dir) {
+  const rec = ownedRecord(el);
+  if (!rec.dir) rec.dir = { orig: el.dataset.rtlyDir !== undefined ? null : el.getAttribute("dir"), ours: "" };
+  el.setAttribute("dir", dir);
+  rec.dir.ours = dir;
+}
+
+// Returns true when it handled the dir attribute (a record existed).
+function releaseOwnedDir(el) {
+  const rec = ownedOrig.get(el);
+  const own = rec && rec.dir;
+  if (!own) return false;
+  if (el.getAttribute("dir") === own.ours) {
+    if (own.orig !== null) el.setAttribute("dir", own.orig);
+    else el.removeAttribute("dir");
+  }
+  delete rec.dir;
+  return true;
+}
+// For text RTLY resolved as LTR (English-majority text that merely contains some Persian, or an
+// English island inside a Persian message) a digits-only face is placed FIRST: "RTLY Latin Digits"
+// maps U+0030-0039 to a system font (see injectFonts), so ASCII digits stay Latin even in a font
+// that draws them as Persian digits.
 const FONT_STACK_LTR = "'RTLY Latin Digits', " + FONT_STACK;
+
+// Bundled open-source fonts (SIL OFL, see fonts/LICENSES.txt). Each entry is [file prefix, unicode-range
+// or null]; the options page lists the same ids (pages/options/options.js FONT_CHOICES). The user
+// always has exactly one active: a Persian font or an Arabic font.
+const FA_RANGE = "U+0600-06FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE80-FEFC";
+const LATIN_RANGE = "U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD";
+const FONT_CATALOG = {
+  // The Farsi-digits build of Vazirmatn: ASCII digits are drawn as Persian digits (DEC-009).
+  vazirmatn: [["vazirmatn-fd", null]],
+  // Estedad draws ASCII digits as Latin; the digits of the Farsi-digits Vazirmatn are added last so
+  // Persian text keeps Persian digits with this font too.
+  estedad: [["estedad-fa", FA_RANGE], ["estedad-latin", LATIN_RANGE], ["vazirmatn-fd", "U+0030-0039"]],
+  "noto-naskh": [["noto-naskh-ar", FA_RANGE]],
+  "noto-sans": [["noto-sans-ar", FA_RANGE]],
+  amiri: [["amiri-ar", FA_RANGE]],
+  cairo: [["cairo-ar", FA_RANGE]],
+  tajawal: [["tajawal-ar", FA_RANGE]],
+};
+const DEFAULT_FONT = "vazirmatn";
 
 // Per-site config registry, populated by content/sites/*.js (loaded before
 // this file by the manifest). In production it holds only the current site's
@@ -88,12 +244,19 @@ const LAYOUT_LTR_SITES = sitesWithFlag("layoutLtr");               // top-level 
 const HEURISTIC_FA_SCAN_SITES = sitesWithFlag("heuristicFaScan");  // extra "scan anything Persian" pass
 const NARROW_ICON_SITES = sitesWithFlag("narrowIcons");            // icon guard limited to interactive controls
 const CLEANUP_STALE_MARK_SITES = sitesWithFlag("cleanupStaleMark");// bootstrap stale-mark sweep
+const LIST_DIRECTION_SITES = sitesWithFlag("listDirection");       // list wrappers take their direction from their first text block
 const COMPREHENSIVE_SELECTOR_SITES = sitesWithFlag("comprehensiveSelectors"); // response selectors cover the whole conversation → skip the generic whole-main fallback FA scan
 
 let SETTINGS = {
   fontScale: 100,
   siteModes: {},
+  // "balanced": a line that starts with a Latin letter stays LTR unless Persian is >= 30% of it.
+  // "persian": leans RTL even when the line starts in English (Persian threshold 20-30%).
+  mixedDirection: "balanced",
+  font: DEFAULT_FONT,
 };
+
+const pickFont = (id) => (Object.prototype.hasOwnProperty.call(FONT_CATALOG, id) ? id : DEFAULT_FONT);
 
 // v1.9.20: set true only once initRTLY() runs (i.e. after the per-site
 // enabled check passes). Gates page-level font scaling and live mode reapply
@@ -140,6 +303,7 @@ let cacheGeneration = 0;
 function bustCaches() {
   cacheGeneration++;
   // WeakMap has no .clear(); we discriminate by checking generation tag on values.
+  resetSidebarAncestors();
 }
 
 // ---------- Teardown registry ----------
@@ -159,6 +323,11 @@ function registerTeardown(fn) {
 function trackInterval(id) {
   registerTeardown(() => clearInterval(id));
   return id;
+}
+// SPA navigation handlers: removed at teardown, so they never outlive the site being switched off.
+function onNavigation(handler) {
+  window.addEventListener("rtly:navigation", handler);
+  registerTeardown(() => window.removeEventListener("rtly:navigation", handler));
 }
 const trackedObservers = new Set();
 function trackObserver(obs) {
@@ -193,9 +362,11 @@ function loadSettings() {
       return;
     }
     chrome.storage.local.get(
-      ["fontScale", "siteModes"],
+      ["fontScale", "siteModes", "mixedDirection", "font"],
       (r) => {
         if (!chrome.runtime?.lastError && r) {
+          if (r.mixedDirection === "persian") SETTINGS.mixedDirection = "persian";
+          SETTINGS.font = pickFont(r.font);
           if (r.fontScale !== undefined) SETTINGS.fontScale = Number(r.fontScale) || 100;
           if (r.siteModes && typeof r.siteModes === "object") SETTINGS.siteModes = r.siteModes;
         }
@@ -321,7 +492,25 @@ const AR_FA_WORD = /[\u0590-\u05FF\u0600-\u06FF\u0700-\u074F\u0750-\u077F\u0780-
 const AR_FA_STRONG_MARKER = /[\u060C\u061B\u061F\u0650-\u0652\u064B-\u064E\u200C]/u;
 const RLE = "\u202B"; // Unicode Right-to-Left Embedding
 
-function detectDirection(text = "") {
+// Persian function words and verb forms: they show the grammar of a sentence, not its topic.
+const PERSIAN_GRAMMAR_WORDS = new Set([
+  "است", "هست", "نیست", "بود", "یک", "برای", "با", "از", "به", "در", "را", "که", "و", "هم", "این", "آن",
+  "مثل", "یا", "نه", "اما", "ولی", "تا", "اگر", "چون", "بین", "روی", "بدون", "دارد", "دارند", "شود",
+  "شده", "کرد", "کند", "کنید", "باید", "نباید",
+]);
+function countPersianGrammarWords(text) {
+  let n = 0;
+  const words = text.split(/[\s،؛؟.,:;!?()[\]"'«»\-–—/]+/);
+  for (let i = 0; i < words.length && n < 2; i++) {
+    const w = words[i];
+    if (PERSIAN_GRAMMAR_WORDS.has(w) || /^ن?می‌/.test(w)) n++;
+  }
+  return n;
+}
+
+// `grammarWords: false` for text that holds a code block: Persian comments in code say nothing about the
+// language of the message around it.
+function detectDirection(text = "", { grammarWords = true } = {}) {
   if (!text || !text.trim()) return "none";
 
   // v1.7: character-based detection.
@@ -370,12 +559,14 @@ function detectDirection(text = "") {
   // produces zero GC pressure.
   let rtlChars = 0;
   let ltrChars = 0;
+  let firstStrong = 0; // 1 = Latin letter came first, 2 = RTL character came first
   const len = text.length;
   for (let i = 0; i < len; i++) {
     const c = text.charCodeAt(i);
     // ASCII letter ranges first (most common in mixed text, fast path)
     if ((c >= 0x41 && c <= 0x5a) || (c >= 0x61 && c <= 0x7a)) {
       ltrChars++;
+      if (!firstStrong) firstStrong = 1;
       continue;
     }
     // Arabic + Persian + Hebrew + supplements + presentation forms + (v1.9.18)
@@ -397,6 +588,7 @@ function detectDirection(text = "") {
       (c >= 0xFE70 && c <= 0xFEFF)    // Arabic Presentation Forms-B
     ) {
       rtlChars++;
+      if (!firstStrong) firstStrong = 2;
     } else if (c === 0xD83A && i + 1 < len) {
       // Adlam lives in the astral plane (U+1E900–1E95F) → a surrogate pair
       // whose high half is 0xD83A and low half is 0xDD00–0xDD5F. charCodeAt
@@ -413,8 +605,19 @@ function detectDirection(text = "") {
   if (!totalScripted) return "none";
   // v1.8.15: lower threshold to 20% when an Arabic-script grammatical marker
   // is present (see AR_FA_STRONG_MARKER definition + the long comment above).
+  const ratio = rtlChars / totalScripted;
+  // "balanced" (default): a text that STARTS with a Latin letter is an English sentence unless
+  // Persian is at least 30% of it. No grammatical-marker discount for these, so an English
+  // sentence that merely ends in a Persian word keeps its period and word order. Persian text
+  // that opens with a Latin term ("Docker یک ابزار است") is still RTL, being over 30% Persian.
+  // Long English terms can keep a Persian sentence under 30% ("BMAD یک framework برای ... است"); two Persian
+  // grammar words still mark the sentence as Persian. Nouns do not count, so "... food is قورمه‌سبزی." stays ltr,
+  // and a short Persian sentence before a long English text (under 15%) does not turn the whole block.
+  if (firstStrong === 1 && SETTINGS.mixedDirection !== "persian") {
+    return ratio >= 0.30 || (grammarWords && ratio >= 0.15 && countPersianGrammarWords(text) >= 2) ? "rtl" : "ltr";
+  }
   const threshold = AR_FA_STRONG_MARKER.test(text) ? 0.20 : 0.30;
-  return rtlChars / totalScripted >= threshold ? "rtl" : "ltr";
+  return ratio >= threshold ? "rtl" : "ltr";
 }
 
 function isIcon(el) {
@@ -540,6 +743,8 @@ const SIDEBAR_SELECTOR_LIST = [
   "[class*='Nav' i]",
 ];
 const SIDEBAR_SELECTOR = SIDEBAR_SELECTOR_LIST.join(",");
+// What an app shell holds and a sidebar does not.
+const APP_SHELL_MARKER = "main, [role='main'], textarea, [contenteditable='true']";
 const CHAT_CONTEXT_SELECTOR =
   "article, [role='article'], .message, [data-message], [data-testid*='message'], [data-qa*='message'], " +
   // 1.8.7: new Claude chat-ui-core message containers
@@ -550,6 +755,33 @@ const CHAT_CONTEXT_SELECTOR =
   // containing the substring `nav` or `menu`) doesn't strip direction from
   // the bubble subtree.
   "[data-expanded]";
+
+// Nearest element at or above `el` that matches SIDEBAR_SELECTOR, or null. An app-shell element
+// (the page root with a class like `side-nav-open` or `sidebar-wrapper`) matches the heuristic too,
+// but it holds the whole app, so it says nothing about the elements below it: a real sidebar never
+// contains the main area or the composer. Each element tests the selector list once and reuses its
+// parent's answer, because `closest()` with this list re-tests every ancestor and costs about 1 ms
+// per call under ChatGPT's deep tree of long class lists. The answers live until the next response
+// pass (each pass follows a page mutation) or cache bust: classes such as `side-nav-open` change,
+// and an app shell may not hold the main area yet when the sidebar is processed first.
+let sidebarAncestorCache = new WeakMap();
+function resetSidebarAncestors() {
+  sidebarAncestorCache = new WeakMap();
+}
+function sidebarAncestor(el) {
+  const chain = [];
+  let value = null;
+  for (let n = el; n && n.nodeType === 1; n = n.parentElement) {
+    if (sidebarAncestorCache.has(n)) { value = sidebarAncestorCache.get(n); break; }
+    chain.push(n);
+  }
+  for (let i = chain.length - 1; i >= 0; i--) {
+    const n = chain[i];
+    if (n.matches(SIDEBAR_SELECTOR) && !n.querySelector(APP_SHELL_MARKER)) value = n;
+    sidebarAncestorCache.set(n, value);
+  }
+  return value;
+}
 
 function isInSidebarOrMenu(el) {
   if (!el) return false;
@@ -586,6 +818,18 @@ function computeIsInSidebarOrMenu(el) {
       el.closest('[data-testid="user-message"], .font-claude-response, .font-claude-message, .standard-markdown, [data-test-render-count]')) {
     return false;
   }
+
+  // Gemini: the app root carries `side-nav-open` while the sidebar is expanded, which matches the
+  // broad `[class*='nav']` heuristic for every element below it. Conversation turns are never chrome.
+  if (siteKey === "gemini.google.com" &&
+      el.closest &&
+      el.closest("user-query, model-response, message-content")) {
+    return false;
+  }
+
+  // Grok: the whole app sits inside a `group/sidebar-wrapper` element that matches the broad
+  // `[class*='sidebar']` heuristic. Message bubbles are never chrome.
+  if (siteKey === "grok.com" && el.closest && el.closest(".message-bubble")) return false;
 
   // v1.9.34: Claude ask_user_input choice card is NOT a menu. Diagnosed live:
   // the card's option rows were being classified as sidebar/menu because a
@@ -635,9 +879,7 @@ function computeIsInSidebarOrMenu(el) {
     return !AR_FA_WORD.test(itemText); // English menu => skip direction, Persian history => allow
   }
 
-  // Single ancestor walk against the combined selector list.
-  // This replaces the previous loop of ~30 individual `.closest()` calls.
-  const closest = el.closest && el.closest(SIDEBAR_SELECTOR);
+  const closest = el.matches && el.matches(SIDEBAR_SELECTOR) ? el : sidebarAncestor(el.parentElement);
   if (!closest) return false;
 
   // If the sidebar-flagged ancestor is itself nested inside a chat message,
@@ -658,7 +900,7 @@ function shouldSkipFont(el) {
 
 function computeShouldSkipFont(el) {
   if (isIcon(el)) return true;
-  // Element is an icon-font container: applying IranYekan would replace the
+  // Element is an icon-font container: applying the RTLY font would replace the
   // ligature glyph (e.g. "menu" → hamburger icon) with literal text.
   try {
     const cls = (el.className || "").toString();
@@ -690,7 +932,7 @@ function computeShouldSkipFont(el) {
     }
   } catch (_) {}
   // Don't skip font for menus - we want to apply font to menus, just not direction
-  if (siteKey === "notebooklm.google.com") {
+  if (canonicalSite === "notebooklm.google.com") {
     if (el.closest("header, [role='toolbar'], .toolbar, .mdc-top-app-bar")) return true;
   }
   return false;
@@ -726,30 +968,466 @@ function isMessageListWrapper(el) {
 function releaseWrapper(el) {
   if (el.dataset.rtlyDir !== undefined) {
     el.removeAttribute("dir");
-    el.style.removeProperty("direction");
-    el.style.removeProperty("text-align");
+    releaseOwnedStyle(el, "direction");
+    releaseOwnedStyle(el, "text-align");
     el.removeAttribute("data-rtly-dir");
   } else if (el.dataset.rtlyAutoDir === "1") {
     el.removeAttribute("dir");
     el.removeAttribute("data-rtly-auto-dir");
   }
   if (el.dataset.rtlyText !== undefined) el.removeAttribute("data-rtly-text");
-  if ((el.style.fontFamily || "").includes("IranYekan")) el.style.removeProperty("font-family");
+  releaseOwnedStyle(el, "font-family");
 }
 
-// True when an ancestor carries an inline IranYekan font-family written by RTLY (so `el` inherits it).
-function inheritsInlineIranYekan(el) {
+// True when an ancestor carries an RTLY font (so `el` inherits it).
+function inheritsInlineFont(el) {
   let p = el.parentElement;
   for (let i = 0; p && i < 40 && p !== document.body; i++, p = p.parentElement) {
-    if (p.style && (p.style.fontFamily || "").indexOf("IranYekan") !== -1) return true;
+    if (p.hasAttribute(OWNED_STYLE_ATTR["font-family"]) || (p.style && isRtlyFont(p.style.fontFamily))) return true;
   }
   return false;
+}
+
+// CodeMirror, Monaco, and Copilot's code viewer.
+const CODE_EDITOR_SELECTOR = ".cm-editor, .monaco-editor, [class*='scriptor-component-code-block']";
+
+// Sites whose list items wrap their text in nested blocks: the text blocks get their own
+// direction, but the <li> / <ol> / <ul> around them keep the page default, so the marker and the
+// indent sit on the wrong side. Give each list element the direction of its first text block
+// (ownership-marked, so cleanup removes exactly this).
+// Direction of the first ~160 characters of `node`'s own text. Text inside a nested list is
+// left out, so an English item that owns a Persian sub-list stays left-to-right.
+function leadingTextDirection(node) {
+  let text = "";
+  const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+  for (let t = walker.nextNode(); t && text.length < 160; t = walker.nextNode()) {
+    const nested = t.parentElement && t.parentElement.closest("ol, ul");
+    if (nested && nested !== node && node.contains(nested)) continue;
+    if (t.parentElement && t.parentElement.closest(MATH_SELECTOR)) continue;
+    text += t.nodeValue;
+  }
+  text = text.replace(/\$\$[^$]{1,400}\$\$|\$[^$\n]{1,200}\$/g, " ").trim();
+  return text ? detectDirection(text) : "none";
+}
+
+// A list reads best with ONE direction: marker, indent and every item on the same side. The
+// list takes the direction most of its items start with (ties: the first item); each item follows
+// its list. An item whose own text goes the other way keeps its text direction but is aligned to
+// the list's side, so the marker and its text stay next to each other.
+function listMajorityDirection(list) {
+  let rtl = 0, ltr = 0, first = "none";
+  const items = list.children;
+  for (let i = 0; i < items.length && i < 40; i++) {
+    if (items[i].tagName !== "LI") continue;
+    const d = leadingTextDirection(items[i]);
+    if (d === "rtl") rtl++; else if (d === "ltr") ltr++; else continue;
+    if (first === "none") first = d;
+  }
+  if (rtl === ltr) return first;
+  return rtl > ltr ? "rtl" : "ltr";
+}
+
+function setOwnedDirection(node, dir) {
+  // A list element takes the list's direction, not its first letter (a site rule such as z.ai's
+  // `[data-expanded] * { unicode-bidi: plaintext }` would hand it back to the first letter).
+  if (ownedStyle(node, "unicode-bidi") !== "isolate") setOwnedStyle(node, "unicode-bidi", "isolate");
+  if (node.dataset.rtlyDir === dir && node.getAttribute("dir") === dir) return;
+  setOwnedDir(node, dir);
+  setOwnedStyle(node, "direction", dir);
+  setOwnedStyle(node, "text-align", "start");
+  node.dataset.rtlyDir = dir;
+}
+
+function syncListDirection(root) {
+  const mode = getEffectiveMode();
+  if (mode !== "full" && mode !== "rtl_only") return;
+  const nodes = root.querySelectorAll("ol, ul, li");
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (node.closest("pre, code") || isInSidebarOrMenu(node)) continue;
+    const ownDir = node.getAttribute("dir");
+    if ((ownDir === "rtl" || ownDir === "ltr") && node.dataset.rtlyDir === undefined) continue; // site's own dir
+    if (node.tagName === "LI") {
+      const list = node.parentElement;
+      // The list's direction: its own mark, else the majority of its items (the parent can be a custom
+      // element that is not an ol/ul and carries no mark), else this item's own text.
+      let listDir = list && (list.dataset.rtlyDir === "rtl" || list.dataset.rtlyDir === "ltr") ? list.dataset.rtlyDir : null;
+      // Items wrapped in custom elements (NotebookLM) have no ol/ul as parent: use the closest list around.
+      if (!listDir && list && list.tagName !== "OL" && list.tagName !== "UL") {
+        const around = list.closest("ol, ul");
+        if (around && (around.dataset.rtlyDir === "rtl" || around.dataset.rtlyDir === "ltr")) listDir = around.dataset.rtlyDir;
+      }
+      if (!listDir && list) {
+        const majority = listMajorityDirection(list);
+        if (majority === "rtl" || majority === "ltr") listDir = majority;
+      }
+      const dir = listDir || leadingTextDirection(node);
+      if (dir !== "rtl" && dir !== "ltr") continue;
+      setOwnedDirection(node, dir);
+      applyListItemFont(node);
+      // Text blocks of this item that run the other way: keep their direction, align to the list side.
+      const side = dir === "rtl" ? "right" : "left";
+      const blocks = node.querySelectorAll("[data-rtly-dir]");
+      for (let j = 0; j < blocks.length; j++) {
+        const b = blocks[j];
+        if (b.dataset.rtlyDir === dir || b.closest("li") !== node) continue;
+        if (ownedStyle(b, "text-align") !== side) {
+          setOwnedStyle(b, "text-align", side);
+          // Gemini sets text-align-last: start, which would keep a one-line block on the wrong side.
+          setOwnedStyle(b, "text-align-last", "auto");
+        }
+      }
+    } else {
+      // A nested list follows the list around it, so one list never reads in two directions. A list right
+      // after a right-to-left text block ("کار اصلی‌اش:") belongs to that sentence, even when most of its
+      // items are English terms; its English items keep their own direction on the list side.
+      const outer = node.parentElement && node.parentElement.closest("ol, ul");
+      const outerDir = outer && outer.dataset.rtlyDir;
+      const intro = !outer && node.previousElementSibling;
+      const dir = outerDir === "rtl" || outerDir === "ltr" ? outerDir
+        : intro && intro.dataset.rtlyDir === "rtl" ? "rtl"
+        : listMajorityDirection(node);
+      if (dir !== "rtl" && dir !== "ltr") continue;
+      setOwnedDirection(node, dir);
+    }
+  }
+}
+
+// A block that RTLY made left-to-right but whose context reads right-to-left follows the context
+// (`data-rtly-follow` keeps it there while its text is the same). Its inline parts get no own direction
+// (see applyDirectionAndFont): drop what an earlier pass gave them.
+function followDirection(el, dir) {
+  setOwnedDirection(el, dir);
+  el.dataset.rtlyFollow = dir;
+  el.querySelectorAll("[data-rtly-dir]").forEach((c) => {
+    if (!INLINE_TAGS.has(c.tagName) || c.matches(MATH_SELECTOR)) return;
+    if (!releaseOwnedDir(c)) c.removeAttribute("dir");
+    ["direction", "text-align", "text-align-last", "unicode-bidi"].forEach((p) => releaseOwnedStyle(c, p));
+    c.removeAttribute("data-rtly-dir");
+  });
+}
+
+function countDirections(nodes, limit = 400) {
+  let rtl = 0, ltr = 0;
+  for (let i = 0; i < nodes.length && i < limit; i++) {
+    const d = nodes[i] && nodes[i].dataset.rtlyDir;
+    if (d === "rtl") rtl++; else if (d === "ltr") ltr++;
+  }
+  return { rtl, ltr };
+}
+
+// The headings of one answer read in one direction. When most text blocks of the answer are right-to-left,
+// a heading with Arabic-script text that started with an English name ("5. OpenHands — مناسب agent platform")
+// follows them. Headings without Arabic-script text keep their own direction.
+function syncHeadingDirection(root) {
+  const mode = getEffectiveMode();
+  if (mode !== "full" && mode !== "rtl_only") return;
+  const headings = root.querySelectorAll(HEADING_SELECTOR);
+  if (!headings.length) return;
+  const { rtl, ltr } = countDirections(root.querySelectorAll("p[data-rtly-dir], li[data-rtly-dir]"));
+  if (rtl <= ltr) return;
+  for (let i = 0; i < headings.length; i++) {
+    const h = headings[i];
+    if (h.dataset.rtlyDir !== "ltr" || h.closest("pre, code") || isInSidebarOrMenu(h)) continue;
+    if (AR_FA_WORD.test(h.textContent || "")) followDirection(h, "rtl");
+  }
+}
+
+// The cells of one table read in one direction. When most cells are right-to-left, a cell with Arabic-script
+// text that started with an English word ("Buildهای Debug") follows the table; an English-only cell keeps
+// its direction and is aligned to the table side, like an English item of a Persian list.
+function syncTableDirection(root) {
+  const mode = getEffectiveMode();
+  if (mode !== "full" && mode !== "rtl_only") return;
+  const tables = root.querySelectorAll("table");
+  for (let t = 0; t < tables.length && t < 40; t++) {
+    const table = tables[t];
+    if (table.closest("pre, code") || isInSidebarOrMenu(table)) continue;
+    const cells = table.querySelectorAll("th, td");
+    const blocks = [];
+    for (let i = 0; i < cells.length && i < 400; i++) {
+      const c = cells[i];
+      if (c.dataset.rtlyDir !== undefined) { blocks.push(c); continue; }
+      const inner = c.querySelectorAll("[data-rtly-dir]");
+      for (let j = 0; j < inner.length; j++) if (!INLINE_TAGS.has(inner[j].tagName)) blocks.push(inner[j]);
+    }
+    // The header row names the columns in the language of the answer: it decides when it has a direction.
+    // Without it, the cells vote (sizes like "15.43 GB" and names like "Build Cache" can tie the vote).
+    const head = countDirections(blocks.filter((b) => b.closest("th")));
+    const all = countDirections(blocks);
+    if (head.rtl + head.ltr ? head.rtl <= head.ltr : all.rtl <= all.ltr) continue;
+    const toSide = (b) => {
+      if (ownedStyle(b, "text-align") === "right") return;
+      setOwnedStyle(b, "text-align", "right");
+      setOwnedStyle(b, "text-align-last", "auto");
+    };
+    for (const b of blocks) {
+      if (b.dataset.rtlyDir !== "ltr") continue;
+      if (AR_FA_WORD.test(b.textContent || "")) followDirection(b, "rtl");
+      else toSide(b);
+    }
+    // An English cell whose text sits directly in inline elements (AI Studio: a span RTLY made left-to-right)
+    // has no block above: the cell itself is aligned to the table side, its direction stays.
+    for (let i = 0; i < cells.length && i < 400; i++) {
+      const c = cells[i];
+      if (c.dataset.rtlyDir !== undefined || AR_FA_WORD.test(c.textContent || "")) continue;
+      if (blocks.some((b) => c.contains(b))) continue;
+      if (c.querySelector('[data-rtly-dir="ltr"]')) toSide(c);
+    }
+  }
+}
+
+// Font for a list item's own text (its direct text nodes; nested blocks and lists get theirs separately).
+// Arabic-script text gets the RTLY font. English text with digits inside a styled Persian list gets the
+// Latin-digits stack, so its ASCII digits are not drawn as Persian digits.
+function applyListItemFont(li) {
+  if (ownedStyle(li, "font-family")) return;
+  const mode = getEffectiveMode();
+  if (mode !== "full" && mode !== "font_only") return;
+  let own = "";
+  for (let n = li.firstChild; n; n = n.nextSibling) if (n.nodeType === 3) own += n.nodeValue;
+  if (shouldSkipFont(li)) return;
+  if (AR_FA_WORD.test(own)) setOwnedStyle(li, "font-family", FONT_STACK);
+  else if (/[A-Za-z]/.test(own) && /[0-9]/.test(own) && inheritsInlineFont(li)) setOwnedStyle(li, "font-family", FONT_STACK_LTR);
+}
+
+// Some sites force direction on every descendant of a right-to-left answer with !important rules (z.ai draws
+// code with CodeMirror inside such an answer). The editor and its lines get RTLY's own left-to-right value,
+// which out-ranks those rules (see ownedStyleCss). Lines are re-created while scrolling, hence one pass per tick.
+// Formulas read left-to-right. A site or RTLY site rule that forces every descendant of a right-to-left block
+// (some at a level a page rule cannot beat) would draw H₂O as O₂H; RTLY's own value out-ranks them all.
+const FORMULA_SELECTOR = ".katex, mjx-container, math, .MathJax";
+function keepFormulasLtr() {
+  const mode = getEffectiveMode();
+  if (mode !== "full" && mode !== "rtl_only") return;
+  try {
+    const found = document.querySelectorAll(FORMULA_SELECTOR);
+    for (let i = 0; i < found.length && i < 2000; i++) {
+      const el = found[i];
+      if (el.parentElement && el.parentElement.closest(FORMULA_SELECTOR)) continue;
+      // The owned rule for this mark also covers the formula's own parts, which such a rule reaches too.
+      if (el.dataset.rtlyKeep !== "formula") el.dataset.rtlyKeep = "formula";
+    }
+  } catch (_) {}
+}
+
+function keepCodeEditorsLtr() {
+  try {
+    const editors = document.querySelectorAll(CODE_EDITOR_SELECTOR);
+    for (let i = 0; i < editors.length && i < 40; i++) {
+      const parts = [editors[i], ...editors[i].querySelectorAll(".cm-content, .cm-line, .view-lines, .view-line")];
+      for (let j = 0; j < parts.length && j < 400; j++) {
+        const el = parts[j];
+        if (ownedStyle(el, "direction") === "ltr" && ownedStyle(el, "text-align") === "left") continue;
+        setOwnedStyle(el, "direction", "ltr");
+        setOwnedStyle(el, "text-align", "left");
+        if (el.dataset.rtlyKeep === undefined) el.dataset.rtlyKeep = "1";
+      }
+      // The card around the editor (language label, copy button) keeps the page's own layout too: climb
+      // while the ancestor holds little besides the code.
+      const codeLen = editors[i].textContent.length;
+      let card = editors[i].parentElement;
+      for (let k = 0; k < 4 && card && card !== document.body; k++, card = card.parentElement) {
+        if (card.textContent.length > codeLen * 1.3 + 40) break;
+        if (ownedStyle(card, "direction") === "ltr") continue;
+        setOwnedStyle(card, "direction", "ltr");
+        if (card.dataset.rtlyKeep === undefined) card.dataset.rtlyKeep = "1";
+      }
+    }
+  } catch (_) {}
+}
+
+const ICON_DESCENDANT_SELECTOR = "svg, img, picture, mat-icon, [data-icon], [data-icon-name], [data-lucide], [data-cds='Icon'], [data-cds='icon'], [data-mat-icon-name], [data-mat-icon-type], [style*='anthropicons' i], [style*='Anthropicons'], [style*='Material Symbols'], [style*='Material Icons'], [style*='Google Symbols'], [style*='Luminous Symbols'], [style*='lumi-symbols' i], [style*='FluentSystemIcons' i], [class*='icon' i], [class*='lucide' i], [class*='anthropicon' i], [class*='material-icons' i], [class*='material-symbols' i], [class*='google-symbols' i], [class*='lumi-symbols' i], [class*='lm-icon' i], [class*='mat-ligature-font' i], [class*='fluent-icon' i], [class*='ms-Icon' i], [class*='ant-icon' i], [class*='tabler-icon' i], [class*='phosphor' i], .anticon";
+const TEXT_BLOCK_SELECTOR = "p, li, h1, h2, h3, h4, h5, h6, blockquote, td, th";
+const HEADING_SELECTOR = "h1, h2, h3, h4, h5, h6";
+const INLINE_OWNER_SELECTOR = "p, h1, h2, h3, h4, h5, h6, blockquote, td, th";
+const INLINE_TAGS = new Set(["SPAN", "STRONG", "B", "EM", "I", "A", "BDI", "MARK", "SMALL", "SUB", "SUP", "U", "S", "LABEL"]);
+const MATH_SELECTOR =".katex, ms-katex, mjx-container, math, .MathJax, [class*='math-inline'], [class*='math-display']";
+
+// The text used to pick a direction. Formulas (rendered, or written as $...$) are Latin letters that
+// say nothing about the language of the sentence around them, and rendered ones repeat their source.
+function textWithoutMath(el) {
+  const raw = el.textContent || "";
+  if (raw.length < 2) return raw;
+  let text = raw;
+  if (typeof el.querySelector === "function" && el.querySelector(MATH_SELECTOR)) {
+    text = "";
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    for (let n = walker.nextNode(), i = 0; n && i < 20000 && text.length <= 5001; n = walker.nextNode(), i++) {
+      const p = n.parentElement;
+      if (p && p.closest(MATH_SELECTOR)) continue;
+      text += n.nodeValue;
+    }
+  }
+  if (text.indexOf("$") !== -1) text = text.replace(/\$\$[^$]{1,400}\$\$|\$[^$\n]{1,200}\$/g, " ");
+  return text;
+}
+
+// Sidebar and menu text keeps its direction and layout, but Arabic-script text in it gets the RTLY font.
+const SIDEBAR_FONT_ROOTS = "nav, aside, [role='navigation'], [class*='sidebar' i]";
+function processSidebarFonts() {
+  const mode = getEffectiveMode();
+  if (mode !== "full" && mode !== "font_only") return;
+  const family = getPreferredFontFamily();
+  // A recycled sidebar node that now holds Latin-only text gives the font back.
+  const had = document.querySelectorAll("[data-rtly-sbfont]");
+  for (let i = 0; i < had.length && i < 400; i++) {
+    if (!AR_FA_WORD.test(had[i].textContent || "")) {
+      releaseOwnedStyle(had[i], "font-family");
+      had[i].removeAttribute("data-rtly-sbfont");
+    }
+  }
+  const roots = document.querySelectorAll(SIDEBAR_FONT_ROOTS);
+  let done = 0;
+  for (let r = 0; r < roots.length && r < 12 && done < 300; r++) {
+    // A wrapper that holds the conversation or the composer is the app shell, not a sidebar.
+    if (roots[r].querySelector("main, [role='main'], article, textarea, [contenteditable]")) continue;
+    const walker = document.createTreeWalker(roots[r], NodeFilter.SHOW_TEXT);
+    for (let t = walker.nextNode(), i = 0; t && i < 2000 && done < 300; t = walker.nextNode(), i++) {
+      if (!AR_FA_WORD.test(t.nodeValue)) continue;
+      const el = t.parentElement;
+      if (!el || el.dataset.rtlySbfont === "1" || el.closest("textarea, [contenteditable]") || shouldSkipFont(el)) continue;
+      if (ownedStyle(el, "font-family")) continue;
+      setOwnedStyle(el, "font-family", family);
+      el.dataset.rtlySbfont = "1";
+      done++;
+    }
+  }
+}
+
+// Composer text: the browser picks a line direction from its first strong letter, so "first دومین کلمه"
+// (English word first, Persian after) is laid out left-to-right and reads as a jumble. A line whose first
+// strong letter is Latin but whose text is mostly Arabic-script is given the right-to-left direction.
+function firstStrongIsLatin(text) {
+  for (let i = 0; i < text.length && i < 200; i++) {
+    const c = text.charCodeAt(i);
+    if ((c >= 0x41 && c <= 0x5a) || (c >= 0x61 && c <= 0x7a)) return true;
+    if (c >= 0x0590 && c <= 0x08ff) return false;
+  }
+  return false;
+}
+
+function refineComposerLine(node, text) {
+  const force = !!text && firstStrongIsLatin(text) && AR_FA_WORD.test(text) && detectDirection(text) === "rtl";
+  if (force) {
+    if (node.dataset.rtlyLine === "1" && ownedStyle(node, "direction") === "rtl") return;
+    setOwnedStyle(node, "unicode-bidi", "isolate");
+    setOwnedStyle(node, "direction", "rtl");
+    node.dataset.rtlyLine = "1";
+  } else if (node.dataset.rtlyLine === "1") {
+    releaseOwnedStyle(node, "unicode-bidi");
+    releaseOwnedStyle(node, "direction");
+    node.removeAttribute("data-rtly-line");
+  }
+}
+
+// Rich editors (ProseMirror) rebuild their line elements and drop inline styles on them, so a rich
+// editor gets one flag on its root and a stylesheet rule (base.css) does the work.
+function refineComposerLines(el) {
+  try {
+    if (el.value !== undefined) { refineComposerLine(el, el.value); return; }
+    const texts = [];
+    const kids = el.children;
+    for (let i = 0; i < kids.length && i < 60; i++) {
+      if (/^(P|DIV|LI)$/.test(kids[i].tagName)) texts.push(kids[i].textContent || "");
+    }
+    let own = "";
+    for (let n = el.firstChild; n; n = n.nextSibling) if (n.nodeType === 3) own += n.nodeValue;
+    if (own.trim() || !texts.length) texts.push(own.trim() ? own : el.textContent || "");
+    let force = false, other = false;
+    for (const t of texts) {
+      if (!t.trim()) continue;
+      if (firstStrongIsLatin(t) && AR_FA_WORD.test(t) && detectDirection(t) === "rtl") force = true;
+      else if (detectDirection(t) === "ltr") other = true;
+    }
+    if (force && !other) {
+      if (el.dataset.rtlyLine !== "root") el.dataset.rtlyLine = "root";
+    } else if (el.dataset.rtlyLine === "root") {
+      el.removeAttribute("data-rtly-line");
+    }
+  } catch (_) {}
+}
+
+// plaintext gives every line its own direction, but it ignores the strong letters of inline children (they
+// are isolated), so a block whose text sits in inline spans would resolve to left-to-right.
+function canUsePlaintext(el) {
+  if (getComputedStyle(el).display === "inline") return false;
+  const kids = el.children;
+  for (let i = 0; i < kids.length && i < 20; i++) {
+    if (kids[i].textContent && kids[i].textContent.trim() && getComputedStyle(kids[i]).display === "inline") return false;
+  }
+  return true;
+}
+
+// True when the text has several lines and at least one of them is left-to-right. Lines that mostly start
+// with a number or a bullet ("۱. خرید نان", "۲. Check the email") are a list: they share the block's
+// direction, so their numbers stay on one side.
+function hasLtrLine(text) {
+  if (!text || text.indexOf("\n") === -1) return false;
+  const lines = text.split("\n");
+  const filled = lines.filter((l) => l.trim());
+  const marked = filled.filter((l) => /^\s*([0-9۰-۹٠-٩]+[.)\-٫]|[-*•▪●])\s/.test(l));
+  if (filled.length >= 2 && marked.length * 2 >= filled.length) return false;
+  for (let i = 0; i < lines.length && i < 50; i++) {
+    const line = lines[i].trim();
+    if (line.length >= 3 && detectDirection(line) === "ltr") return true;
+  }
+  return false;
+}
+
+// A flex row with exactly one child that is pushed to the end of the line.
+function isEndAlignedFlexRow(el) {
+  if (el.childElementCount !== 1 || (el.tagName !== "DIV" && el.tagName !== "SECTION")) return false;
+  // getComputedStyle forces a style recalculation, and this runs on thousands of single-child divs while RTLY
+  // is writing styles: only a row whose class or inline style asks to be pushed to the end is measured.
+  const hint = (typeof el.className === "string" ? el.className : "") + " " + (el.getAttribute("style") || "");
+  if (!/justify-end|justify-content\s*:\s*(flex-)?(end|right)/i.test(hint)) return false;
+  const cs = getComputedStyle(el);
+  return (cs.display === "flex" || cs.display === "inline-flex") &&
+    (cs.flexDirection === "row") && /^(flex-end|end|right)$/.test(cs.justifyContent);
 }
 
 function applyDirectionAndFont(el) {
   try {
     if (!el || !el.nodeType || el.nodeType !== 1) return;
     if (rtlyStopped) return; // site was switched off live: never write again
+    // Code editors (CodeMirror, Monaco) draw code lines themselves; their lines stay left-to-right.
+    if (el.closest && el.closest(CODE_EDITOR_SELECTOR)) {
+      if (el.dataset && (el.dataset.rtlyDir !== undefined || el.dataset.rtlyProcessed !== undefined)) releaseWrapper(el);
+      return;
+    }
+    // Code is left-to-right (base.css), and RTLY's own direction would out-rank that rule: nothing inside
+    // pre or code gets one, whichever scan reaches it (Claude wraps a whole code block in one span).
+    if (el.closest && el.closest("pre, code") && !el.closest(MATH_SELECTOR)) {
+      if (el.dataset && (el.dataset.rtlyDir !== undefined || el.dataset.rtlyProcessed !== undefined)) cleanupRTLYElement(el);
+      return;
+    }
+    // An inline font from an older RTLY: drop it and the "processed" marks so this pass restyles the element.
+    if (el.style && isLegacyRtlyFont(el.style.fontFamily)) {
+      el.style.removeProperty("font-family");
+      el.removeAttribute("data-rtly-processed");
+      el.removeAttribute("data-rtly-tc");
+      el.removeAttribute("data-rtly-text");
+    }
+    // Lists on these sites get their direction from syncListDirection (whole list, majority of its
+    // items). Once it owns a list element, the per-element pass must not flip it back.
+    if (el.dataset && el.dataset.rtlyDir !== undefined && LIST_DIRECTION_SITES.has(siteKey) &&
+        (el.tagName === "OL" || el.tagName === "UL" || el.tagName === "LI")) {
+      // The list keeps its direction, but an item still needs the font for its own text.
+      if (el.tagName === "LI") applyListItemFont(el);
+      return;
+    }
+    // An item that disagrees with the direction of the list around it (its own text pass ran first, or its
+    // parent is a custom element): the list pass decides, once, for the whole list.
+    if (el.tagName === "LI" && LIST_DIRECTION_SITES.has(siteKey) && el.dataset) {
+      const par = el.parentElement;
+      const outer = par && (par.tagName === "OL" || par.tagName === "UL" ? par : par.closest("ol, ul"));
+      const od = outer && outer.dataset.rtlyDir;
+      if ((od === "rtl" || od === "ltr") && el.dataset.rtlyDir !== od && !(el.getAttribute("dir") && el.dataset.rtlyDir === undefined)) {
+        syncListDirection(outer);
+        if (el.dataset.rtlyDir === od) return;
+      }
+    }
     // --- Reflow-free fast-skip (v1.9.20) ---------------------------------
     // The generic per-mutation rescan (ChatGPT, Poe, Copilot, AI Studio,
     // Qwen, misc — every site without a special processing branch) calls
@@ -808,10 +1486,10 @@ function applyDirectionAndFont(el) {
     const fontFamily = getPreferredFontFamily();
     // `ltr`: RTLY resolved this element's text as LTR. Such text gets the Latin-digits stack
     // (see FONT_STACK_LTR) so ASCII digits in English / code / version strings are not drawn as
-    // Persian digits; RTL text keeps IranYekan's Persian digit shapes.
+    // Persian digits; RTL text keeps the font's own digit shapes.
     const applyFontOnly = (target, ltr = false) => {
       if (shouldSkipFont(target)) return;
-      // v1.8.17: gate font application on the target's CURRENT text. IranYekan
+      // v1.8.17: gate font application on the target's CURRENT text. The font
       // is an Arabic-script face whose Latin glyphs have ascent/descent
       // metrics different from typical site fonts (Soehne on ChatGPT,
       // ABC Diatype on Claude, etc.). Painting it over a textarea containing
@@ -819,7 +1497,7 @@ function applyDirectionAndFont(el) {
       // "j" / "g" / "p" rendered at a different Y position than the textarea's
       // native baseline. Restrict the paint to elements whose text actually
       // contains Arabic-script characters; when text becomes Latin-only
-      // (user clears Persian and types English), strip any IranYekan we
+      // (user clears Persian and types English), strip any RTLY font we
       // applied earlier so the site's metrics are fully restored.
       //
       // Text source: el.value for <textarea>/<input> (replaced elements whose
@@ -832,21 +1510,22 @@ function applyDirectionAndFont(el) {
         ? target.value
         : (target.textContent || "");
       // v2.0: an LTR island (no Arabic-script text of its own) nested inside a block RTLY already
-      // painted with IranYekan inherits that font, Persian digits included. Re-state the font on
-      // the island with the Latin-digits stack. It is only ever set where IranYekan is already
+      // painted with an RTLY font inherits that font. Re-state the font on
+      // the island with the Latin-digits stack. It is only ever set where an RTLY font is already
       // inherited, so the island's glyphs do not change except for the digits.
       const hasAr = AR_FA_WORD.test(txt);
-      const island = ltr && !hasAr && inheritsInlineIranYekan(target);
+      const island = ltr && !hasAr && inheritsInlineFont(target);
       const wantFont = hasAr || island;
-      const cur = target.style.fontFamily || "";
-      const applied = cur.includes("IranYekan");
+      const cur = ownedStyle(target, "font-family");
+      // An inline font from an RTLY build that styled inline: replaced by the attribute.
+      const inline = isRtlyFont(target.style.fontFamily);
       if (wantFont) {
-        const hasLatin = cur.includes("RTLY Latin Digits");
-        if (!applied || hasLatin !== ltr) {
-          target.style.setProperty("font-family", ltr ? FONT_STACK_LTR : fontFamily, "important");
+        if (inline) releaseOwnedStyle(target, "font-family");
+        if (!cur || inline || (cur === FONT_STACK_LTR) !== ltr) {
+          setOwnedStyle(target, "font-family", ltr ? FONT_STACK_LTR : fontFamily);
         }
-      } else if (applied) {
-        target.style.removeProperty("font-family");
+      } else if (cur || inline) {
+        releaseOwnedStyle(target, "font-family");
       }
       // NOTE: font-size scaling is intentionally NOT applied per-element here.
       // Using `1em * scale` recursively compounded across nested elements
@@ -904,9 +1583,13 @@ function applyDirectionAndFont(el) {
       if (effectiveMode === "full" || effectiveMode === "font_only") {
         applyFontOnly(el);
       }
+      if (effectiveMode === "full" || effectiveMode === "rtl_only") refineComposerLines(el);
       // Guard the marker write too — same-value assignment is still a DOM
       // mutation, and assigning it on every pass kept feeding the loop above.
       if (el.dataset.rtlyProcessed !== "1") el.dataset.rtlyProcessed = "1";
+      // The descendant rule of base.css keys on this mark, not on data-rtly-processed: a rule with
+      // `[data-rtly-processed] *` made every processed message element restyle its whole subtree (IS-022).
+      if (el.dataset.rtlyEditor !== "1") el.dataset.rtlyEditor = "1";
       return;
     }
 
@@ -926,8 +1609,8 @@ function applyDirectionAndFont(el) {
       if (el.hasAttribute("data-rtly-dir")) {
         el.removeAttribute("data-rtly-dir");
         el.removeAttribute("dir");
-        el.style.removeProperty("direction");
-        el.style.removeProperty("text-align");
+        releaseOwnedStyle(el, "direction");
+        releaseOwnedStyle(el, "text-align");
       }
       const effectiveMode = getEffectiveMode();
       if (effectiveMode === "full" || effectiveMode === "font_only") {
@@ -986,7 +1669,7 @@ function applyDirectionAndFont(el) {
     }
     
     // For NotebookLM, only process elements within Chat section
-    if (siteKey === "notebooklm.google.com") {
+    if (canonicalSite === "notebooklm.google.com") {
       const selectors = [
         '[aria-label*="Chat" i]',
         '[data-testid*="chat" i]',
@@ -1021,6 +1704,15 @@ function applyDirectionAndFont(el) {
     }
     
     const effectiveMode = getEffectiveMode();
+    // A row that pushes its single child to the end (a chat bubble row: `display:flex; justify-content:flex-end`)
+    // keeps the page's left-to-right direction. Right-to-left would flip the push to the other side and move the
+    // bubble (DEC-003: RTLY never changes the layout). The text inside the bubble gets its own direction.
+    if ((effectiveMode === "full" || effectiveMode === "rtl_only") && isEndAlignedFlexRow(el)) {
+      setOwnedStyle(el, "direction", "ltr");
+      if (el.dataset.rtlyKeep === undefined) el.dataset.rtlyKeep = "1";
+      if (el.dataset.rtlyProcessed !== "1") el.dataset.rtlyProcessed = "1";
+      return;
+    }
     // v1.9.26 (ChatGPT freeze / "wait"): textContent, NEVER innerText. innerText
     // forces a synchronous reflow on EVERY element this function processes. On a
     // long thread's first load nothing is fast-skipped yet, so this fired for
@@ -1032,8 +1724,24 @@ function applyDirectionAndFont(el) {
     // needs the RTL/LTR character ratio, which textContent gives reflow-free.
     // el.value is still used for inputs (textContent doesn't reflect a typed
     // value), though input-like elements already return earlier.
-    const text = el.value !== undefined ? el.value : (el.textContent || "");
+    const text = el.value !== undefined ? el.value : textWithoutMath(el);
     if (!text?.trim()) return;
+
+    // A wrapper that holds (almost) only a code block is part of the code viewer, not message text:
+    // Persian comments inside must not turn the whole viewer (scrollbar, alignment) right-to-left.
+    if (el.tagName !== "PRE" && typeof el.querySelector === "function") {
+      const innerPre = el.querySelector("pre:not(ms-katex pre):not(.katex-display pre), " + CODE_EDITOR_SELECTOR);
+      if (innerPre && innerPre.textContent.length >= text.length * 0.8) {
+        releaseWrapper(el);
+        // The card around a code editor keeps the page's own left-to-right layout (label, copy button).
+        if (el.querySelector(CODE_EDITOR_SELECTOR) && ownedStyle(el, "direction") !== "ltr") {
+          setOwnedStyle(el, "direction", "ltr");
+          if (el.dataset.rtlyKeep === undefined) el.dataset.rtlyKeep = "1";
+        }
+        if (el.dataset.rtlyProcessed !== "1") el.dataset.rtlyProcessed = "1";
+        return;
+      }
+    }
 
     // v1.7.4: large-container guard.
     //
@@ -1065,12 +1773,14 @@ function applyDirectionAndFont(el) {
     const normalizedFp = fp(normalized);
     const alreadyText = el.dataset.rtlyText === normalizedFp;
 
-    const dir = detectDirection(normalized);
+    const dir = detectDirection(normalized, { grammarWords: !el.querySelector("pre, " + CODE_EDITOR_SELECTOR) });
     if (dir === "none") return;
 
     // For Gemini, always re-apply to ensure styles are set correctly
     // Only skip if text is same AND direction is unchanged AND not Gemini
     if (siteKey !== "gemini.google.com" && alreadyText && alreadyDir === dir) return;
+    // A block that follows the direction around it (syncHeadingDirection, syncTableDirection) keeps it while its text is the same.
+    if (alreadyText && el.dataset.rtlyFollow !== undefined && el.dataset.rtlyFollow === alreadyDir) return;
 
     // Double-check: make absolutely sure this is not a menu element
     if (isInSidebarOrMenu(el)) return;
@@ -1147,14 +1857,21 @@ function applyDirectionAndFont(el) {
     // {direction:ltr}` rule on buttons/anchors in grok-zai.css. Both
     // changes ship together — see the long comment block at the top of
     // the z.ai icon-protection section in grok-zai.css.
+    // A text block is not a control: an icon inside it (a source chip in a ChatGPT paragraph) moves with
+    // the text, and without a direction the block falls back to the page's left-to-right order.
+    const isTextBlock = el.matches(TEXT_BLOCK_SELECTOR);
     const containsIconGate =
       NARROW_ICON_SITES.has(siteKey)
         ? isInteractiveControl
-        : true;
-    const containsIcon =
-      containsIconGate && el.querySelector && !!el.querySelector(
-        "svg, img, picture, mat-icon, [data-icon], [data-icon-name], [data-lucide], [data-cds='Icon'], [data-cds='icon'], [data-mat-icon-name], [data-mat-icon-type], [style*='anthropicons' i], [style*='Anthropicons'], [style*='Material Symbols'], [style*='Material Icons'], [style*='Google Symbols'], [style*='Luminous Symbols'], [style*='lumi-symbols' i], [style*='FluentSystemIcons' i], [class*='icon' i], [class*='lucide' i], [class*='anthropicon' i], [class*='material-icons' i], [class*='material-symbols' i], [class*='google-symbols' i], [class*='lumi-symbols' i], [class*='lm-icon' i], [class*='mat-ligature-font' i], [class*='fluent-icon' i], [class*='ms-Icon' i], [class*='ant-icon' i], [class*='tabler-icon' i], [class*='phosphor' i], .anticon"
-      );
+        : !isTextBlock;
+    let containsIcon =
+      containsIconGate && el.querySelector && !!el.querySelector(ICON_DESCENDANT_SELECTOR);
+    // The glyphs of a rendered formula (root signs, fraction bars) are drawn as svg: they are not controls.
+    if (containsIcon && el.querySelector(MATH_SELECTOR)) {
+      const found = el.querySelectorAll(ICON_DESCENDANT_SELECTOR);
+      containsIcon = false;
+      for (let i = 0; i < found.length && i < 60; i++) if (!found[i].closest(MATH_SELECTOR)) { containsIcon = true; break; }
+    }
     if (containsIcon) {
       if (effectiveMode === "full" || effectiveMode === "font_only") applyFontOnly(el, dir === "ltr");
       // v1.9.10: guard same-value write — see v1.8.10 input-like branch comment.
@@ -1172,23 +1889,52 @@ function applyDirectionAndFont(el) {
     }
     // --- end icon guard ---
 
+    // Word-level spans (ChatGPT wraps every streamed word in one): a direction on a single word
+    // isolates it and moves the spaces around it, which breaks a mixed Persian / English line.
+    // The text block that holds them already carries the direction; only the font is set here.
+    // The same for any inline part of a text block that has a direction: an isolated "4. Cline — "
+    // would sit as one left-to-right piece next to the Persian text, with the number in the middle.
+    // List items are left out: an English item of a Persian list keeps its own direction through its span.
+    // A formula wrapper (Gemini's span.math-inline) keeps its own left-to-right direction: a site rule can make
+    // the katex inside inherit, and it would then draw H₂O as O₂H.
+    const textBlock = INLINE_TAGS.has(el.tagName) && !el.matches(MATH_SELECTOR) && el.parentElement &&
+      el.parentElement.closest(INLINE_OWNER_SELECTOR);
+    if (el.hasAttribute("data-d-stream-word") || (textBlock && textBlock.dataset.rtlyDir !== undefined)) {
+      if (el.dataset.rtlyDir !== undefined) {
+        if (!releaseOwnedDir(el)) el.removeAttribute("dir");
+        ["direction", "text-align", "text-align-last", "unicode-bidi"].forEach((p) => releaseOwnedStyle(el, p));
+        el.removeAttribute("data-rtly-dir");
+      }
+      if (effectiveMode === "full" || effectiveMode === "font_only") applyFontOnly(el, dir === "ltr");
+      if (el.dataset.rtlyProcessed !== "1") el.dataset.rtlyProcessed = "1";
+      const tcWord = fp(el.textContent);
+      if (el.dataset.rtlyTc !== tcWord) el.dataset.rtlyTc = tcWord;
+      return;
+    }
+
     // Apply direction only for full or rtl_only
     const applyDir = effectiveMode === "full" || effectiveMode === "rtl_only";
     if (applyDir) {
-      el.setAttribute("dir", dir);
-      el.style.setProperty("direction", dir, "important");
+      setOwnedDir(el, dir);
+      setOwnedStyle(el, "direction", dir);
       // v1.7: use logical `start` instead of physical `right`/`left`.
       // `start` resolves to right when direction is rtl and left when ltr,
       // and follows the direction property automatically — so if a parent's
       // direction ever changes, alignment follows without re-applying.
-      el.style.setProperty("text-align", "start", "important");
+      setOwnedStyle(el, "text-align", "start");
+      // Right-to-left text keeps the direction RTLY decided. Inline, because a site rule such as z.ai's
+      // `[data-expanded] * { unicode-bidi: plaintext }` would hand the decision back to the first letter.
+      // A block whose lines are in different languages (separate lines of one paragraph) lets each line
+      // pick its own direction; every other block keeps the direction decided here.
+      if (dir === "rtl") setOwnedStyle(el, "unicode-bidi", hasLtrLine(text) && canUsePlaintext(el) ? "plaintext" : "isolate");
       if (siteKey === "gemini.google.com") {
         requestAnimationFrame(() => {
+          if (rtlyStopped) return;
           try {
             const computedDir = getComputedStyle(el).direction;
             if (computedDir !== dir) {
-              el.style.setProperty("direction", dir, "important");
-              el.style.setProperty("text-align", "start", "important");
+              setOwnedStyle(el, "direction", dir);
+              setOwnedStyle(el, "text-align", "start");
             }
           } catch (e) {}
         });
@@ -1276,8 +2022,8 @@ function markClaudeChoiceCards() {
           header = header.parentElement;
         }
         if (header && header.parentElement === banner &&
-            (header.getAttribute("dir") === "rtl" || header.style.direction === "rtl")) {
-          header.style.setProperty("direction", "ltr", "important");
+            (header.getAttribute("dir") === "rtl" || header.style.direction === "rtl" || ownedStyle(header, "direction") === "rtl")) {
+          setOwnedStyle(header, "direction", "ltr");
           header.setAttribute("dir", "ltr");
         }
       }
@@ -1285,39 +2031,62 @@ function markClaudeChoiceCards() {
   } catch (_) {}
 }
 
-function injectIranYekanFont() {
+function fontFaceRules(family, faces) {
+  const base = chrome.runtime.getURL("fonts/");
+  let css = "";
+  faces.forEach(([name, unicodeRange]) => {
+    const range = unicodeRange ? "\n  unicode-range: " + unicodeRange + ";" : "";
+    [[400, "normal"], [700, "bold"]].forEach(([w, label]) => {
+      css += `
+@font-face {
+  font-family: "${family}";
+  src: url("${base}${name}-${w}.woff2") format("woff2");
+  font-weight: ${label};
+  font-style: normal;
+  font-display: swap;${range}
+}`;
+    });
+  });
+  return css;
+}
+
+// (Re)writes the @font-face rules for the fonts the user picked. Safe to call again on a setting change.
+// A page can hold inline styles written by an older RTLY (a site that stores message HTML, or a tab open
+// during an update). Drop the old font and the "already processed" marks so the next pass restyles them.
+function sweepLegacyFont() {
   try {
-    const base = chrome.runtime.getURL("fonts/");
-    const regular = base + "iranyekan-regular.woff";
-    const bold = base + "iranyekan-bold.woff";
-    if (document.getElementById("rtly-font-face")) return;
-    const style = document.createElement("style");
-    style.id = "rtly-font-face";
-    style.textContent = `
-@font-face {
-  font-family: "IranYekan";
-  src: url("${regular}") format("woff");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
+    document.querySelectorAll('[style*="IranYekan"]').forEach((el) => {
+      if (!isLegacyRtlyFont(el.style.fontFamily)) return;
+      el.style.removeProperty("font-family");
+      el.removeAttribute("data-rtly-processed");
+      el.removeAttribute("data-rtly-tc");
+      el.removeAttribute("data-rtly-text");
+      // A container with an unchanged text fingerprint is skipped without a look at its children.
+      let up = el.parentElement;
+      for (let i = 0; up && i < 30; up = up.parentElement, i++) up.removeAttribute("data-rtly-tc");
+    });
+  } catch (_) {}
 }
-@font-face {
-  font-family: "IranYekan";
-  src: url("${bold}") format("woff");
-  font-weight: bold;
-  font-style: normal;
-  font-display: swap;
-}
-/* IranYekan draws every ASCII digit as a Persian digit. This digits-only face (U+0030-0039) maps
-   to a system font and is listed FIRST for text RTLY resolved as LTR (see FONT_STACK_LTR).
-   No size-adjust / metric override: it only swaps the digit glyphs. Same idea as the extension
-   pages' "RTLY Digits" in shared/ui.css. */
+
+function injectFonts() {
+  try {
+    const css =
+      fontFaceRules(FONT_MARK, FONT_CATALOG[pickFont(SETTINGS.font)]) +
+      `
+/* Keeps ASCII digits Latin in text RTLY resolved as LTR (see FONT_STACK_LTR). No metric override:
+   it only swaps the digit glyphs. */
 @font-face {
   font-family: "RTLY Latin Digits";
   src: local("Segoe UI"), local("Helvetica Neue"), local("Roboto"), local("Arial");
   unicode-range: U+0030-0039;
 }`;
-    (document.head || document.documentElement).appendChild(style);
+    let style = document.getElementById("rtly-font-face");
+    if (!style) {
+      style = document.createElement("style");
+      style.id = "rtly-font-face";
+      (document.head || document.documentElement).appendChild(style);
+    }
+    if (style.textContent !== css) style.textContent = css;
   } catch (_) {}
 }
 
@@ -1336,6 +2105,15 @@ async function bootstrap() {
   if (chrome?.storage?.onChanged?.addListener) {
     chrome.storage.onChanged.addListener((changes, area) => {
       if (area !== "local") return;
+      if (changes.mixedDirection) {
+        SETTINGS.mixedDirection = changes.mixedDirection.newValue === "persian" ? "persian" : "balanced";
+        bustCaches();
+        if (rtlyActive && !rtlyStopped) reapplyRTLY();
+      }
+      if (changes.font) {
+        SETTINGS.font = pickFont(changes.font.newValue);
+        if (rtlyActive && !rtlyStopped) injectFonts();
+      }
       if (changes.fontScale) {
         SETTINGS.fontScale = Number(changes.fontScale.newValue) || 100;
         applyGlobalFontScale(); // no-op unless RTLY is active on this site
@@ -1392,11 +2170,15 @@ function deactivateRTLY() {
   rtlyStopped = true;
   try { runTeardown(); } catch (_) {}
   try {
-    document.querySelectorAll("[data-rtly-processed], [data-rtly-dir], [data-rtly-auto-dir], [data-rtly-card-rtl], [data-rtly-listeners-added]").forEach((el) => {
+    document.querySelectorAll("[data-rtly-processed], [data-rtly-keep], [data-rtly-line], [data-rtly-sbfont], [data-rtly-dir], [data-rtly-auto-dir], [data-rtly-card-rtl], [data-rtly-listeners-added]").forEach((el) => {
       cleanupRTLYElement(el);
       el.removeAttribute("data-rtly-card-rtl");
       el.removeAttribute("data-rtly-listeners-added");
     });
+    document.querySelectorAll(OWNED_STYLE_SELECTOR).forEach((el) => {
+      for (const prop in OWNED_STYLE_ATTR) el.removeAttribute(OWNED_STYLE_ATTR[prop]);
+    });
+    removeOwnedStyleSheet();
     const root = document.documentElement;
     restoreRootFontSize(root);
     rtlyActive = false;
@@ -1425,7 +2207,12 @@ function initRTLY() {
   // this tab. Mark it so applyGlobalFontScale() applies the page-level scale
   // (it is a no-op until this point) and so live mode changes can reapply.
   rtlyActive = true;
-  injectIranYekanFont(); // v2.0: only on active sites (was unconditional in bootstrap)
+  injectFonts(); // only on active sites
+  sweepLegacyFont();
+  [1500, 5000].forEach((ms) => {
+    const id = setTimeout(() => { if (!rtlyStopped) sweepLegacyFont(); }, ms);
+    registerTeardown(() => clearTimeout(id));
+  });
   // v1.9.33: drive the Claude choice-card marking on a small standalone
   // interval. The card is static once rendered and the main observer only
   // watches childList, so process() alone fired at most once after the card
@@ -1459,8 +2246,8 @@ function initRTLY() {
         stale.removeAttribute("data-rtly-text");
         stale.removeAttribute("data-rtly-processed");
         stale.removeAttribute("dir");
-        stale.style.removeProperty("direction");
-        stale.style.removeProperty("text-align");
+        releaseOwnedStyle(stale, "direction");
+        releaseOwnedStyle(stale, "text-align");
       });
     document
       .querySelectorAll('textarea, [contenteditable="true"], [contenteditable=""]')
@@ -1470,6 +2257,7 @@ function initRTLY() {
         while (cur && cur !== document.body && cur !== document.documentElement && levels < 6) {
           if (cur.hasAttribute("data-rtly-dir") ||
               cur.hasAttribute("data-rtly-processed") ||
+              cur.hasAttribute(OWNED_STYLE_ATTR["direction"]) ||
               cur.style.direction ||
               cur.style.textAlign ||
               cur.getAttribute("dir") === "rtl" ||
@@ -1478,8 +2266,8 @@ function initRTLY() {
             cur.removeAttribute("data-rtly-text");
             cur.removeAttribute("data-rtly-processed");
             cur.removeAttribute("dir");
-            cur.style.removeProperty("direction");
-            cur.style.removeProperty("text-align");
+            releaseOwnedStyle(cur, "direction");
+            releaseOwnedStyle(cur, "text-align");
           }
           cur = cur.parentElement;
           levels++;
@@ -1558,7 +2346,7 @@ function initRTLY() {
   // way, which made RTL apply on one tab but not another depending on render
   // timing. Busting on navigation forces a fresh, deterministic recompute.
   // This only re-reads classification (no DOM writes), so it adds no flicker.
-  window.addEventListener("rtly:navigation", () => bustCaches());
+  onNavigation(() => bustCaches());
 }
 
 /* applyModeStyles — 1.8.6 (CSS-gated)
@@ -1652,6 +2440,20 @@ function setupCopyDirectionPreservation() {
 }
 
 // --- Menu Protection ---
+// Removes only the direction RTLY gave an element (its dir mark and owned styles); the site's own dir,
+// inline direction and inline text-align stay.
+function releaseRtlyDirection(el) {
+  if (el.dataset.rtlyDir !== undefined) {
+    if (!releaseOwnedDir(el)) el.removeAttribute("dir");
+    el.removeAttribute("data-rtly-dir");
+  } else if (el.dataset.rtlyAutoDir === "1") {
+    el.removeAttribute("dir");
+    el.removeAttribute("data-rtly-auto-dir");
+  }
+  releaseOwnedStyle(el, "direction");
+  releaseOwnedStyle(el, "text-align");
+}
+
 function setupMenuProtection() {
   // Flag to prevent infinite loops
   let isProtecting = false;
@@ -1702,10 +2504,7 @@ function setupMenuProtection() {
             if (isInSidebarOrMenu(el) && !protectedElements.has(el)) {
               protectedElements.add(el);
 
-              // Only remove if actually set (avoid unnecessary DOM operations)
-              if (el.hasAttribute("dir")) el.removeAttribute("dir");
-              if (el.style.direction) el.style.removeProperty("direction");
-              if (el.style.textAlign) el.style.removeProperty("text-align");
+              releaseRtlyDirection(el);
 
               processedCount++;
             }
@@ -1743,10 +2542,11 @@ function setupMenuProtection() {
 
           if (mutation.type === "attributes" && mutation.attributeName === "dir") {
             const target = mutation.target;
-            if (isInSidebarOrMenu(target) && target.hasAttribute("dir")) {
+            // Only a direction RTLY wrote: a dir the site gives its own menu stays (DEC-003).
+            if ((target.dataset.rtlyDir !== undefined || target.dataset.rtlyAutoDir === "1") && isInSidebarOrMenu(target)) {
               // Use requestAnimationFrame to avoid blocking
               requestAnimationFrame(() => {
-                target.removeAttribute("dir");
+                if (!rtlyStopped) releaseRtlyDirection(target);
               });
               processed++;
             }
@@ -1901,6 +2701,7 @@ const BODY_CLASS_MAP = {
   "chat.z.ai": "rtly-zai",
   "z.ai": "rtly-zai",
   "notebooklm.google.com": "rtly-notebooklm",
+  "notebook.google.com": "rtly-notebooklm",
   "chat.deepseek.com": "rtly-deepseek",
   "qwen.ai": "rtly-qwen",
   // v1.9.10: these four sites had manifest content_scripts, TARGET_DOMAINS
@@ -1951,16 +2752,16 @@ function setupBodyClass() {
   }
 
   // Also re-sync on SPA navigation.
-  window.addEventListener("rtly:navigation", () => {
-    setTimeout(syncBodyClass, 50);
-  });
+  onNavigation(() => { setTimeout(syncBodyClass, 50); });
 }
 
 // --- Inputs ---
 async function setupInputs(cfg) {
   const el = await waitForSelectors(cfg.inputs);
-  if (!el) return;
-  applyDirectionAndFont(el);
+  if (rtlyStopped) return;
+  // Gemini mounts its composer late; keep going so the watcher below binds it.
+  if (!el && siteKey !== "gemini.google.com") return;
+  if (el) applyDirectionAndFont(el);
 
   // Debounced handler - only process after user stops typing (avoids input lag)
   const debouncedHandler = debounce((target) => {
@@ -1968,36 +2769,50 @@ async function setupInputs(cfg) {
   }, 250);
   const handler = (ev) => {
     const target = ev?.target || el;
-    debouncedHandler(target);
+    if (target) debouncedHandler(target);
   };
 
-  // Use passive listeners where possible - avoid keydown (blocks typing)
-  ["input", "keyup", "paste", "compositionend", "change"].forEach((evt) =>
-    el.addEventListener(evt, handler, { passive: true, capture: true })
-  );
-  // Mark so the navigation rebind below never double-binds this element.
-  el.dataset.rtlyListenersAdded = "1";
+  // Editors that are mounted or replaced after the pass above (Claude re-creates its composer) never got
+  // the listeners below. One delegated listener covers every editable on the page.
+  const delegatedInput = (ev) => {
+    if (rtlyStopped) return;
+    const t = ev.target;
+    if (!t || t.nodeType !== 1 || typeof t.closest !== "function") return;
+    const root = t.closest('textarea, input, [contenteditable="true"], [contenteditable=""]');
+    if (root && !isInSidebarOrMenu(root)) debouncedHandler(root);
+  };
+  document.addEventListener("input", delegatedInput, { passive: true, capture: true });
+  registerTeardown(() => document.removeEventListener("input", delegatedInput, true));
 
-  if (el.contentEditable === "true" || el.getAttribute("contenteditable") === "true") {
-    el.addEventListener("blur", () => applyDirectionAndFont(el), { passive: true, capture: true });
+  if (el) {
+    // Use passive listeners where possible - avoid keydown (blocks typing)
+    ["input", "keyup", "paste", "compositionend", "change"].forEach((evt) =>
+      el.addEventListener(evt, handler, { passive: true, capture: true })
+    );
+    // Mark so the navigation rebind below never double-binds this element.
+    el.dataset.rtlyListenersAdded = "1";
+
+    if (el.contentEditable === "true" || el.getAttribute("contenteditable") === "true") {
+      el.addEventListener("blur", () => applyDirectionAndFont(el), { passive: true, capture: true });
+    }
+
+    // MutationObserver: skip characterData (fires on every keystroke - causes severe lag)
+    const inputMo = trackObserver(new MutationObserver(debounce(() => {
+      if (!el.isConnected) { releaseObserver(inputMo); return; }
+      requestAnimationFrame(() => {
+        applyDirectionAndFont(el);
+        if (el.contentEditable === "true" && el.querySelector) {
+          el.querySelectorAll("[contenteditable='true']").forEach(applyDirectionAndFont);
+        }
+      });
+    }, 300)));
+    // 1.8.10: childList/subtree ONLY — NOT attributes. Our dir=auto + font are
+    // applied once and are idempotent, so we never need to react to the input's
+    // own attribute changes. Watching `attributes` here meant the observer
+    // re-fired on our own writes (and on per-keystroke attribute churn some
+    // editors emit), which was the second half of the input-refresh loop.
+    inputMo.observe(el, { childList: true, subtree: true });
   }
-
-  // MutationObserver: skip characterData (fires on every keystroke - causes severe lag)
-  const inputMo = trackObserver(new MutationObserver(debounce(() => {
-    if (!el.isConnected) { releaseObserver(inputMo); return; }
-    requestAnimationFrame(() => {
-      applyDirectionAndFont(el);
-      if (el.contentEditable === "true" && el.querySelector) {
-        el.querySelectorAll("[contenteditable='true']").forEach(applyDirectionAndFont);
-      }
-    });
-  }, 300)));
-  // 1.8.10: childList/subtree ONLY — NOT attributes. Our dir=auto + font are
-  // applied once and are idempotent, so we never need to react to the input's
-  // own attribute changes. Watching `attributes` here meant the observer
-  // re-fired on our own writes (and on per-keystroke attribute churn some
-  // editors emit), which was the second half of the input-refresh loop.
-  inputMo.observe(el, { childList: true, subtree: true });
 
   // 1.8.10: re-bind on SPA navigation. Some routes re-mount the composer when
   // switching chats; the element our listeners/observer were attached to then
@@ -2022,20 +2837,18 @@ async function setupInputs(cfg) {
       } catch (_) {}
     });
   }, 150);
-  window.addEventListener("rtly:navigation", () => setTimeout(rebindInputs, 100));
+  onNavigation(() => { if (!rtlyStopped) setTimeout(rebindInputs, 100); });
 
   // Gemini: check for new inputs less aggressively (reduces input lag)
   if (siteKey === "gemini.google.com") {
     const checkInputs = debounce(() => {
       if (rtlyStopped) return;
-      const activeEl = document.activeElement;
-      if (activeEl && (activeEl.tagName === "TEXTAREA" || activeEl.getAttribute?.("contenteditable") === "true")) return;
       cfg.inputs.forEach((sel) => {
         try {
           document.querySelectorAll(sel).forEach((inputEl) => {
             if (isInSidebarOrMenu(inputEl)) return;
             const txt = (inputEl.value ?? inputEl.textContent ?? "").trim();
-            if (txt) requestAnimationFrame(() => applyDirectionAndFont(inputEl));
+            if (txt || !inputEl.dataset.rtlyListenersAdded) requestAnimationFrame(() => applyDirectionAndFont(inputEl));
             if (!inputEl.dataset.rtlyListenersAdded) {
               ["input", "keyup", "paste", "compositionend"].forEach((evt) =>
                 inputEl.addEventListener(evt, handler, { passive: true, capture: true })
@@ -2050,8 +2863,9 @@ async function setupInputs(cfg) {
     // Aggressive polling for the first minute, then self-terminate. The
     // 60s window catches Gemini's lazy-mount sequence of textareas; after
     // that we rely on the MutationObserver below.
-    const iv = setInterval(checkInputs, 5000);
-    setTimeout(() => clearInterval(iv), 60000);
+    const iv = trackInterval(setInterval(checkInputs, 5000));
+    const ivStop = setTimeout(() => clearInterval(iv), 60000);
+    registerTeardown(() => clearTimeout(ivStop));
     const mo = trackObserver(new MutationObserver(debounce(checkInputs, 1000)));
     // v1.9.10: same document_start race as menuObserver/layoutObserver above —
     // document.body may not exist yet. If body isn't ready, defer hookup to
@@ -2079,7 +2893,7 @@ function setupResponses(cfg) {
   const fallback = ["[role='log']", "[data-testid*='message']", ".messages", ".chat", "main article"];
 
   // For NotebookLM, only process elements within Chat section
-  const isNotebookLM = siteKey === "notebooklm.google.com";
+  const isNotebookLM = canonicalSite === "notebooklm.google.com";
   const isGemini = siteKey === "gemini.google.com";
 
 
@@ -2132,22 +2946,27 @@ function setupResponses(cfg) {
   // Gemini processing - optimized for performance (avoid input lag, reduce during streaming)
   const processGemini = () => {
     try {
-      if (document.activeElement?.tagName === "TEXTAREA" ||
-          document.activeElement?.getAttribute?.("contenteditable") === "true") return;
+      // The composer keeps focus after a message is sent, so responses must still be processed
+      // while it is focused. Only the focused composer itself is left alone (no work while typing).
+      const typingEl = document.activeElement?.tagName === "TEXTAREA" ||
+        document.activeElement?.getAttribute?.("contenteditable") === "true"
+        ? document.activeElement : null;
       let mainContainer = document.querySelector("main") || document.querySelector("[role='main']");
       if (mainContainer) {
         const chatArea = mainContainer.querySelector("[data-qa*='chat'], [data-qa*='conversation'], [class*='chat'], [class*='Chat']");
         if (chatArea && !isInSidebarOrMenu(chatArea)) mainContainer = chatArea;
       }
       if (!mainContainer) mainContainer = document.body;
-      if (!mainContainer || isInSidebarOrMenu(mainContainer)) return;
+      // <main> sits under the app root, whose `side-nav-open` class trips the sidebar heuristic;
+      // every element is still checked individually below.
+      if (!mainContainer) return;
 
       // First, process all input boxes
       cfg.inputs.forEach((sel) => {
         try {
           const inputs = document.querySelectorAll(sel);
           inputs.forEach((inputEl) => {
-            if (!isInSidebarOrMenu(inputEl)) {
+            if (!isInSidebarOrMenu(inputEl) && inputEl !== typingEl) {
               const txt = inputEl.value !== undefined ? inputEl.value : inputEl.textContent || "";
               if (txt && txt.trim()) {
                 applyDirectionAndFont(inputEl);
@@ -2225,6 +3044,10 @@ function setupResponses(cfg) {
         }
       }
 
+      if (LIST_DIRECTION_SITES.has(siteKey)) {
+        mainContainer.querySelectorAll("message-content, user-query").forEach(syncListDirection);
+      }
+
       const messageElements = mainContainer.querySelectorAll("[data-message], [data-role], [data-qa], [role='article']");
       let messageCount = 0;
       const maxMessages = 30;
@@ -2257,7 +3080,22 @@ function setupResponses(cfg) {
   // bumps it; any in-flight slice from an older pass sees the mismatch and bails,
   // so passes never stack.
   let responsePassGen = 0;
+  let lastLegacySweep = 0;
+  // IS-022: on a page with many message containers, a container is styled once it comes near the view.
+  // Styling every container of a long ChatGPT page at once made the browser restyle the same subtrees
+  // under the site's large stylesheet for many seconds. Containers far away wait for the observer.
+  const DEFER_MIN_CONTAINERS = 40;
+  const nearContainers = new WeakMap();
+  let nearObserver = null;
   const process = () => {
+    if (rtlyStopped) return;
+    resetSidebarAncestors();
+    keepCodeEditorsLtr();
+    keepFormulasLtr();
+    // Content can arrive late with old inline styles (a site that stores message HTML); sweep them
+    // here too, throttled, because a container with old "processed" marks is skipped otherwise.
+    const nowTs = Date.now();
+    if (nowTs - lastLegacySweep > 2000) { lastLegacySweep = nowTs; sweepLegacyFont(); processSidebarFonts(); }
     responseProcessCount++;
     if (DEBUG && responseProcessCount % 50 === 0) log("response process", responseProcessCount);
     
@@ -2290,6 +3128,13 @@ function setupResponses(cfg) {
         containerEls = [];
         allContainerSelectors.forEach((sel) => {
           try { containerRoot.querySelectorAll(sel).forEach((e) => containerEls.push(e)); } catch (_) {}
+        });
+      }
+      if (nearObserver && containerEls.length > DEFER_MIN_CONTAINERS) {
+        containerEls = containerEls.filter((el) => {
+          const near = nearContainers.get(el);
+          if (near === undefined) { nearContainers.set(el, false); nearObserver.observe(el); return false; }
+          return near;
         });
       }
 
@@ -2328,6 +3173,9 @@ function setupResponses(cfg) {
           if (childEl.closest("pre, code")) return;
           applyDirectionAndFont(childEl);
         });
+        if (LIST_DIRECTION_SITES.has(siteKey)) syncListDirection(el);
+        syncHeadingDirection(el);
+        syncTableDirection(el);
       };
 
       // The two fallback FA scans, run once AFTER all containers are processed.
@@ -2377,6 +3225,28 @@ function setupResponses(cfg) {
             }
           }
         }
+
+        // Sites whose answers are found by the scans above have no container for the list pass: give the
+        // lists (and items added while streaming) that no pass has marked yet their direction here.
+        if (LIST_DIRECTION_SITES.has(siteKey) && !COMPREHENSIVE_SELECTOR_SITES.has(siteKey)) {
+          const scope = (isNotebookLM && chatContainer) || document.querySelector("main") || document.querySelector("[role='main']") || document.body;
+          const loose = scope ? scope.querySelectorAll("ol:not([data-rtly-dir]), ul:not([data-rtly-dir]), li:not([data-rtly-dir])") : [];
+          const parents = new Set();
+          for (let i = 0; i < loose.length && i < 300 && parents.size < 40; i++) {
+            const n = loose[i];
+            if (!n.parentElement || n.closest("pre, code") || isInSidebarOrMenu(n)) continue;
+            if (AR_FA_WORD.test(n.textContent || "")) parents.add(n.parentElement);
+          }
+          // Items marked by their own text that disagree with the list around them (custom-element lists).
+          const marked = scope ? scope.querySelectorAll("li[data-rtly-dir]") : [];
+          for (let i = 0; i < marked.length && i < 300; i++) {
+            const n = marked[i];
+            const outer = n.parentElement && n.parentElement.closest("ol, ul");
+            const od = outer && outer.dataset.rtlyDir;
+            if ((od === "rtl" || od === "ltr") && n.dataset.rtlyDir !== od && outer.parentElement) parents.add(outer);
+          }
+          parents.forEach((p) => syncListDirection(p.parentElement || p));
+        }
       };
 
       // v1.9.27: TIME-SLICED processing. The browser shows "Page Unresponsive"
@@ -2388,10 +3258,16 @@ function setupResponses(cfg) {
       // responsePassGen, so an in-flight slice from a superseded pass bails.
       const myGen = ++responsePassGen;
       let idx = 0;
+      let sliceHandle = null;
+      registerTeardown(() => {
+        if (!sliceHandle) return;
+        if (sliceHandle.idle !== undefined && typeof cancelIdleCallback !== "undefined") cancelIdleCallback(sliceHandle.idle);
+        if (sliceHandle.timer !== undefined) clearTimeout(sliceHandle.timer);
+      });
       const SLICE_MS = 8;
       const now = () => (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
       const runSlice = () => {
-        if (myGen !== responsePassGen) return; // superseded by a newer pass
+        if (rtlyStopped || myGen !== responsePassGen) return; // switched off, or superseded by a newer pass
         try {
           const start = now();
           while (idx < containerEls.length) {
@@ -2401,9 +3277,10 @@ function setupResponses(cfg) {
         } catch (e) {
           log("process slice error", e);
         }
+        if (rtlyStopped) return;
         if (idx < containerEls.length) {
-          if (typeof requestIdleCallback !== "undefined") requestIdleCallback(runSlice, { timeout: 200 });
-          else setTimeout(runSlice, 0);
+          if (typeof requestIdleCallback !== "undefined") sliceHandle = { idle: requestIdleCallback(runSlice, { timeout: 200 }) };
+          else sliceHandle = { timer: setTimeout(runSlice, 0) };
         } else {
           try { runScans(); } catch (e) { log("process scans error", e); }
         }
@@ -2414,10 +3291,24 @@ function setupResponses(cfg) {
     }
   };
 
+  if (typeof IntersectionObserver === "function") {
+    let nearPassQueued = false;
+    nearObserver = trackObserver(new IntersectionObserver((entries) => {
+      let came = false;
+      for (const e of entries) {
+        nearContainers.set(e.target, e.isIntersecting);
+        if (e.isIntersecting) came = true;
+      }
+      if (!came || nearPassQueued) return;
+      nearPassQueued = true;
+      setTimeout(() => { nearPassQueued = false; process(); }, 50);
+    }, { rootMargin: "1200px 0px" }));
+  }
   process();
 
   if (isGemini) {
     const runProcess = () => {
+      if (rtlyStopped) return;
       if (requestIdleCallback) {
         requestIdleCallback(() => process(), { timeout: 500 });
       } else {
@@ -2431,11 +3322,11 @@ function setupResponses(cfg) {
     mo.observe(document.body || document.documentElement, { childList: true, subtree: true });
     window.addEventListener("scroll", throttle(runProcess, 1500), { passive: true });
     document.addEventListener("focusout", debounce(runProcess, 500), true);
-    window.addEventListener("rtly:navigation", debounce(() => setTimeout(runProcess, 500), 500));
+    onNavigation(debounce(() => setTimeout(runProcess, 500), 500));
     let n = 0;
     // Aggressive polling for ~60s during initial load while the chat tree
     // settles, then self-terminate.
-    const iv = setInterval(() => { runProcess(); if (++n >= 12) clearInterval(iv); }, 5000);
+    const iv = trackInterval(setInterval(() => { runProcess(); if (++n >= 12) clearInterval(iv); }, 5000));
     // Long-running keepalive — gated on visibility, registered for teardown.
     trackInterval(setInterval(() => {
       if (document.visibilityState !== "visible") return;
@@ -2444,9 +3335,29 @@ function setupResponses(cfg) {
     return;
   }
 
-  const mo = trackObserver(new MutationObserver(debounce(process, 400)));
+  // A container whose text did not change is skipped as stable. A site can render its children again
+  // with the same text (ChatGPT replaces the lists after the first pass on a full load), so new
+  // elements with text clear the stable mark of every container above them.
+  const clearStableMarks = (records) => {
+    for (const r of records) {
+      let added = false;
+      for (const n of r.addedNodes) {
+        if (n.nodeType === 1 && (n.textContent || "").trim()) { added = true; break; }
+      }
+      if (!added) continue;
+      for (let n = r.target; n && n.nodeType === 1; n = n.parentElement) {
+        if (n.hasAttribute("data-rtly-tc")) n.removeAttribute("data-rtly-tc");
+      }
+    }
+  };
+  const debouncedProcess = debounce(process, 400);
+  const mo = trackObserver(new MutationObserver((records) => {
+    if (rtlyStopped) return;
+    clearStableMarks(records);
+    debouncedProcess();
+  }));
   mo.observe(document.body || document.documentElement, CONFIG.OBSERVER_CONFIG);
-  window.addEventListener("rtly:navigation", () => setTimeout(process, 100));
+  onNavigation(() => setTimeout(process, 100));
 
   // Also process on specific events for sites that need the heuristic FA scan
   if (HEURISTIC_FA_SCAN_SITES.has(siteKey)) {
@@ -2528,18 +3439,19 @@ function waitForSelectors(selectors = []) {
     const found = selectors.map((s) => document.querySelector(s)).find(Boolean);
     if (found) return resolve(found);
 
+    let timer = 0;
+    const finish = (value) => {
+      obs.disconnect();
+      clearTimeout(timer);
+      resolve(value);
+    };
     const obs = new MutationObserver(() => {
       const el = selectors.map((s) => document.querySelector(s)).find(Boolean);
-      if (el) {
-        obs.disconnect();
-        resolve(el);
-      }
+      if (el) finish(el);
     });
     obs.observe(document.documentElement, CONFIG.OBSERVER_CONFIG);
-    setTimeout(() => {
-      obs.disconnect();
-      resolve(null);
-    }, 5000);
+    timer = setTimeout(() => finish(null), 5000);
+    registerTeardown(() => finish(null));
   });
 }
 
@@ -2575,16 +3487,34 @@ async function isSiteEnabled(domain) {
 // direction state RTLY actually created:
 //   • data-rtly-dir       → main text path set dir + inline direction/text-align
 //   • data-rtly-auto-dir  → input path wrote dir="auto" (was absent before)
-// Font (which RTLY always owns when it paints IranYekan) and the bookkeeping
+// Font (which RTLY always owns when it paints an RTLY font) and the bookkeeping
 // markers are always cleared.
 function cleanupRTLYElement(el) {
   try {
+    if (el.dataset.rtlySbfont !== undefined) {
+      releaseOwnedStyle(el, "font-family");
+      el.removeAttribute("data-rtly-sbfont");
+    }
+    if (el.dataset.rtlyLine !== undefined) {
+      if (el.dataset.rtlyLine !== "root") {
+        releaseOwnedStyle(el, "unicode-bidi");
+        releaseOwnedStyle(el, "direction");
+      }
+      el.removeAttribute("data-rtly-line");
+    }
+    if (el.dataset.rtlyKeep !== undefined) {
+      releaseOwnedStyle(el, "direction");
+      releaseOwnedStyle(el, "text-align");
+      el.removeAttribute("data-rtly-keep");
+    }
     const ownsDir = el.dataset.rtlyDir !== undefined;     // real dir (rtl/ltr) set by us
     const ownsAutoDir = el.dataset.rtlyAutoDir === "1";   // dir="auto" set by us
     if (ownsDir) {
-      el.removeAttribute("dir");
-      el.style.removeProperty("direction");
-      el.style.removeProperty("text-align");
+      if (!releaseOwnedDir(el)) el.removeAttribute("dir");
+      releaseOwnedStyle(el, "direction");
+      releaseOwnedStyle(el, "text-align");
+      releaseOwnedStyle(el, "text-align-last");
+      releaseOwnedStyle(el, "unicode-bidi");
     } else if (ownsAutoDir) {
       el.removeAttribute("dir");
     }
@@ -2592,12 +3522,13 @@ function cleanupRTLYElement(el) {
     // dir) that RTLY never created — leave its dir/direction/text-align alone.
     el.removeAttribute("data-rtly-processed");
     el.removeAttribute("data-rtly-dir");
+    el.removeAttribute("data-rtly-follow");
+    el.removeAttribute("data-rtly-editor");
     el.removeAttribute("data-rtly-auto-dir");
     el.removeAttribute("data-rtly-text");
     el.removeAttribute("data-rtly-tc");
-    // v2.0: only remove a font-family RTLY wrote (the old code also deleted any inline
-    // font-size, which RTLY never sets per element, i.e. it removed the SITE's own value).
-    if ((el.style.fontFamily || "").includes("IranYekan")) el.style.removeProperty("font-family");
+    // Only a font-family RTLY wrote is removed; the site's own inline values stay.
+    releaseOwnedStyle(el, "font-family");
   } catch (_) {}
 }
 
@@ -2607,7 +3538,7 @@ function reapplyRTLY() {
   // pass through isInSidebarOrMenu / isIcon / shouldSkipFont.
   bustCaches();
 
-  document.querySelectorAll("[data-rtly-processed]").forEach(cleanupRTLYElement);
+  document.querySelectorAll("[data-rtly-processed], [data-rtly-keep]").forEach(cleanupRTLYElement);
   const cfg = CONFIG.SITES[siteKey];
   cfg.inputs.forEach((sel) => {
     try {
@@ -2673,6 +3604,7 @@ if (typeof window !== "undefined" && window.__RTLY_TEST__) {
     AR_FA_WORD,
     AR_FA_STRONG_MARKER,
     detectDirection,
+    SETTINGS,
     isInSidebarOrMenu,
     applyDirectionAndFont,
     CONFIG,
@@ -2690,6 +3622,7 @@ if (typeof window !== "undefined" && window.__RTLY_TEST__) {
 } else if (window.__RTLY_CONTENT_V1__) {
   log("Already initialized, skipping");
 } else {
+
   window.__RTLY_CONTENT_V1__ = true;
   bootstrap();
 }

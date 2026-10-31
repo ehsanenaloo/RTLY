@@ -13,7 +13,7 @@ It runs in your browser only. No account, no tracking, no server.
 
 [![Add to Chrome](https://img.shields.io/badge/Chrome%20Web%20Store-Add%20to%20Chrome-4285F4?logo=googlechrome&logoColor=white&style=for-the-badge)](https://chromewebstore.google.com/detail/hhifipkafndnildgldggiohfkbpikmkd)
 [![User guide](https://img.shields.io/badge/User%20guide-Read%20online-0e7c95?logo=readthedocs&logoColor=white&style=for-the-badge)](https://ehsanenaloo.github.io/RTLY/)
-[![Buy me a coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/enaloo)
+[![Support RTLY](https://img.shields.io/badge/Support-enaloo.com-0E7490?style=for-the-badge)](https://enaloo.com/support/)
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 ![Manifest V3](https://img.shields.io/badge/Manifest-V3-blue)
@@ -27,20 +27,20 @@ It runs in your browser only. No account, no tracking, no server.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshots/before-after-dark.png">
-  <img src="docs/assets/screenshots/before-after-light.png" alt="The same Persian chat answer without RTLY (left-aligned, default font) and with RTLY (right-aligned, IranYekan font)">
+  <img src="docs/assets/screenshots/before-after-light.png" alt="The same Persian chat answer without RTLY (left-aligned, default font) and with RTLY (right-aligned, RTLY font)">
 </picture>
 
 ## What is RTLY?
 
 Most AI chat sites are built for left-to-right text. When you write or read Persian, Arabic or Hebrew, the lines sit on the wrong side, punctuation lands in the wrong place, mixed English and Persian sentences get scrambled, and the default font is often poor for Arabic script.
 
-RTLY fixes this on the page itself. For each message it looks at the text, and if the text is mostly right-to-left script it sets the direction to right-to-left and applies the bundled IranYekan font. English messages stay left-to-right and keep the site's font. RTLY avoids code blocks, icons, menus and sidebars.
+RTLY fixes this on the page itself. For each message it looks at the text, and if the text is mostly right-to-left script it sets the direction to right-to-left and applies a bundled Persian or Arabic font. English messages stay left-to-right and keep the site's font. RTLY avoids code blocks, icons, menus and sidebars.
 
 ## Features
 
 | | |
 | --- | --- |
-| **Automatic direction** <br> Direction is chosen per message from the characters in it. Persian, Arabic, Hebrew, Urdu and other right-to-left scripts are detected. Mixed text follows the dominant language. | **IranYekan font** <br> The font is bundled in the extension. It is applied only to text that contains Arabic-script characters, so English text keeps the site's own font. |
+| **Automatic direction** <br> Direction is chosen per message from the characters in it. Persian, Arabic, Hebrew, Urdu and other right-to-left scripts are detected. Mixed text follows the dominant language. | **Bundled fonts** <br> Vazirmatn is the default. You can pick another Persian or Arabic font in the settings. The fonts are bundled in the extension. It is applied only to text that contains Arabic-script characters, so English text keeps the site's own font. |
 | **Three modes per site** <br> *Full* (font and direction), *Font* only, or *RTL* only. Changing the mode applies to open tabs without a reload. | **On or off per site** <br> Switch any of the 16 supported sites off from the popup, the settings page, the right-click menu or the keyboard shortcut `Alt+Shift+R`. |
 | **Font size** <br> Scale chat text from 85% to 120% in steps of 5. | **Private by design** <br> No network requests, no analytics, no remote code. Settings stay in your browser's extension storage. |
 | **Light and dark, four colors** <br> The popup and settings page follow your system theme or your choice, with teal, blue, indigo or neutral accents. | **15 interface languages** <br> English, Persian, Arabic, Hebrew, Urdu and ten more right-to-left languages. Some strings are still English in some languages (see [Translations](#translations)). |
@@ -82,14 +82,14 @@ Sites change their page markup without notice. When that happens RTLY can stop w
 | --- | --- | --- |
 | **Chrome** (111 or newer) | Tested | [Chrome Web Store](https://chromewebstore.google.com/detail/hhifipkafndnildgldggiohfkbpikmkd) |
 | **Microsoft Edge** | Tested package, same as Chrome | [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/rtly-rtl-font-tool-for-ai-chats/babdpiodfdcobcfpkolpbpfofihllooa), or unzip the Chrome zip from [Releases](https://github.com/ehsanenaloo/RTLY/releases) and load it unpacked. |
-| **Firefox 128+** (desktop) | Experimental | [Temporary install from the Releases page](#firefox-experimental) |
+| **Firefox 128+** (desktop) | Less tested | [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/rtly-rtl-font-for-ai-chats/), or [load the zip temporarily](#firefox-experimental) |
 | **Safari** | Not supported | |
 
-**Chrome and Edge:** open the store page, click **Add to Chrome** (or **Get** in Edge), then click the puzzle icon in the toolbar and pin RTLY. Tabs that were already open before you installed need a reload.
+**Chrome, Edge and Firefox:** open the store page, click **Add to Chrome** (**Get** in Edge, **Add to Firefox** in Firefox), then click the puzzle icon in the toolbar and pin RTLY. Tabs that were already open before you installed need a reload.
 
 <a id="firefox-experimental"></a>
 
-**Firefox (experimental):** RTLY is not on Firefox Add-ons.
+**Firefox (zip file):** you can also try the Firefox zip without the store.
 
 1. Download `rtly-<version>-firefox.zip` from the [Releases page](https://github.com/ehsanenaloo/RTLY/releases).
 2. In Firefox, open `about:debugging#/runtime/this-firefox`.
@@ -113,7 +113,7 @@ The [user guide](https://ehsanenaloo.github.io/RTLY/) covers every control, with
 - Settings (on/off per site, modes, font size, theme, language) are saved in the browser's extension storage on your device.
 - RTLY needs permission to read and change the pages of the sites listed above, because it sets direction and font on the text there. It reads the text only to decide its direction and never sends it anywhere.
 - It requests two extension permissions, `storage` and `contextMenus`, plus access to the sites listed above. It does not request the tabs, history, cookies or downloads permissions.
-- Links in the popup and settings (GitHub, Buy me a coffee, the store page) open in a new tab only when you click them.
+- Links in the popup and settings (GitHub, the support page, the store page) open in a new tab only when you click them.
 
 Read the [privacy policy](docs/PRIVACY.md) for details.
 
@@ -146,7 +146,7 @@ Direction is chosen per block from its characters. A block that is mostly Englis
 <details>
 <summary><b>Does it change the font of English text?</b></summary>
 
-No. The IranYekan font is applied only to elements whose text contains Arabic-script characters. If you only want the font or only the direction, choose the **Font** or **RTL** mode for that site.
+No. The RTLY font is applied only to elements whose text contains Arabic-script characters. If you only want the font or only the direction, choose the **Font** or **RTL** mode for that site.
 </details>
 
 <details>
@@ -181,10 +181,10 @@ This README is also available in [Persian](docs/translations/README.fa.md) and [
 
 Bug reports, broken-site reports, translation fixes and small pull requests are welcome. Read [CONTRIBUTING.md](.github/CONTRIBUTING.md) first.
 
-If RTLY saves you time, you can [buy me a coffee](https://buymeacoffee.com/enaloo). A rating on the [Chrome Web Store](https://chromewebstore.google.com/detail/hhifipkafndnildgldggiohfkbpikmkd/reviews) also helps other people find it.
+If RTLY saves you time, you can [support the project](https://enaloo.com/support/). A rating on the [Chrome Web Store](https://chromewebstore.google.com/detail/hhifipkafndnildgldggiohfkbpikmkd/reviews) also helps other people find it.
 
 ## License
 
 [MIT](LICENSE). Copyright 2026 Ehsan Enaloo.
 
-The MIT license covers the code in this repository. The bundled IranYekan font files in `extension/fonts/` and the site logos in `extension/logos/` are third-party material and keep their own terms.
+The MIT license covers the code in this repository. The bundled font files in `extension/fonts/` and the site logos in `extension/logos/` are third-party material and keep their own terms.

@@ -20,6 +20,7 @@
       ".ms-text-chunk",
       ".chat-turn-container",
       "main [role='article']"
-    ]
+    ],
+    "listDirection": true
   };
 })();

@@ -82,6 +82,19 @@
           </div>
         </div>
         <div class="setting">
+          <label class="setting__label" for="mixedDirection" data-i18n="mixedDirection">Mixed-language lines</label>
+          <p class="setting__hint" data-i18n="optMixedDirectionHint">Sets the direction of a line that mixes Persian and English.</p>
+          <select class="select" id="mixedDirection">
+            <option value="balanced" data-i18n="mixedDirectionBalanced">Balanced (default)</option>
+            <option value="persian" data-i18n="mixedDirectionPersian">Prefer right-to-left</option>
+          </select>
+        </div>
+        <div class="setting">
+          <label class="setting__label" for="font" data-i18n="fontFamilyLabel">Font</label>
+          <p class="setting__hint" data-i18n="optFontsHint">Fonts are bundled with RTLY. Pick a Persian or an Arabic font; it is used for all Arabic-script text.</p>
+          <select class="select" id="font"></select>
+        </div>
+        <div class="setting">
           <label class="setting__label" for="uiLocale" data-i18n="languageLabel">UI language</label>
           <select class="select" id="uiLocale"></select>
         </div>

@@ -10,7 +10,7 @@
 .rtly-chatgpt .katex {
   display: inline-block;
 }
-.rtly-chatgpt.rtly-with-font [style*="IranYekan"] code {
+.rtly-chatgpt.rtly-with-font [data-rtly-s-font] code {
   font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
     Liberation Mono, monospace, var(--rtly-font-family) !important;
 }

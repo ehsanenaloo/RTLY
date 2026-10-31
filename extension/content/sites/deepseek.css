@@ -2,7 +2,7 @@
 /* DeepSeek */
 
 /* Direction will be set dynamically by JavaScript based on content analysis */
-.rtly-deepseek.rtly-with-rtl [dir="rtl"]:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]), .rtly-deepseek.rtly-with-rtl [dir="rtl"] *:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]):not(nav *):not(aside *):not([role="navigation"] *):not([role="menu"] *):not(header *):not([role="banner"] *):not(code):not(kbd):not(samp):not(pre):not(var):not(tt):not(code *):not(pre *):not(kbd *):not(samp *) {
+.rtly-deepseek.rtly-with-rtl [dir="rtl"]:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]), .rtly-deepseek.rtly-with-rtl [dir="rtl"] *:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]):not(nav *):not(aside *):not([role="navigation"] *):not([role="menu"] *):not(header *):not([role="banner"] *):not(code):not(kbd):not(samp):not(pre):not(var):not(tt):not(code *):not(pre *):not(kbd *):not(samp *):not(.cm-editor):not(.cm-editor *):not(.monaco-editor):not(.monaco-editor *):not(:where(.katex, .katex *, mjx-container, mjx-container *, math, math *, .MathJax, .MathJax *)) {
   direction: rtl !important;
   text-align: right !important;
 }
@@ -18,7 +18,7 @@
   text-align: right !important;
 }
 
-.rtly-deepseek.rtly-with-font [style*="IranYekan"] code, .rtly-deepseek.rtly-with-font [style*="IranYekan"] kbd, .rtly-deepseek.rtly-with-font [style*="IranYekan"] samp, .rtly-deepseek.rtly-with-font [style*="IranYekan"] pre {
+.rtly-deepseek.rtly-with-font [data-rtly-s-font] code, .rtly-deepseek.rtly-with-font [data-rtly-s-font] kbd, .rtly-deepseek.rtly-with-font [data-rtly-s-font] samp, .rtly-deepseek.rtly-with-font [data-rtly-s-font] pre {
   font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
     Liberation Mono, monospace, var(--rtly-font-family) !important;
 }

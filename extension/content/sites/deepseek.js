@@ -28,6 +28,7 @@
     ],
     "layoutLtr": true,
     "heuristicFaScan": true,
-    "cleanupStaleMark": true
+    "cleanupStaleMark": true,
+    "listDirection": true
   };
 })();

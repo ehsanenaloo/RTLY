@@ -33,6 +33,7 @@
     "layoutLtr": true,
     "heuristicFaScan": true,
     "narrowIcons": true,
+    "listDirection": true,
     "cleanupStaleMark": true
   };
 })();

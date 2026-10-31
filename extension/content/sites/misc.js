@@ -26,7 +26,8 @@
       "[class*='message']",
       "[class*='response']"
     ],
-    "layoutLtr": true
+    "layoutLtr": true,
+    "listDirection": true
   };
   R["mistral.ai"] = {
     "inputs": [
@@ -43,7 +44,8 @@
       "[class*='Message']",
       "[class*='response']"
     ],
-    "layoutLtr": true
+    "layoutLtr": true,
+    "listDirection": true
   };
   R["huggingface.co"] = {
     "inputs": [
@@ -59,7 +61,8 @@
       "[class*='message']",
       "[class*='chat']"
     ],
-    "layoutLtr": true
+    "layoutLtr": true,
+    "listDirection": true
   };
   R["cohere.com"] = {
     "inputs": [
@@ -75,6 +78,7 @@
       "[class*='message']",
       "[class*='response']"
     ],
-    "layoutLtr": true
+    "layoutLtr": true,
+    "listDirection": true
   };
 })();

@@ -2,9 +2,18 @@
 
 RTLY's own code is released under the MIT License (see `LICENSE` in the repository root). The files below come from other parties and keep their own terms.
 
-## IranYekan font
+## Fonts
 
-`fonts/iranyekan-regular.woff` and `fonts/iranyekan-bold.woff` are the IranYekan typeface. They are bundled so RTLY can show Persian text in a consistent font without any network request. The rights to the typeface stay with its authors. The RTLY author has confirmed that redistributing these files with the extension is allowed. The font is not covered by the MIT License.
+The fonts in `fonts/` are bundled so RTLY can show Persian and Arabic text without any network request. All of them are licensed under the SIL Open Font License 1.1; the full text and the copyright lines are in `fonts/LICENSES.txt`. The fonts are not covered by the MIT License.
+
+- Vazirmatn (The Vazirmatn Project Authors): `vazirmatn-*`
+- Estedad (The Estedad Project Authors): `estedad-*`
+- Noto Naskh Arabic and Noto Sans Arabic (The Noto Project Authors): `noto-naskh-*`, `noto-sans-*`
+- Amiri (The Amiri Project Authors): `amiri-*`
+- Cairo (The Cairo Project Authors): `cairo-*`
+- Tajawal (The Tajawal Project Authors): `tajawal-*`
+
+The files are the WOFF2 builds published by the Fontsource project.
 
 ## Site logos
 

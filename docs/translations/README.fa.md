@@ -13,7 +13,7 @@
 
 [![Add to Chrome](https://img.shields.io/badge/Chrome%20Web%20Store-Add%20to%20Chrome-4285F4?logo=googlechrome&logoColor=white&style=for-the-badge)](https://chromewebstore.google.com/detail/hhifipkafndnildgldggiohfkbpikmkd)
 [![User guide](https://img.shields.io/badge/User%20guide-Read%20online-0e7c95?style=for-the-badge)](https://ehsanenaloo.github.io/RTLY/fa/)
-[![Buy me a coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/enaloo)
+[![حمایت از RTLY](https://img.shields.io/badge/Support-enaloo.com-0E7490?style=for-the-badge)](https://enaloo.com/support/)
 
 </div>
 
@@ -82,7 +82,7 @@ ChatGPT، Claude، Gemini، Perplexity، Microsoft Copilot، Google AI Studio، 
 
 ## مشارکت و حمایت
 
-گزارش خطا، گزارش سایت خراب، اصلاح ترجمه و درخواست‌های کوچک پذیرفته می‌شوند. اگر RTLY وقتتان را می‌گیرد، می‌توانید [یک قهوه بخرید](https://buymeacoffee.com/enaloo).
+گزارش خطا، گزارش سایت خراب، اصلاح ترجمه و درخواست‌های کوچک پذیرفته می‌شوند. اگر RTLY وقتتان را می‌گیرد، می‌توانید [از پروژه حمایت کنید](https://enaloo.com/support/).
 
 ## مجوز
 

@@ -20,7 +20,8 @@
     "responses": [
       "[data-content='ai-message']",
       ".ai-message-content"
-    ]
+    ],
+    "listDirection": true
   };
   // Copilot moved to copilot.com (bing.com/chat redirects there); same selectors.
   R["copilot.com"] = R["copilot.microsoft.com"];

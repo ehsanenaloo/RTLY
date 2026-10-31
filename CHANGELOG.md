@@ -6,6 +6,41 @@ The format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-10-30
+
+### Added
+
+- After a fresh install, a welcome page opens once in a background tab. After you remove RTLY, the browser opens a short survey page. About now has links to report a problem or suggest a feature. These pages open as plain links and carry only the version, language, browser, system and install age.
+- Settings: choose the font from a list of Persian and Arabic open-source fonts that ship with RTLY.
+- Settings: a "Mixed-language lines" option sets how lines that mix Persian and English are directed.
+
+### Changed
+
+- The default Persian font is now Vazirmatn. The old IranYekan font is no longer included.
+- A line that starts in English stays left-to-right unless Persian is at least 30% of it, or it uses Persian grammar words and is at least 15% Persian.
+- Direction and font are set through one stylesheet instead of inline styles on each element. The page's own inline styles are no longer changed.
+- On very long chats, RTLY styles the messages near the screen first, so the page no longer stalls when it opens.
+- The rate link opens the store you installed RTLY from (Chrome Web Store, Edge Add-ons or Firefox Add-ons).
+- The Support links open https://enaloo.com/support/. The footer text no longer repeats the tab name.
+- The public repository holds the extension, its documentation and the community files. Tests and build tools are no longer published.
+
+### Fixed
+
+- NotebookLM works at its new address, notebook.google.com. RTLY asks for access to this extra site.
+- Code blocks with Persian comments, including editor-style code blocks, and formulas stay left-to-right on all sites.
+- Lists that mix English and Persian items keep one direction, so the numbers or bullets stay next to their text. A list of English terms after a Persian sentence follows that sentence.
+- Headings of a Persian answer read in the same direction, and a heading number stays at the start of its heading.
+- Cells of a Persian table line up on the same side.
+- Numbered lines written in one paragraph keep their numbers on one side.
+- A sentence with formulas keeps its Persian direction.
+- On Gemini and Grok, answers get RTL styling while the site sidebar is open.
+- Lists on DeepSeek and NotebookLM, and answers on the new ChatGPT page layout, get RTL styling.
+- On ChatGPT, lists and headings get the Persian font when a chat is opened by reloading the page, and Persian paragraphs with a source link read right-to-left.
+- In the message box, a line that starts with an English word but is written in Persian or Arabic reads right-to-left.
+- Persian and Arabic text in site sidebars uses the selected font. Its direction and layout stay as the site made them.
+- Menus keep the direction and alignment the site gave them.
+- The copy button and language label of code cards keep their place.
+
 ## [2.0.0] - 2026-10-09
 
 First open-source release.
@@ -69,5 +104,6 @@ Versions 1.0 to 1.9.36 were published through the Chrome Web Store before the so
 
 - Direction detection by characters replaced counting words (1.7). Earlier history was not kept.
 
-[Unreleased]: https://github.com/ehsanenaloo/RTLY/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/ehsanenaloo/RTLY/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/ehsanenaloo/RTLY/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/ehsanenaloo/RTLY/releases/tag/v2.0.0

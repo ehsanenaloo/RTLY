@@ -22,7 +22,7 @@
   unicode-bidi: plaintext;
 }
 /* Direction will be set dynamically by JavaScript based on content analysis */
-.rtly-grok.rtly-with-rtl [dir="rtl"]:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]), .rtly-grok.rtly-with-rtl [dir="rtl"] *:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]):not(nav *):not(aside *):not([role="navigation"] *):not([role="menu"] *):not(header *):not([role="banner"] *):not(code):not(kbd):not(samp):not(pre):not(var):not(tt):not(code *):not(pre *):not(kbd *):not(samp *), .rtly-zai.rtly-with-rtl [dir="rtl"]:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]), .rtly-zai.rtly-with-rtl [dir="rtl"] *:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]):not(nav *):not(aside *):not([role="navigation"] *):not([role="menu"] *):not(header *):not([role="banner"] *):not(code):not(kbd):not(samp):not(pre):not(var):not(tt):not(code *):not(pre *):not(kbd *):not(samp *) {
+.rtly-grok.rtly-with-rtl [dir="rtl"]:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]), .rtly-grok.rtly-with-rtl [dir="rtl"] *:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]):not(nav *):not(aside *):not([role="navigation"] *):not([role="menu"] *):not(header *):not([role="banner"] *):not(code):not(kbd):not(samp):not(pre):not(var):not(tt):not(code *):not(pre *):not(kbd *):not(samp *):not(.cm-editor):not(.cm-editor *):not(.monaco-editor):not(.monaco-editor *), .rtly-zai.rtly-with-rtl [dir="rtl"]:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]), .rtly-zai.rtly-with-rtl [dir="rtl"] *:not(nav):not(aside):not([role="navigation"]):not([role="menu"]):not(header):not([role="banner"]):not(nav *):not(aside *):not([role="navigation"] *):not([role="menu"] *):not(header *):not([role="banner"] *):not(code):not(kbd):not(samp):not(pre):not(var):not(tt):not(code *):not(pre *):not(kbd *):not(samp *):not(.cm-editor):not(.cm-editor *):not(.monaco-editor):not(.monaco-editor *):not(:where(.katex, .katex *, mjx-container, mjx-container *, math, math *, .MathJax, .MathJax *)) {
   direction: rtl !important;
   text-align: right !important;
 }
@@ -59,8 +59,8 @@
  * `[dir="rtl"]` rule above already handles cases where JS does set
  * dir; this rule is the safety net for when it doesn't.
  * ============================================================ */
-.rtly-zai.rtly-with-rtl [data-expanded],
-.rtly-zai.rtly-with-rtl [data-expanded] * {
+.rtly-zai.rtly-with-rtl [data-expanded]:not([data-rtly-dir]),
+.rtly-zai.rtly-with-rtl [data-expanded] *:not([data-rtly-dir]):not(td):not(th) {
   unicode-bidi: plaintext;
 }
 .rtly-zai.rtly-with-rtl [data-expanded] {
@@ -95,3 +95,4 @@
       [class*="icon" i], [class*="lucide" i], [data-lucide]) {
   direction: ltr !important;
 }
+

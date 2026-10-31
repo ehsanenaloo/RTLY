@@ -54,7 +54,7 @@ window.FOOTER_NAV_CONFIG = {
       messageKey: 'footerSupportCopy',
       ctaLabelKey: 'footerSupportCta',
       showCtaButton: true,
-      url: 'https://buymeacoffee.com/enaloo',
+      url: 'https://enaloo.com/support/',
       action: 'link'
     }
   ]

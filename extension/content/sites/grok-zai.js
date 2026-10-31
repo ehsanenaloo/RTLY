@@ -19,9 +19,11 @@
     "responses": [
       "[role='main'] article",
       "[data-message-author-role='assistant']",
+      ".message-bubble",
       "main"
     ],
-    "layoutLtr": true
+    "layoutLtr": true,
+    "listDirection": true
   };
   R["chat.z.ai"] = {
     "inputs": [
@@ -48,7 +50,8 @@
     "layoutLtr": true,
     "heuristicFaScan": true,
     "narrowIcons": true,
-    "cleanupStaleMark": true
+    "cleanupStaleMark": true,
+    "listDirection": true
   };
   R["z.ai"] = {
     "inputs": [
@@ -75,6 +78,7 @@
     "layoutLtr": true,
     "heuristicFaScan": true,
     "narrowIcons": true,
-    "cleanupStaleMark": true
+    "cleanupStaleMark": true,
+    "listDirection": true
   };
 })();

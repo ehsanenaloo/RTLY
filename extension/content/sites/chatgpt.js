@@ -8,6 +8,7 @@
 //   heuristicFaScan       run the extra scan-anything-with-Persian pass
 //   narrowIcons           restrict the icon-suppression guard to interactive controls
 //   cleanupStaleMark      sweep stale data-rtly-processed marks on bootstrap
+//   listDirection         <ol>/<ul>/<li> take the direction of their first text block
 //   comprehensiveSelectors  response selectors cover the whole conversation
 //                           (user + assistant), so content.js skips the generic
 //                           whole-main fallback FA scan — the O(all-nodes)
@@ -25,20 +26,31 @@
       "[data-message-author-role='assistant']",
       "article[data-message-author-role='assistant']",
       ".markdown",
-      "[data-message-author-role='user']"
+      "[data-markdown-text-style]",
+      "[class*='MarkdownRoot']",
+      "[data-message-author-role='user']",
+      "[data-dil-message-id]",
+      "[data-user-message-bubble='true']"
     ],
+    "listDirection": true,
     "comprehensiveSelectors": true
   };
   R["chatgpt.com"] = {
     "inputs": [
-      "#prompt-textarea"
+      "#prompt-textarea",
+      ".ProseMirror[contenteditable='true']"
     ],
     "responses": [
       "[data-message-author-role='assistant']",
       "article[data-message-author-role='assistant']",
       ".markdown",
-      "[data-message-author-role='user']"
+      "[data-markdown-text-style]",
+      "[class*='MarkdownRoot']",
+      "[data-message-author-role='user']",
+      "[data-dil-message-id]",
+      "[data-user-message-bubble='true']"
     ],
+    "listDirection": true,
     "comprehensiveSelectors": true
   };
 })();

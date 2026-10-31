@@ -25,13 +25,28 @@
       { id: "about",   labelKey: "footerNavAbout",   messageKey: "footerAboutCopy",   ctaLabelKey: "footerAboutCta",   showCtaButton: true, url: "https://www.enaloo.com", action: "link" },
       { id: "github",  labelKey: "footerNavGithub",  messageKey: "footerGithubCopy",  ctaLabelKey: "footerGithubCta",  showCtaButton: true, url: "https://github.com/ehsanenaloo/RTLY", action: "link" },
       { id: "rate",    labelKey: "footerNavRate",    messageKey: "footerRateCopy",    ctaLabelKey: "footerRateCta",    showCtaButton: true, url: "", action: "link" },
-      { id: "support", labelKey: "footerNavSupport", messageKey: "footerSupportCopy", ctaLabelKey: "footerSupportCta", showCtaButton: true, url: "https://buymeacoffee.com/enaloo", action: "link" }
+      { id: "support", labelKey: "footerNavSupport", messageKey: "footerSupportCopy", ctaLabelKey: "footerSupportCta", showCtaButton: true, url: "https://enaloo.com/support/", action: "link" }
     ]
   };
 
+  // The store the user installed from: each store gives the extension its own ID. An unpacked or unknown
+  // build falls back to the browser (Edge, Firefox, else Chrome).
+  const STORE_REVIEW_URLS = {
+    chrome: "https://chromewebstore.google.com/detail/hhifipkafndnildgldggiohfkbpikmkd/reviews",
+    edge: "https://microsoftedge.microsoft.com/addons/detail/rtly-rtl-font-tool-for-ai-chats/babdpiodfdcobcfpkolpbpfofihllooa",
+    firefox: "https://addons.mozilla.org/firefox/addon/rtly-rtl-font-for-ai-chats/reviews/",
+  };
+  const STORE_BY_ID = {
+    hhifipkafndnildgldggiohfkbpikmkd: "chrome",
+    babdpiodfdcobcfpkolpbpfofihllooa: "edge",
+    "rtly@enaloo.com": "firefox",
+  };
   function getStoreReviewUrl() {
-    if (/firefox/i.test(navigator.userAgent)) return "https://github.com/ehsanenaloo/RTLY";
-    return "https://chromewebstore.google.com/detail/hhifipkafndnildgldggiohfkbpikmkd/reviews";
+    let id = "";
+    try { id = (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.id) || ""; } catch (_) {}
+    const ua = (typeof navigator !== "undefined" && navigator.userAgent) || "";
+    const store = STORE_BY_ID[id] || (/firefox/i.test(ua) ? "firefox" : /\bEdg\//.test(ua) ? "edge" : "chrome");
+    return STORE_REVIEW_URLS[store];
   }
 
   function resolveConfig() {
@@ -119,19 +134,9 @@
       const item = getActive();
       if (!item) return;
 
-      // Render: [label]  [short message]   [CTA]
-      // The label is the bold active-tab name (e.g., "Rate"), the message is
-      // the optional supporting copy (e.g., "Enjoying RTLY?"). Both share one
-      // row with the CTA, separated visually so the row never wraps.
+      // Render: [message]   [CTA]. The tab name is only on the nav tab, not repeated in the text.
       refs.message.textContent = "";
-      const labelText = localize(t, item.labelKey);
       const messageText = localize(t, item.messageKey);
-      if (labelText) {
-        const labelEl = document.createElement("span");
-        labelEl.className = "rtly-footer-active-label";
-        labelEl.textContent = labelText;
-        refs.message.appendChild(labelEl);
-      }
       if (messageText) {
         const messageEl = document.createElement("span");
         messageEl.className = "rtly-footer-active-message";
@@ -328,5 +333,5 @@
     return { start, stop, refreshLocale };
   }
 
-  window.RTLY_FOOTER = { create: createRtlyFooter };
+  window.RTLY_FOOTER = { create: createRtlyFooter, storeReviewUrl: getStoreReviewUrl };
 })();

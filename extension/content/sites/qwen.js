@@ -28,6 +28,7 @@
       ".message-item",
       "[aria-label*='assistant']"
     ],
-    "layoutLtr": true
+    "layoutLtr": true,
+    "listDirection": true
   };
 })();

@@ -1,7 +1,7 @@
 /* === Google AI Studio === */
 /* AI Studio */
 
-.rtly-aistudio.rtly-with-font [style*="IranYekan"] ms-code-block, .rtly-aistudio.rtly-with-font [style*="IranYekan"] code, .rtly-aistudio.rtly-with-font [style*="IranYekan"] kbd, .rtly-aistudio.rtly-with-font [style*="IranYekan"] samp, .rtly-aistudio.rtly-with-font [style*="IranYekan"] pre, .rtly-aistudio.rtly-with-font [style*="IranYekan"] .inline-code {
+.rtly-aistudio.rtly-with-font [data-rtly-s-font] ms-code-block, .rtly-aistudio.rtly-with-font [data-rtly-s-font] code, .rtly-aistudio.rtly-with-font [data-rtly-s-font] kbd, .rtly-aistudio.rtly-with-font [data-rtly-s-font] samp, .rtly-aistudio.rtly-with-font [data-rtly-s-font] pre, .rtly-aistudio.rtly-with-font [data-rtly-s-font] .inline-code {
   font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
     Liberation Mono, monospace, var(--rtly-font-family) !important;
 }

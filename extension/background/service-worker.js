@@ -25,6 +25,7 @@ const HOST_TO_SITE = {
   "poe.com": "poe.com",
   "aistudio.google.com": "aistudio.google.com",
   "notebooklm.google.com": "notebooklm.google.com",
+  "notebook.google.com": "notebooklm.google.com",
   "grok.com": "grok.com",
   "chat.z.ai": "z.ai",
   "z.ai": "z.ai",
@@ -126,26 +127,130 @@ function createContextMenu() {
 chrome.runtime.onInstalled.addListener(createContextMenu);
 chrome.runtime.onStartup.addListener(createContextMenu);
 
+// ── enaloo.com pages: welcome after install, survey after removal ────
+// The extension only opens these links. It sends nothing itself. The query holds
+// the version, UI language, browser name and major version, system and install age.
+const ENALOO_APP_URL = "https://enaloo.com/apps/rtly";
+const ext = globalThis.browser || chrome;
+
+function detectBrowser() {
+  const ua = (globalThis.navigator && navigator.userAgent) || "";
+  let m;
+  if ((m = /\bEdg\/(\d+)/.exec(ua))) return { name: "edge", major: m[1] };
+  if ((m = /\bFirefox\/(\d+)/.exec(ua))) return { name: "firefox", major: m[1] };
+  if (/\bOPR\/|\bVivaldi\//.test(ua)) return { name: "other", major: "" };
+  if ((m = /\bChrome\/(\d+)/.exec(ua))) return { name: "chrome", major: m[1] };
+  return { name: "other", major: "" };
+}
+
+function installAgeBucket(installedAt, now) {
+  if (typeof installedAt !== "number" || !isFinite(installedAt)) return "unknown";
+  const days = (now - installedAt) / 864e5;
+  if (days < 1) return "d1";
+  if (days < 7) return "w1";
+  if (days < 30) return "m1";
+  if (days < 90) return "m3";
+  return "more";
+}
+
+function mapPlatformOs(os) {
+  return ["win", "mac", "linux", "cros", "android"].includes(os) ? os : "other";
+}
+
+async function openWelcomePage() {
+  const b = detectBrowser();
+  const q = new URLSearchParams({
+    v: ext.runtime.getManifest().version,
+    lang: ext.i18n.getUILanguage(),
+    b: b.name,
+  });
+  await ext.tabs.create({ url: `${ENALOO_APP_URL}/welcome/?${q}`, active: false });
+}
+
+async function setSurveyUrl() {
+  const { installedAt } = await ext.storage.local.get("installedAt");
+  const b = detectBrowser();
+  let os = "other";
+  try { os = mapPlatformOs((await ext.runtime.getPlatformInfo()).os); } catch (_) {}
+  const q = new URLSearchParams({
+    v: ext.runtime.getManifest().version,
+    lang: ext.i18n.getUILanguage(),
+    b: b.name,
+    os,
+    age: installAgeBucket(installedAt, Date.now()),
+  });
+  if (b.major) q.set("bv", b.major);
+  await ext.runtime.setUninstallURL(`${ENALOO_APP_URL}/uninstall/?${q}`);
+}
+
+ext.runtime.onInstalled.addListener(async (details) => {
+  try {
+    if (details.reason === "install") {
+      await ext.storage.local.set({ installedAt: Date.now() });
+      await openWelcomePage();
+    }
+  } catch (e) {
+    console.debug("RTLY: welcome page error", e);
+  }
+  try { await setSurveyUrl(); } catch (e) { console.debug("RTLY: survey url error", e); }
+});
+ext.runtime.onStartup.addListener(async () => {
+  try { await setSurveyUrl(); } catch (e) { console.debug("RTLY: survey url error", e); }
+});
+
+// ── Site setting writes ──────────────────────────────────────────────
+// The service worker is the single writer of siteSettings. Every change is a get -> modify -> set
+// round trip, and two quick changes (popup, options, context menu, shortcut) would otherwise
+// interleave: both read the same snapshot and the second set drops the first change. All writers
+// go through this queue and run one at a time.
+let toggleQueue = Promise.resolve();
+function enqueueToggle(task) {
+  const run = toggleQueue.then(() => new Promise((resolve) => {
+    try { task(resolve); } catch (_) { resolve(); }
+  }));
+  toggleQueue = run.catch(() => {});
+}
+
+// decide(settings) returns the new boolean status for `site`. callback(error) runs after the write.
+function updateSiteSetting(site, decide, callback) {
+  enqueueToggle((done) => {
+    chrome.storage.local.get(["siteSettings"], (result) => {
+      if (chrome.runtime.lastError) {
+        console.error("RTLY: storage get error", chrome.runtime.lastError);
+        callback(chrome.runtime.lastError.message || "storage get failed");
+        done();
+        return;
+      }
+      try {
+        const settings = canonicalizeSettings(result.siteSettings || {});
+        applyToggleToSettings(settings, site, decide(settings));
+        chrome.storage.local.set({ siteSettings: settings }, () => {
+          // The write is complete: let the next queued change read the fresh map.
+          done();
+          if (chrome.runtime.lastError) {
+            console.error("RTLY: storage set error", chrome.runtime.lastError);
+            callback(chrome.runtime.lastError.message || "storage set failed");
+            return;
+          }
+          callback(null);
+        });
+      } catch (error) {
+        console.error("RTLY: error updating settings", error);
+        callback(error.message || "update failed");
+        done();
+      }
+    });
+  });
+}
+
 // ── Toggle handlers (context menu + keyboard shortcut) ───────────────
 function toggleSiteForTab(tab) {
   if (!tab?.id) return;
   const site = getSiteFromUrl(tab.url);
   if (!site) return;
-  chrome.storage.local.get(["siteSettings"], (res) => {
-    if (chrome.runtime.lastError) {
-      console.error("RTLY: storage get failed", chrome.runtime.lastError);
-      return;
-    }
-    const settings = canonicalizeSettings(res.siteSettings || {});
-    const next = settings[site] === false; // toggle: false → true, otherwise → false
-    applyToggleToSettings(settings, site, next);
-    chrome.storage.local.set({ siteSettings: settings }, () => {
-      if (chrome.runtime.lastError) {
-        console.error("RTLY: storage set failed", chrome.runtime.lastError);
-        return;
-      }
-      reloadSiteTabs(site, tab.id);
-    });
+  // toggle: false → true, otherwise → false
+  updateSiteSetting(site, (settings) => settings[site] === false, (err) => {
+    if (!err) reloadSiteTabs(site, tab.id);
   });
 }
 
@@ -160,17 +265,6 @@ chrome.commands.onCommand.addListener((command, tab) => {
 });
 
 // ── Messages from popup/options ──────────────────────────────────────
-// The service worker is the single writer of siteSettings. Every toggle is a get -> modify -> set
-// round trip, and two quick toggles (popup + options, or two clicks) would otherwise interleave:
-// both read the same snapshot and the second set drops the first change. Run them one at a time.
-let toggleQueue = Promise.resolve();
-function enqueueToggle(task) {
-  const run = toggleQueue.then(() => new Promise((resolve) => {
-    try { task(resolve); } catch (_) { resolve(); }
-  }));
-  toggleQueue = run.catch(() => {});
-}
-
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // Defense-in-depth: only accept messages from our own extension's pages.
   // Strict equality — previously `sender.id && sender.id !== ...` allowed
@@ -191,36 +285,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       return true;
     }
 
-    enqueueToggle((done) => {
-      chrome.storage.local.get(["siteSettings"], (result) => {
-        if (chrome.runtime.lastError) {
-          console.error("RTLY: storage get error", chrome.runtime.lastError);
-          sendResponse({ success: false, error: chrome.runtime.lastError.message });
-          done();
-          return;
-        }
-        try {
-          const settings = canonicalizeSettings(result.siteSettings || {});
-          applyToggleToSettings(settings, site, status);
-
-          chrome.storage.local.set({ siteSettings: settings }, () => {
-            // The write is complete: let the next queued toggle read the fresh map. The tab
-            // reload below does not touch storage, so it does not need to hold the queue.
-            done();
-            if (chrome.runtime.lastError) {
-              console.error("RTLY: storage set error", chrome.runtime.lastError);
-              sendResponse({ success: false, error: chrome.runtime.lastError.message });
-              return;
-            }
-
-            reloadSiteTabs(site, null, (count) => sendResponse({ success: true, reloadedTabs: count }));
-          });
-        } catch (error) {
-          console.error("RTLY: error updating settings", error);
-          sendResponse({ success: false, error: error.message });
-          done();
-        }
-      });
+    updateSiteSetting(site, () => status, (err) => {
+      if (err) {
+        sendResponse({ success: false, error: err });
+        return;
+      }
+      reloadSiteTabs(site, null, (count) => sendResponse({ success: true, reloadedTabs: count }));
     });
   } catch (error) {
     console.error("RTLY: error handling message", error);

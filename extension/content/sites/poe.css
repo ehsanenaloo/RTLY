@@ -13,7 +13,7 @@
   direction: ltr !important;
 }
 
-.rtly-poe.rtly-with-font [style*="IranYekan"] code, .rtly-poe.rtly-with-font [style*="IranYekan"] kbd, .rtly-poe.rtly-with-font [style*="IranYekan"] samp, .rtly-poe.rtly-with-font [style*="IranYekan"] pre {
+.rtly-poe.rtly-with-font [data-rtly-s-font] code, .rtly-poe.rtly-with-font [data-rtly-s-font] kbd, .rtly-poe.rtly-with-font [data-rtly-s-font] samp, .rtly-poe.rtly-with-font [data-rtly-s-font] pre {
   font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
     Liberation Mono, monospace, var(--rtly-font-family) !important;
 }

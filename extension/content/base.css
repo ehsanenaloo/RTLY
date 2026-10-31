@@ -128,9 +128,24 @@
    Persian editor stays RTL — exactly the bug we want to avoid. With
    plaintext on every descendant, each <p> independently auto-detects
    from its own first-strong character, line by line. */
-.rtly-with-rtl [contenteditable="true"][data-rtly-processed] *,
-.rtly-with-rtl [contenteditable=""][data-rtly-processed] * {
+.rtly-with-rtl [contenteditable="true"][data-rtly-editor] *,
+.rtly-with-rtl [contenteditable=""][data-rtly-editor] * {
   unicode-bidi: plaintext !important;
+}
+/* Formulas always read left-to-right, also inside a right-to-left answer. */
+.rtly-with-rtl .katex,
+.rtly-with-rtl .katex-display,
+.rtly-with-rtl mjx-container,
+.rtly-with-rtl math {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+/* A composer whose lines start with a Latin word but are written in Arabic script: the lines read
+   right-to-left (JS sets data-rtly-line="root" on the editor). */
+.rtly-with-rtl [contenteditable][data-rtly-line="root"],
+.rtly-with-rtl [contenteditable][data-rtly-line="root"] > * {
+  unicode-bidi: isolate !important;
+  direction: rtl !important;
 }
 /* v1.9.24 — direction-aware isolation.
  * RTL-majority blocks keep `isolate`: base direction = the rtl we detected
@@ -151,6 +166,30 @@
 [data-rtly-dir="ltr"] {
   unicode-bidi: plaintext;
 }
+/* A list element takes its direction from the whole list, not from its own first letter. */
+[data-rtly-dir]:is(ol, ul, li) {
+  unicode-bidi: isolate;
+}
+/* Code is always left-to-right, whatever the language of its comments or the direction it inherits. */
+.rtly-with-rtl pre,
+.rtly-with-rtl pre code,
+.rtly-with-rtl .cm-editor,
+.rtly-with-rtl .monaco-editor,
+.rtly-with-rtl [class*="scriptor-component-code-block"] {
+  direction: ltr !important;
+  text-align: left !important;
+}
+/* A code editor draws its own lines: every line keeps the left-to-right base, a Persian comment inside it
+   is just an RTL run (no per-line first-letter direction, no isolate). */
+.rtly-with-rtl .cm-editor,
+.rtly-with-rtl .monaco-editor {
+  unicode-bidi: isolate !important;
+}
+.rtly-with-rtl .cm-editor *,
+.rtly-with-rtl .monaco-editor * {
+  direction: ltr !important;
+  unicode-bidi: normal !important;
+}
 [class*="rtly-"] code,
 [class*="rtly-"] kbd,
 [class*="rtly-"] samp,
@@ -163,7 +202,7 @@
 /* Active-site tokens. Gated on the class RTLY only adds to <html> when it is active on this site,
    so a disabled site (or any non-RTLY page) never receives these custom properties. */
 html.rtly-active {
-  --rtly-font-family: "IranYekan", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --rtly-font-family: "RTLY Font", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 /* LAYOUT RULE (v2.0): RTLY never changes the host site's layout. The former rules that zeroed
    body padding-top and the margin/padding of every text input were removed: they restyled site
@@ -331,3 +370,4 @@ html.rtly-active {
   direction: ltr !important;
 }
 /* End universal icon protection */
+

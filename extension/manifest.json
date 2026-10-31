@@ -138,7 +138,8 @@
         "content/content.js"
       ],
       "matches": [
-        "https://notebooklm.google.com/*"
+        "https://notebooklm.google.com/*",
+        "https://notebook.google.com/*"
       ],
       "run_at": "document_start"
     },
@@ -223,6 +224,7 @@
     "https://poe.com/*",
     "https://aistudio.google.com/*",
     "https://notebooklm.google.com/*",
+    "https://notebook.google.com/*",
     "https://grok.com/*",
     "https://chat.z.ai/*",
     "https://z.ai/*",
@@ -257,7 +259,7 @@
     "contextMenus"
   ],
   "short_name": "RTLY",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "web_accessible_resources": [
     {
       "matches": [
@@ -274,6 +276,7 @@
         "https://poe.com/*",
         "https://aistudio.google.com/*",
         "https://notebooklm.google.com/*",
+        "https://notebook.google.com/*",
         "https://grok.com/*",
         "https://chat.z.ai/*",
         "https://z.ai/*",
@@ -291,8 +294,22 @@
         "https://www.copilot.com/*"
       ],
       "resources": [
-        "fonts/iranyekan-regular.woff",
-        "fonts/iranyekan-bold.woff"
+        "fonts/amiri-ar-400.woff2",
+        "fonts/amiri-ar-700.woff2",
+        "fonts/cairo-ar-400.woff2",
+        "fonts/cairo-ar-700.woff2",
+        "fonts/estedad-fa-400.woff2",
+        "fonts/estedad-fa-700.woff2",
+        "fonts/estedad-latin-400.woff2",
+        "fonts/estedad-latin-700.woff2",
+        "fonts/noto-naskh-ar-400.woff2",
+        "fonts/noto-naskh-ar-700.woff2",
+        "fonts/noto-sans-ar-400.woff2",
+        "fonts/noto-sans-ar-700.woff2",
+        "fonts/tajawal-ar-400.woff2",
+        "fonts/tajawal-ar-700.woff2",
+        "fonts/vazirmatn-fd-400.woff2",
+        "fonts/vazirmatn-fd-700.woff2"
       ]
     }
   ]

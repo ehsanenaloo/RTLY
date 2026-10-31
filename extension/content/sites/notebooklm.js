@@ -27,6 +27,8 @@
       "[data-testid*='message']",
       ".lm-message",
       ".lm-chat-message"
-    ]
+    ],
+    "listDirection": true
   };
+  R["notebook.google.com"] = R["notebooklm.google.com"];
 })();

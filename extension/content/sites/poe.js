@@ -21,6 +21,7 @@
       "[class*='ChatMessage_chatMessage']",
       "[class*='Message_content']",
       "[class*='MarkdownAnswer']"
-    ]
+    ],
+    "listDirection": true
   };
 })();

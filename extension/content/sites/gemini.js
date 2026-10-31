@@ -57,6 +57,7 @@
       "[data-test-id*='collapsed-bubble' i]",
       "[data-test-id*='user-query' i]"
     ],
-    "narrowIcons": true
+    "narrowIcons": true,
+    "listDirection": true
   };
 })();

@@ -32,7 +32,7 @@ Do not open a public issue. Follow [SECURITY.md](SECURITY.md) and use private re
 
 ## Support the project
 
-If RTLY saves you time, you can [buy me a coffee](https://buymeacoffee.com/enaloo). It is never required.
+If RTLY saves you time, you can [support the project](https://enaloo.com/support/). It is never required.
 
 ## What to expect
 

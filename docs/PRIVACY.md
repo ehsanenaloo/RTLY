@@ -1,6 +1,6 @@
 # RTLY privacy policy
 
-Last updated: 2026-10-08. This policy applies to RTLY 2.0.0 and later versions until it is updated.
+Last updated: 2026-10-17. This policy applies to RTLY 2.0.0 and later versions until it is updated.
 
 ## Summary
 
@@ -25,6 +25,7 @@ RTLY keeps these settings in your browser's extension storage (`chrome.storage.l
 | Theme and color palette | Your choice for RTLY's own pages |
 | Interface language | The language you picked |
 | Support reminder | The time of installation and the time the reminder was last shown, so it can wait about a month |
+| Install time | The time of installation, used only to work out the install age in the removal link below |
 
 Your chats, prompts and answers are never stored by RTLY. The settings stay until you remove the extension. Removing the extension removes them.
 
@@ -32,7 +33,9 @@ Your chats, prompts and answers are never stored by RTLY. The settings stay unti
 
 Nothing. RTLY makes no network requests. There is no server to receive data, and the extension contains no analytics, advertising, tracking or remote code.
 
-The popup and settings page have links to the project's GitHub page, to the Buy me a coffee page and to the store's reviews page. They open in a new tab only when you click them. Once opened, those sites receive your request from your browser and follow their own privacy policies.
+RTLY only opens some pages on enaloo.com as links. It opens a welcome page once in a background tab after a fresh install. The browser opens a short survey page after you remove RTLY. The popup's About window has links to report a problem or suggest a feature, which open only when you click them. These links carry only the RTLY version, the interface language, the browser name and version, the system type (such as Windows or Mac) and how long RTLY was installed (in broad steps, such as under a day or under a week). They carry no ID, no email, no page address and no chat content. The site follows its own privacy policy.
+
+The popup and settings page have links to the project's GitHub page, to the support page on enaloo.com and to the store's reviews page. They open in a new tab only when you click them. Once opened, those sites receive your request from your browser and follow their own privacy policies.
 
 ## Permissions
 
@@ -52,7 +55,7 @@ An AI chat site can see its own page after RTLY has changed it, for example the 
 
 - **Browser stores** (Chrome Web Store, Microsoft Edge Add-ons, Firefox Add-ons) keep their own install statistics. RTLY does not see them.
 - **GitHub** hosts the source code, the releases and the user guide. GitHub may record visits to those pages, as any web host does. The extension itself never contacts GitHub.
-- **Buy me a coffee** is contacted only if you click a support link.
+- **enaloo.com** is contacted only if you click a support link.
 
 ## Children
 

@@ -12,21 +12,21 @@
    ========================================================================== */
 
 @font-face {
-  font-family: "IranYekan";
-  src: url("../fonts/iranyekan-regular.woff") format("woff");
+  font-family: "Vazirmatn";
+  src: url("../fonts/vazirmatn-fd-400.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: "IranYekan";
-  src: url("../fonts/iranyekan-bold.woff") format("woff");
+  font-family: "Vazirmatn";
+  src: url("../fonts/vazirmatn-fd-700.woff2") format("woff2");
   font-weight: 600 700;
   font-style: normal;
   font-display: swap;
 }
 
-/* IranYekan draws every digit as a Persian digit. For locales that expect
+/* The Farsi-digits Vazirmatn draws every digit as a Persian digit. For locales that expect
    Western digits we put a digits-only face first in the stack. */
 @font-face {
   font-family: "RTLY Digits";
@@ -74,10 +74,9 @@
   --r-lg: 16px;
   --ease: cubic-bezier(.22, 1, .36, 1);
   --font-latin: system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font: "RTLY Digits", "IranYekan", var(--font-latin);
+  --font: "RTLY Digits", "Vazirmatn", var(--font-latin);
 }
-/* Persian-digit locales keep IranYekan's native numerals */
-:root:lang(fa), :root:lang(ps), :root:lang(ur) { --font: "IranYekan", var(--font-latin); }
+:root:lang(fa), :root:lang(ps), :root:lang(ur) { --font: "Vazirmatn", var(--font-latin); }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
@@ -480,7 +479,6 @@ bdi, .ltr { unicode-bidi: isolate; }
 .rtly-footer-panel { padding: 8px 14px; }
 .rtly-footer-panel-top { display: flex; align-items: center; gap: 12px; min-height: 40px; }
 .rtly-footer-message { flex: 1; min-width: 0; font-size: 12.5px; line-height: 1.55; color: var(--ink-2); }
-.rtly-footer-active-label { font-weight: 700; color: var(--ink); margin-inline-end: 6px; }
 .rtly-footer-controls { flex: none; }
 .rtly-footer-cta {
   min-height: 32px; max-width: 160px; padding: 0 14px;
@@ -709,3 +707,6 @@ input[type="range"]:active::-webkit-slider-thumb { transform: scale(1.12); }
   text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
 }
 .rtly-about-link:hover { color: var(--primary-strong); }
+
+.rtly-about-report { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.rtly-about-report .rtly-about-link { direction: inherit; margin-block-start: 0; }

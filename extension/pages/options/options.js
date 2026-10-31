@@ -44,24 +44,26 @@
       chrome.storage.local.get(keys, (r) => resolve(chrome.runtime?.lastError ? {} : r));
     });
   }
+  // Resolves true when the write persisted, false when it failed. Never rejects.
   function setStorage(obj) {
     return new Promise((resolve) => {
-      if (!chrome?.storage?.local) return resolve();
-      chrome.storage.local.set(obj, () => resolve());
+      if (!chrome?.storage?.local) return resolve(false);
+      try {
+        chrome.storage.local.set(obj, () => {
+          if (chrome.runtime?.lastError) {
+            console.debug("RTLY: storage set failed", chrome.runtime.lastError.message);
+            resolve(false);
+            return;
+          }
+          resolve(true);
+        });
+      } catch (e) {
+        console.debug("RTLY: storage set threw", e);
+        resolve(false);
+      }
     });
   }
 
-
-  // Fallback writer (only used when chrome.runtime.sendMessage is unavailable). The background
-  // service worker is the single writer of siteSettings; if we must write from a page we re-read
-  // the stored map IMMEDIATELY before the write instead of writing a possibly stale in-memory
-  // snapshot, so a toggle made elsewhere in the meantime (another tab, the background) survives.
-  async function writeSiteSettingFallback(siteId, status) {
-    const stored = await getStorage(["siteSettings"]);
-    const cur = canonicalizeLegacyKeys({ ...(stored.siteSettings || {}) });
-    cur[siteId] = status;
-    await setStorage({ siteSettings: cur });
-  }
 
   // Debounce for slider
   function debounce(fn, wait) {
@@ -101,12 +103,23 @@
     return map;
   }
 
+  // Bundled fonts: ids match FONT_CATALOG in content/content.js; the first id is the default. One font is
+  // always active. The list is grouped: Persian fonts and Arabic fonts.
+  const FONT_CHOICES = {
+    persianFont: [["vazirmatn", "Vazirmatn"], ["estedad", "Estedad"]],
+    arabicFont: [["noto-naskh", "Noto Naskh Arabic"], ["noto-sans", "Noto Sans Arabic"], ["amiri", "Amiri"], ["cairo", "Cairo"], ["tajawal", "Tajawal"]],
+  };
+  const FONT_IDS = [...FONT_CHOICES.persianFont, ...FONT_CHOICES.arabicFont].map(([v]) => v);
+  const fontId = (id) => (FONT_IDS.includes(id) ? id : FONT_IDS[0]);
+
   // App state
   const State = {
     siteSettings: {},
     siteModes: {},
     pinnedSites: {},
     fontScale: 100,
+    mixedDirection: "balanced",
+    font: "vazirmatn",
     theme: "system",
     uiLocale: "en",
     colorPalette: "teal",
@@ -145,14 +158,19 @@
       name.className = "palette-name";
       name.textContent = item.label;
       btn.append(dot, name);
+      const paint = (id) => root.querySelectorAll("[data-palette-id]").forEach((b) => {
+        const active = b.dataset.paletteId === id;
+        b.classList.toggle("is-active", active);
+        b.setAttribute("aria-checked", String(active));
+      });
       btn.addEventListener("click", () => {
+        const previous = State.colorPalette;
         State.colorPalette = item.id;
         applyPalette(item.id);
-        setStorage({ colorPalette: item.id }).then(flashSaved);
-        root.querySelectorAll("[data-palette-id]").forEach((b) => {
-          const active = b.dataset.paletteId === item.id;
-          b.classList.toggle("is-active", active);
-          b.setAttribute("aria-checked", String(active));
+        paint(item.id);
+        setStorage({ colorPalette: item.id }).then((ok) => {
+          if (!ok) { State.colorPalette = previous; applyPalette(previous); paint(previous); }
+          flashSaved(ok);
         });
       });
       root.appendChild(btn);
@@ -178,9 +196,13 @@
   function setupThemeSwitcher() {
     const root = $("themeSwitcher");
     const choose = (theme) => {
+      const previous = State.theme;
       State.theme = theme;
       applyTheme(theme);
-      setStorage({ theme }).then(flashSaved);
+      setStorage({ theme }).then((ok) => {
+        if (!ok) { State.theme = previous; applyTheme(previous); }
+        flashSaved(ok);
+      });
     };
     root.addEventListener("click", (e) => {
       const btn = e.target.closest("button[data-theme]");
@@ -308,8 +330,18 @@
     range.value = String(State.fontScale);
     val.textContent = State.fontScale + "%";
     paintRange(range);
+    let savedFontScale = State.fontScale;
     const persistFontScale = debounce((n) => {
-      setStorage({ fontScale: n }).then(flashSaved);
+      setStorage({ fontScale: n }).then((ok) => {
+        if (ok) { savedFontScale = n; } else {
+          State.fontScale = savedFontScale;
+          range.value = String(savedFontScale);
+          val.textContent = savedFontScale + "%";
+          paintRange(range);
+          applyPreview();
+        }
+        flashSaved(ok);
+      });
     }, 250);
     range.addEventListener("input", () => {
       State.fontScale = parseInt(range.value, 10) || 100;
@@ -317,6 +349,44 @@
       paintRange(range);
       applyPreview();
       persistFontScale(State.fontScale);
+    });
+
+    // Mixed-language lines
+    const mixed = $("mixedDirection");
+    mixed.value = State.mixedDirection;
+    mixed.addEventListener("change", () => {
+      const next = mixed.value === "persian" ? "persian" : "balanced";
+      const previous = State.mixedDirection;
+      State.mixedDirection = next;
+      setStorage({ mixedDirection: next }).then((ok) => {
+        if (!ok) { State.mixedDirection = previous; mixed.value = previous; }
+        flashSaved(ok);
+      });
+    });
+
+    // Font: one list, grouped into Persian and Arabic fonts
+    const fontSelect = $("font");
+    Object.keys(FONT_CHOICES).forEach((groupKey) => {
+      const group = document.createElement("optgroup");
+      group.setAttribute("data-i18n-label", groupKey);
+      group.label = t(groupKey, groupKey);
+      FONT_CHOICES[groupKey].forEach(([value, label]) => {
+        const opt = document.createElement("option");
+        opt.value = value;
+        opt.textContent = label;
+        group.appendChild(opt);
+      });
+      fontSelect.appendChild(group);
+    });
+    fontSelect.value = State.font;
+    fontSelect.addEventListener("change", () => {
+      const next = fontId(fontSelect.value);
+      const previous = State.font;
+      State.font = next;
+      setStorage({ font: next }).then((ok) => {
+        if (!ok) { State.font = previous; fontSelect.value = previous; }
+        flashSaved(ok);
+      });
     });
 
     // UI language
@@ -443,9 +513,17 @@
         b.title = t(m === "full" ? "modeFull" : m === "font_only" ? "modeFontOnly" : "modeRtlOnly");
         b.setAttribute("aria-pressed", String(m === mode));
         b.addEventListener("click", () => {
+          const previous = State.siteModes[site.id];
+          const paint = (active) => [...chips.children].forEach((c, i) => c.setAttribute("aria-pressed", String(MODES[i] === active)));
           State.siteModes[site.id] = m;
-          setStorage({ siteModes: State.siteModes }).then(flashSaved);
-          [...chips.children].forEach((c) => c.setAttribute("aria-pressed", String(c === b)));
+          paint(m);
+          setStorage({ siteModes: State.siteModes }).then((ok) => {
+            if (!ok) {
+              if (previous === undefined) delete State.siteModes[site.id]; else State.siteModes[site.id] = previous;
+              paint(previous || "full");
+            }
+            flashSaved(ok);
+          });
         });
         chips.appendChild(b);
       });
@@ -461,11 +539,17 @@
       star.setAttribute("aria-pressed", String(pinned));
       star.appendChild(starIcon());
       star.addEventListener("click", () => {
-        const next = star.getAttribute("aria-pressed") !== "true";
+        const wasPinned = star.getAttribute("aria-pressed") === "true";
+        const next = !wasPinned;
+        const previous = State.pinnedSites[site.id];
         State.pinnedSites[site.id] = next;
         star.setAttribute("aria-pressed", String(next));
-        setStorage({ pinnedSites: State.pinnedSites }).then(() => {
-          flashSaved();
+        setStorage({ pinnedSites: State.pinnedSites }).then((ok) => {
+          if (!ok) {
+            if (previous === undefined) delete State.pinnedSites[site.id]; else State.pinnedSites[site.id] = previous;
+            star.setAttribute("aria-pressed", String(wasPinned));
+          }
+          flashSaved(ok);
           updateCounts();
         });
       });
@@ -514,7 +598,8 @@
             rollback();
           }
         } else {
-          writeSiteSettingFallback(site.id, next).then(flashSaved);
+          // Only the service worker writes siteSettings; a page-side write could overwrite a concurrent change.
+          rollback();
         }
       });
       const track = document.createElement("span");
@@ -567,7 +652,7 @@
 
   // ── Dynamic footer ────────────────────────────────────────────────
   // Replaces the previous static changelog+email+website footer.
-  const SUPPORT_URL = "https://buymeacoffee.com/enaloo";
+  const SUPPORT_URL = "https://enaloo.com/support/";
   let footerInstance = null;
 
   function openTab(url) {
@@ -604,8 +689,10 @@
 
       const st = await getStorage([
         "siteSettings", "siteModes", "pinnedSites",
-        "fontScale", "theme", "uiLocale", "colorPalette",
+        "fontScale", "theme", "uiLocale", "colorPalette", "mixedDirection", "font",
       ]);
+      State.font = fontId(st.font);
+      State.mixedDirection = st.mixedDirection === "persian" ? "persian" : "balanced";
       State.siteSettings = canonicalizeLegacyKeys(st.siteSettings || {});
       State.siteModes = canonicalizeLegacyKeys(st.siteModes || {});
       State.pinnedSites = st.pinnedSites || {};
@@ -649,6 +736,16 @@
           if (r) { r.value = String(State.fontScale); paintRange(r); }
           if (v) v.textContent = State.fontScale + "%";
           applyPreview();
+        }
+        if (changes.mixedDirection) {
+          State.mixedDirection = changes.mixedDirection.newValue === "persian" ? "persian" : "balanced";
+          const m = $("mixedDirection");
+          if (m) m.value = State.mixedDirection;
+        }
+        if (changes.font) {
+          State.font = fontId(changes.font.newValue);
+          const f = $("font");
+          if (f) f.value = State.font;
         }
         if (changes.theme) {
           State.theme = changes.theme.newValue || "system";

@@ -1,8 +1,8 @@
 # RTLY
 
-> A browser extension (Manifest V3; Chrome and Edge, with an experimental Firefox build) that sets right-to-left direction and the IranYekan font for Persian, Arabic, Hebrew and Urdu text on 16 AI chat sites such as ChatGPT, Claude and Gemini. Local only: no account, no server, no analytics, no network requests.
+> A browser extension (Manifest V3; Chrome and Edge, with an experimental Firefox build) that sets right-to-left direction and a bundled Persian or Arabic font for Persian, Arabic, Hebrew and Urdu text on 16 AI chat sites such as ChatGPT, Claude and Gemini. Local only: no account, no server, no analytics, no network requests.
 
-Written against RTLY 2.0.0. Checked 2026-10-08. Source: https://github.com/ehsanenaloo/RTLY
+Written against RTLY 2.1.0. Checked 2026-10-30. Source: https://github.com/ehsanenaloo/RTLY
 
 ## Get started
 
