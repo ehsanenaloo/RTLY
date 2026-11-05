@@ -1117,8 +1117,8 @@ function countDirections(nodes, limit = 400) {
 }
 
 // The headings of one answer read in one direction. When most text blocks of the answer are right-to-left,
-// a heading with Arabic-script text that started with an English name ("5. OpenHands — مناسب agent platform")
-// follows them. Headings without Arabic-script text keep their own direction.
+// every heading that came out left-to-right ("5. OpenHands — مناسب agent platform", "Flutter") follows them,
+// so the headings of one answer sit on one side.
 function syncHeadingDirection(root) {
   const mode = getEffectiveMode();
   if (mode !== "full" && mode !== "rtl_only") return;
@@ -1129,7 +1129,47 @@ function syncHeadingDirection(root) {
   for (let i = 0; i < headings.length; i++) {
     const h = headings[i];
     if (h.dataset.rtlyDir !== "ltr" || h.closest("pre, code") || isInSidebarOrMenu(h)) continue;
-    if (AR_FA_WORD.test(h.textContent || "")) followDirection(h, "rtl");
+    if ((h.textContent || "").trim()) followDirection(h, "rtl");
+  }
+}
+
+// ChatGPT draws some answers as widgets of divs (data-d-component: checklists, score rows, cards) whose
+// rows hold an icon and a text. The rows keep the page's side because of the icon guard, and each text
+// takes its own direction, so one widget read on both sides. A widget whose texts are mostly right-to-left
+// (about equal: the answer decides) is right-to-left as a whole: its rows, boxes, labels and every text in it.
+function syncWidgetDirection(root) {
+  const mode = getEffectiveMode();
+  if (mode !== "full" && mode !== "rtl_only") return;
+  if (typeof root.querySelector !== "function" || !root.querySelector("[data-d-component]")) return;
+  const found = root.querySelectorAll("[data-d-component]:not([data-d-component='text'])");
+  let answer = null;
+  for (let i = 0, done = 0; i < found.length && done < 40; i++) {
+    const w = found[i];
+    if (w.parentElement && w.parentElement.closest("[data-d-component]")) continue;
+    if (w.closest("pre, code") || isInSidebarOrMenu(w)) continue;
+    done++;
+    // Weighted by text length: short English titles above long Persian descriptions do not outvote them.
+    const texts = w.querySelectorAll("[data-d-component='text'][data-rtly-dir]");
+    let rw = 0, lw = 0;
+    for (let k = 0; k < texts.length && k < 400; k++) {
+      const len = (texts[k].textContent || "").length;
+      if (texts[k].dataset.rtlyDir === "rtl") rw += len; else if (texts[k].dataset.rtlyDir === "ltr") lw += len;
+    }
+    let rtl = rw > lw * 1.2;
+    if (!rtl && rw && lw <= rw * 1.2 && rw <= lw * 1.2) {
+      if (!answer) {
+        const m = w.closest("[data-message-author-role], [data-dil-message-id], article, .markdown") || root;
+        answer = countDirections(m.querySelectorAll("p[data-rtly-dir], li[data-rtly-dir]"));
+      }
+      rtl = answer.rtl > answer.ltr;
+    }
+    if (!rtl) continue;
+    const parts = [w, ...w.querySelectorAll("[data-d-component], [data-has-label], [data-has-label] label, [data-has-label] label > span")];
+    for (let j = 0; j < parts.length && j < 600; j++) {
+      const t = parts[j];
+      if (t.dataset.rtlyDir === "rtl" || t.hasAttribute("data-d-inline") || t.tagName === "BUTTON" || t.matches(MATH_SELECTOR) || t.closest("pre, code")) continue;
+      followDirection(t, "rtl");
+    }
   }
 }
 
@@ -3176,6 +3216,7 @@ function setupResponses(cfg) {
         if (LIST_DIRECTION_SITES.has(siteKey)) syncListDirection(el);
         syncHeadingDirection(el);
         syncTableDirection(el);
+        syncWidgetDirection(el);
       };
 
       // The two fallback FA scans, run once AFTER all containers are processed.

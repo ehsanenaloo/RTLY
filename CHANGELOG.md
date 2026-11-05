@@ -6,9 +6,16 @@ The format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-11-05
+
 ### Changed
 
 - The help link in the popup opens the guide on enaloo.com.
+
+### Fixed
+
+- On ChatGPT, all headings of a Persian answer sit on the same side, also headings written in English.
+- On ChatGPT, checklists, score rows and cards in a Persian answer read in one direction.
 
 ## [2.1.0] - 2026-10-30
 
@@ -108,6 +115,7 @@ Versions 1.0 to 1.9.36 were published through the Chrome Web Store before the so
 
 - Direction detection by characters replaced counting words (1.7). Earlier history was not kept.
 
-[Unreleased]: https://github.com/ehsanenaloo/RTLY/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/ehsanenaloo/RTLY/compare/v2.1.1...HEAD
+[2.1.1]: https://github.com/ehsanenaloo/RTLY/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/ehsanenaloo/RTLY/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/ehsanenaloo/RTLY/releases/tag/v2.0.0
